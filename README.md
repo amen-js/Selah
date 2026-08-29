@@ -19,7 +19,7 @@ O plano de produto e execução do hackathon está em [`plans/selah.plan.md`](pl
 | Dev 1 | Pedro | [pedromlabio](https://github.com/pedromlabio) |
 | Dev 2 | Will | [willian-ishida](https://github.com/willian-ishida) |
 | Dev 3 | Mário | [marionantes](https://github.com/marionantes) |
-| Design | Matheus | — |
+| Design | Matheus | [MatheusGomes-ctrl](https://github.com/MatheusGomes-ctrl) |
 | P.O. | Lilian | [lilianjanniffer](https://github.com/lilianjanniffer) |
 
 ## Licença

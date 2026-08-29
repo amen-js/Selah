@@ -18,7 +18,7 @@ todos:
     content: "Dev 2: servidor Hono com /api/quiz/gerar via SDK openai apontado ao OpenRouter, retornando JSON estruturado"
     status: pending
   - id: conteudo
-    content: "P.O.: selecionar e aprovar histórias e referências de Êxodo e Daniel por faixa etária; Dev 2: mapear somente essas refs na YouVersion com suporte a idiomas"
+    content: "P.O.: selecionar e aprovar histórias e referências de Criação, Noé e José por faixa etária; Dev 2: mapear somente essas refs na YouVersion com suporte a idiomas"
     status: pending
   - id: ui-lab
     content: "Dev 3: caixa de diálogo, HUD, seletor de idioma e diário na rota /lab com dados mockados, sem depender do canvas"
@@ -29,8 +29,8 @@ todos:
   - id: geracao-segura
     content: "Dev 2: geração segura — prompt restrito à passagem aprovada, schema de quiz, validação etária e bíblica, exatamente uma resposta correta e fallback curado"
     status: pending
-  - id: regiao-exodo
-    content: Dev 1 carrega os .glb e faz gatilho de proximidade; Designer preenche mapas/exodo.ts com o layout
+  - id: regiao-criacao
+    content: Dev 1 carrega os .glb e faz gatilho de proximidade; Designer preenche mapas/criacao.ts com o layout
     status: pending
   - id: selah
     content: "Momento Selah: Dev 1 faz pausa do Ecctrl, useSpring na câmera e fade de áudio; Dev 3 faz a UI do versículo, quiz A/B/C/D e botão ouvir (TTS)"
@@ -47,8 +47,11 @@ todos:
   - id: pausa-parental
     content: "Dev 3: após o Momento Selah, pausar a exploração até liberação local do responsável; Dev 1 mantém movimento e mundo bloqueados enquanto pausaParentalAtiva"
     status: pending
-  - id: regiao-daniel
-    content: Dev 1 monta o hub com portais; Designer preenche mapas/daniel.ts
+  - id: regiao-noe
+    content: Dev 1 monta o hub com portais e, se a jornada principal estiver estável, inicia a região de Noé; Designer preenche mapas/noe.ts
+    status: pending
+  - id: regiao-jose
+    content: "Expansão pós-demo: Dev 1 reutiliza a estrutura de regiões para José; Designer preenche mapas/jose.ts após aprovação do recorte pela P.O."
     status: pending
   - id: tts-selah
     content: "Dev 2 (ideia no escopo): fala do texto (TTS) via Web Speech API no Momento Selah — versículo + pergunta/feedback — para faixa etária que ainda não lê (crianças); Dev 3 expõe toggle no store/UI"
@@ -86,9 +89,11 @@ Isso vira vantagem no pitch: o jogo roda no navegador, o jurado abre por um link
 O jogador é uma criança que encontra um mapa antigo e viaja por regiões bíblicas:
 
 - **Vale Central (hub)** — portais para as regiões, quadro de progresso
-- **Êxodo** — deserto, Mar Vermelho, Monte Sinai. NPC: Moisés
-- **Daniel** — Babilônia, cova dos leões, fornalha. NPC: Daniel
-- **Jonas** — só se sobrar tempo (não conte com ela)
+- **A Criação** — um mundo vazio ganha luz, natureza, animais e vida
+- **Noé e a Arca** — preparação da arca, materiais, animais e a chegada da chuva
+- **José, o Sonhador** — sonhos, adversidades, perdão e propósito até o Egito
+
+Para a hackathon, **A Criação** é a única região obrigatória e deve receber todo o polimento. **Noé** só entra depois que a jornada principal e o Momento Selah estiverem estáveis. **José** compõe a visão do produto e fica como expansão pós-demo, salvo decisão explícita da P.O. de substituir escopo já concluído.
 
 Em cada região: 1 NPC virtual narrativo, 5 versículos colecionáveis e 1 desafio final. Os NPCs deixam claro que são personagens automatizados e apresentam quizzes gerados por IA; não há chat ou entrada de texto livre.
 
@@ -139,10 +144,10 @@ O princípio que organiza tudo: **só o Dev 1 escreve código 3D**. Os outros do
 O Dev 1 expõe o mapa como um array de dados puro, e o designer edita esse arquivo direto com o Vite em hot reload, vendo o resultado na tela em tempo real:
 
 ```ts
-// src/mapas/exodo.ts
+// src/mapas/criacao.ts
 export const props = [
-  { modelo: "palmeira", pos: [12, 0, -8], rot: 0.4, escala: 1.2 },
-  { modelo: "tenda",    pos: [-5, 0, 3],  rot: 0,   escala: 1 },
+  { modelo: "arvore", pos: [12, 0, -8], rot: 0.4, escala: 1.2 },
+  { modelo: "rocha",  pos: [-5, 0, 3],  rot: 0,   escala: 1 },
 ];
 ```
 
@@ -154,7 +159,7 @@ Isto é o que permite os três trabalharem em paralelo sem colidir. Dev 3 escrev
 
 ```ts
 type Estado = {
-  regiao: "hub" | "exodo" | "daniel";
+  regiao: "hub" | "criacao" | "noe" | "jose";
   idioma: string;                     // "pt-BR" | "en-US" | "es-ES" | ...
   faixaEtaria: "crianca" | "geral";   // ativa TTS automático no Selah quando "crianca"
   ttsAtivo: boolean;                  // toggle manual de fala do texto
@@ -336,7 +341,7 @@ Ninguém espera ninguém. Dev 1 commita o scaffold em 10 minutos e os outros clo
 - **Dev 2**: conta e chave OpenRouter + YouVersion; ativa ZDR, desativa prompt logging, valida ambos com `curl`; esqueleto de `src/services/`
 - **Dev 3**: escreve o contrato do store persistente local (incluindo `idioma`, `faixaEtaria`, `ttsAtivo`, quiz e histórico anônimo) e publica no grupo
 - **Designer**: baixa e organiza os kits Kenney/Quaternius em `public/models/`
-- **P.O.**: abre o documento de curadoria com histórias, faixa etária e referências aprovadas de Êxodo
+- **P.O.**: abre o documento de curadoria com faixa etária, recorte e referências aprovadas de A Criação
 
 ### 0:30–1:30 — Vertical slice
 
@@ -346,21 +351,21 @@ Meta: personagem andando + NPC apresentando um quiz JSON gerado pela IA. Feio, m
 - **Dev 2**: `/api/quiz/gerar` com schema + primeira chamada YouVersion funcionando
 - **Dev 3**: quiz A/B/C/D, HUD e seletor de idioma na rota `/lab`, com mock
 - **Designer**: identidade no Figma — cor, tipografia, tela inicial
-- **P.O.**: histórias de Êxodo aprovadas por faixa etária, com ~40 refs e 5 colecionáveis
+- **P.O.**: recorte de A Criação aprovado por faixa etária, com referências candidatas e 5 colecionáveis definidos
 
 **Checkpoint 1:30 (P.O. cobra):** se o personagem não anda, cortem a física e usem movimento cinemático.
 
-### 1:30–3:00 — Região Êxodo
+### 1:30–3:00 — Região A Criação
 
 - **Dev 1**: carrega os `.glb`, gatilho de proximidade, colecionáveis girando
 - **Dev 2**: geração validada — quatro alternativas, uma correta, explicação sustentada pelo texto e fallback aprovado
 - **Dev 3**: diário, histórico local, Jogar sem salvar e Apagar progresso + tela inicial com o visual do designer
-- **Designer**: preenche `mapas/exodo.ts` com o layout do deserto
-- **P.O.**: persona narrativa do Moisés, revisa quizzes de fallback e começa histórias aprovadas de Daniel
+- **Designer**: preenche `mapas/criacao.ts` com a progressão de vazio/escuridão para luz, natureza e vida
+- **P.O.**: define a voz do narrador virtual, revisa quizzes de fallback e começa o recorte aprovado de Noé
 
 ### 3:00–4:00 — Momento Selah
 
-**A hora mais importante do dia.** Se algo tiver que cair, é a região 2, nunca isto.
+**A hora mais importante do dia.** Se algo tiver que cair, é a região de Noé, nunca isto.
 
 - **Dev 1**: pausa do `<Ecctrl>`, `useSpring` na câmera, fade do áudio e bloqueio da exploração enquanto `pausaParentalAtiva`
 - **Dev 2**: `/api/quiz/responder`, validação etária/bíblica e teste de falha fechada; se sobrar tempo, `src/services/tts.ts` para leitura do versículo e quiz
@@ -368,12 +373,12 @@ Meta: personagem andando + NPC apresentando um quiz JSON gerado pela IA. Feio, m
 - **Designer**: arte do momento de pausa — luz, partícula, tipografia grande
 - **P.O.**: testa como criança testaria, inclusive sem ler e só ouvindo, tenta provocar geração inadequada e reporta o que confunde
 
-### 4:00–5:00 — Região Daniel + hub
+### 4:00–5:00 — Hub + região de Noé, se a jornada principal estiver estável
 
 Reuso puro. Se a região 1 ficou bem feita, esta sai em 45 minutos.
 
-- **Dev 1**: hub com dois portais
-- **Designer**: `mapas/daniel.ts`
+- **Dev 1**: hub com portais para A Criação, Noé e José; somente o portal de A Criação precisa estar jogável, e Noé entra se houver tempo
+- **Designer**: `mapas/noe.ts`; José permanece como expansão pós-demo
 - **Dev 2**: quizzes aprovados de fallback + snapshot YouVersion das regiões quando permitido pelas licenças
 - **Dev 3 + P.O.**: montam os slides
 
@@ -402,7 +407,7 @@ Três vezes, cronometrado. P.O. apresenta, Dev 1 opera o jogo, os outros ficam c
 - **YouVersion indisponível / rate limit** → cache de sessão + snapshot local das refs das regiões ativas; o NPC nunca depende de fetch ao vivo na demo
 - **Rate limit do modelo grátis** → cascata configurada desde o início
 - **Modelo/provedor retém conteúdo** → exigir ZDR e `data_collection: "deny"`; se não houver endpoint compatível, usar fallback local
-- **Escopo estoura** → 1 região polida vence 3 quebradas. Corte a região 2 às 4:30 se não estiver fluindo
+- **Escopo estoura** → A Criação polida vence três regiões quebradas. Corte Noé às 4:30 se não estiver fluindo; José permanece pós-demo
 - **Performance no notebook do jurado** → sem sombras dinâmicas, `<Instances>` para vegetação, testar em máquina fraca antes do freeze
 - **Mobile compromete o caminho crítico** → manter como tarefa opcional depois da jornada principal; preparar UI e controles desacoplados desde o início, mas adiar PWA e Capacitor
 - **WebGL excede memória no celular** → modelos `.glb` e texturas comprimidos, perfil gráfico mobile e testes em Safari iOS e Chrome Android reais

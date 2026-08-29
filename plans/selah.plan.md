@@ -1,15 +1,15 @@
 ---
 name: Selah Jogo Bíblico
-overview: Selah — jogo 3D de mundo aberto no navegador onde crianças exploram regiões bíblicas conversando com NPCs ancorados no texto real. Plano de 7 horas com divisão de tarefas para 3 devs (1 com experiência em jogos), 1 designer e 1 P.O.
+overview: "Selah — jogo 3D de mundo aberto no navegador onde crianças exploram regiões bíblicas conversando com NPCs ancorados no texto bíblico real via YouVersion (multilíngue). A mecânica central é o Momento Selah. Plano de 7 horas com divisão de tarefas para 3 devs (1 com experiência em jogos), 1 designer e 1 P.O."
 todos:
   - id: contrato
-    content: "Dev 3: escrever e publicar o contrato do store zustand (regiao, versiculosColetados, selahsCompletados, selahAtivo, abrirSelah/fecharSelah) nos primeiros 20 minutos"
+    content: "Dev 3: escrever e publicar o contrato do store zustand (regiao, idioma, versiculosColetados, selahsCompletados, selahAtivo, abrirSelah/fecharSelah) nos primeiros 20 minutos"
     status: pending
   - id: setup
     content: "Dev 1: scaffold Vite + React 19 + TS com todas as deps e repo no GitHub"
     status: pending
   - id: assets
-    content: "Designer: baixar kits Kenney e Quaternius (CC0) para public/models/ e commitar; P.O.: baixar JSON da Bíblia ACF"
+    content: "Designer: baixar kits Kenney e Quaternius (CC0) para public/models/ e commitar; Dev 2: configurar cliente YouVersion em src/services/ + chave no proxy Hono"
     status: pending
   - id: slice-3d
     content: "Dev 1: vertical slice 3D — Canvas, RigidBody, Ecctrl com um cubo andando"
@@ -18,16 +18,16 @@ todos:
     content: "Dev 2: servidor Hono com /api/npc em streaming via SDK openai apontado ao OpenRouter"
     status: pending
   - id: conteudo
-    content: "P.O.: curar exodo.json e daniel.json com ~40 versículos cada e escrever as personas de Moisés e Daniel"
+    content: "P.O.: curar referências de Êxodo e Daniel (~40 versículos + 5 colecionáveis cada) e escrever personas de Moisés e Daniel; Dev 2: mapear essas refs na YouVersion com suporte a idiomas"
     status: pending
   - id: ui-lab
-    content: "Dev 3: caixa de diálogo, HUD e diário na rota /lab com dados mockados, sem depender do canvas"
+    content: "Dev 3: caixa de diálogo, HUD, seletor de idioma e diário na rota /lab com dados mockados, sem depender do canvas"
     status: pending
   - id: identidade
     content: "Designer: identidade visual do Selah no Figma — cor, tipografia, tela inicial, arte do momento de pausa"
     status: pending
   - id: grounding
-    content: "Dev 2: grounding — system prompt que proíbe afirmar fora dos versículos injetados, exige citar referência e recusa perguntas fora de contexto"
+    content: "Dev 2: grounding — system prompt que proíbe afirmar fora dos versículos injetados da YouVersion, exige citar referência no idioma ativo e recusa perguntas fora de contexto"
     status: pending
   - id: regiao-exodo
     content: Dev 1 carrega os .glb e faz gatilho de proximidade; Designer preenche mapas/exodo.ts com o layout
@@ -39,7 +39,7 @@ todos:
     content: "Dev 2: endpoint /api/avaliar com rubrica em JSON estruturado"
     status: pending
   - id: metricas
-    content: "Dev 3: dashboard com contador de Selahs como métrica principal"
+    content: "Dev 3: dashboard com contador de Selahs como métrica principal, versículos coletados, perguntas e nível de compreensão"
     status: pending
   - id: regiao-daniel
     content: Dev 1 monta o hub com portais; Designer preenche mapas/daniel.ts
@@ -48,7 +48,7 @@ todos:
     content: Áudio com howler, Sky e Environment do drei, checagem de 60fps em máquina fraca
     status: pending
   - id: fallback
-    content: "Dev 2: gerar respostas-cache.json e validar a demo inteira com Wi-Fi desligado"
+    content: "Dev 2: gerar respostas-cache.json + cache local de versículos YouVersion; validar a demo inteira com Wi-Fi desligado"
     status: pending
   - id: deploy
     content: Deploy do front e do proxy, gravar vídeo de backup de 2 minutos, congelar o código às 5:45
@@ -65,9 +65,9 @@ Jogo 3D de mundo aberto no navegador. *Selah* é a marcação de pausa que apare
 
 ## Diagnóstico da rede
 
-Testei a conectividade agora: `registry.npmjs.org`, `github.com` e `openrouter.ai/api/v1` responderam **200 em menos de 400ms**. O bloqueio que vocês encontraram é do **cliente Roblox** (usa portas UDP próprias), não da web.
+Testei a conectividade agora: `registry.npmjs.org`, `github.com` e `openrouter.ai/api/v1` responderam **200 em menos de 400ms**. O bloqueio que vocês encontraram é do **cliente Roblox** (usa portas UDP 49152–65535 próprias), não da web.
 
-Isso vira vantagem no pitch: o jogo roda no navegador, o jurado abre por um link, zero instalação, funciona em Chromebook de escola.
+Isso vira vantagem no pitch: o jogo roda no navegador, o jurado abre por um link, zero instalação, zero conta Roblox, funciona em Chromebook de escola.
 
 ## Conceito
 
@@ -93,6 +93,8 @@ Quando a criança alcança um versículo colecionável:
 
 Isso amarra o nome à experiência, cria leitura real em vez de item de inventário, e faz o jurado **sentir** o contraste entre barulho e silêncio em vez de ler sobre ele num slide.
 
+Tecnicamente é barato: pausar o `<Ecctrl>`, um `useSpring` na câmera, `howler` com fade no volume, e a UI de diálogo já construída.
+
 **Contador de Selahs** é a métrica principal do dashboard. Tempo de tela é métrica de vício; Selah é métrica de encontro.
 
 ## Time e divisão de responsabilidades
@@ -100,10 +102,10 @@ Isso amarra o nome à experiência, cria leitura real em vez de item de inventá
 O princípio que organiza tudo: **só o Dev 1 escreve código 3D**. Os outros dois trabalham em áreas que não exigem Three.js e não ficam bloqueados esperando a cena ficar pronta.
 
 - **Dev 1 — Engine (o que manja de jogos).** Canvas R3F, física Rapier, character controller, Momento Selah, portais, performance. É o gargalo crítico do projeto: **protejam o tempo dele**. Ele não faz deploy, não escreve prompt, não monta slide, não responde pergunta de ambiente dos outros
-- **Dev 2 — IA e backend.** Servidor Hono, integração OpenRouter, streaming, grounding bíblico, avaliação de resposta, cache de fallback. É TypeScript de servidor puro, testável com `curl`, zero 3D
-- **Dev 3 — Interface e estado.** Toda a UI é React DOM posicionada por cima do canvas: caixa de diálogo, diário de versículos, dashboard, tela inicial, telas de transição. Mais o store zustand. Zero 3D
+- **Dev 2 — IA e backend.** Servidor Hono, integração OpenRouter, proxy YouVersion, streaming, grounding bíblico, avaliação de resposta, cache de fallback. É TypeScript de servidor puro, testável com `curl`, zero 3D
+- **Dev 3 — Interface e estado.** Toda a UI é React DOM posicionada por cima do canvas: caixa de diálogo, diário de versículos, seletor de idioma, dashboard, tela inicial, telas de transição. Mais o store zustand. Zero 3D
 - **Designer.** Identidade do Selah, telas no Figma, curadoria dos assets Kenney e level design por dados (explicado abaixo)
-- **P.O.** Curadoria dos versículos, personas dos NPCs, roteiro e slides do pitch, e **guardião do cronômetro** — é quem decide os cortes de escopo
+- **P.O.** Curadoria das referências bíblicas, personas dos NPCs, roteiro e slides do pitch, e **guardião do cronômetro** — é quem decide os cortes de escopo
 
 ### Como o designer faz level design sem programar
 
@@ -126,10 +128,12 @@ Isto é o que permite os três trabalharem em paralelo sem colidir. Dev 3 escrev
 ```ts
 type Estado = {
   regiao: "hub" | "exodo" | "daniel";
+  idioma: string;                     // "pt-BR" | "en-US" | "es-ES" | ...
   versiculosColetados: string[];      // ["Ex 14:14", ...]
   selahsCompletados: number;
   selahAtivo: null | { ref: string; texto: string };
   dialogoAberto: boolean;
+  setIdioma: (idioma: string) => void;
   abrirSelah: (ref: string) => void;
   fecharSelah: () => void;
 };
@@ -141,7 +145,7 @@ Dev 1 só chama `abrirSelah()`. Dev 3 só lê `selahAtivo` para renderizar. Nenh
 
 ```mermaid
 flowchart LR
-    PO["P.O.: versiculos.json + personas"] --> Dev2["Dev 2: backend IA"]
+    PO["P.O.: refs + personas"] --> Dev2["Dev 2: backend IA + YouVersion"]
     PO --> Dev1
     Design["Designer: telas Figma"] --> Dev3["Dev 3: UI DOM + store"]
     Design --> Mapas["mapas/*.ts (dados)"]
@@ -161,8 +165,9 @@ npm i hono @hono/node-server openai@7.8.0 tsx concurrently
 ```
 
 - **ecctrl** é o item mais importante: character controller de terceira pessoa pronto. Economiza 1-2 horas que vocês não têm
+- **@react-three/rapier** para colisão de terreno e gatilhos de área
 - **leva** dá sliders para ajustar velocidade, pulo e luz **com o jogo rodando**. Escondam com `<Leva hidden />` antes da demo
-- **Hono** em processo separado (porta 8787) para proxiar o OpenRouter. **A chave nunca vai ao cliente** — `VITE_` expõe no bundle
+- **Hono** em processo separado (porta 8787) para proxiar o OpenRouter e a YouVersion. **A chave nunca vai ao cliente** — `VITE_` expõe no bundle
 - **openai** fala com OpenRouter trocando só a `baseURL`, evitando parsing manual de SSE:
 
 ```ts
@@ -174,17 +179,50 @@ const client = new OpenAI({
 
 ### Assets — não modelem nada
 
-[Kenney.nl](https://kenney.nl/assets) (Nature Kit, Castle Kit, Blocky Characters) e [Quaternius](https://quaternius.com), todos CC0 em `.glb`. Baixem **na primeira meia hora** e commitem no repo.
+- [Kenney.nl](https://kenney.nl/assets) — Nature Kit, Castle Kit, Survival Kit, Blocky Characters. Todos **CC0**, `.glb` pronto
+- [Quaternius](https://quaternius.com) — personagens modulares animados, CC0
+- [Poly Pizza](https://poly.pizza) — busca por modelo avulso
 
-### Texto bíblico
+Baixem tudo **na primeira meia hora** e commitem no repo em `public/models/`. Se a rede oscilar às 14h, vocês estão salvos.
 
-[thiagobodruk/biblia](https://github.com/thiagobodruk/biblia) tem a Bíblia em JSON. Usem a Almeida Revista e Corrigida, que é domínio público. Baixem o arquivo, não dependam de API externa.
+### Texto bíblico — API da YouVersion (multilíngue)
+
+O jogo consome a **API da YouVersion** via proxy Hono (`src/services/`):
+
+- **Detecção / seleção de idioma:** detecta o idioma do navegador (`pt-BR`, `en-US`, `es-ES`) com opção de troca manual no menu
+- **Versão bíblica dinâmica:** YouVersion devolve o texto na versão correspondente ao idioma (ex.: NVI/ARA em português, NIV/ESV em inglês, RVR em espanhol)
+- **Cache local e fallback:** versículos de cada região ficam cacheados na sessão; se a rede oscilar, o jogo usa o cache. Para a demo offline, pré-gerar também um snapshot dos textos das regiões ativas
+
+Curadoria do P.O. continua sendo lista de **referências** (livro/capítulo/versículo) + personas — o texto em si vem da API no idioma ativo.
+
+## Arquitetura
+
+```mermaid
+flowchart TD
+    Browser["Navegador (React 19 + Vite)\n[Detecta idioma do usuário]"]
+    R3F["Canvas R3F: cena, Rapier, ecctrl"]
+    HUD["HUD DOM: dialogo, diario, metricas"]
+    Store["zustand: progresso, versiculos, idioma"]
+    Proxy["Hono :8787"]
+    OR["OpenRouter (LLM)"]
+    YV["API YouVersion (textos bíblicos)"]
+    Cache["cache local + respostas-cache.json"]
+
+    Browser --> R3F
+    Browser --> HUD
+    R3F --> Store
+    HUD --> Store
+    Store --> Proxy
+    Proxy --> OR
+    Proxy --> YV
+    Proxy -.->|"rede caiu"| Cache
+```
 
 ## A IA precisa ser real, não cosmética
 
-**1. NPC ancorado no texto.** O prompt recebe os versículos reais da passagem e o system prompt proíbe afirmar qualquer coisa fora deles, exigindo citar referência. Sem vector DB: em 7h, curadoria manual de 40-60 versículos por região já é grounding legítimo.
+**1. NPC ancorado no texto.** O prompt recebe o bloco de versículos obtidos via YouVersion no idioma ativo. O system prompt proíbe afirmar qualquer coisa fora desse contexto e exige citar a referência exata. Sem vector DB: em 7h, curadoria manual de 40–60 referências por região + texto vivo da API já é grounding legítimo.
 
-**2. Avaliação aberta por LLM.** A criança escreve com as próprias palavras e o LLM avalia com rubrica:
+**2. Avaliação aberta por LLM.** A criança escreve com as próprias palavras (Web Speech API para voz se sobrar tempo) e o LLM avalia com rubrica:
 
 ```ts
 { compreendeu: boolean, nivel: 1|2|3, feedback: string, versiculoSugerido: string }
@@ -194,8 +232,9 @@ const client = new OpenAI({
 
 ### Endpoints
 
-- `POST /api/npc` — `{ regiao, mensagem, historico }`, responde em streaming
+- `POST /api/npc` — `{ regiao, mensagem, historico, idioma }`, injeta versículos da região via YouVersion, responde em streaming
 - `POST /api/avaliar` — devolve o JSON da rubrica
+- `GET /api/versiculo` — `{ ref, idioma }` → texto via YouVersion (com cache)
 
 ### Modelos
 
@@ -208,30 +247,30 @@ Gratuitos disponíveis hoje: `google/gemma-4-31b-it:free`, `minimax/minimax-m3:f
 Ninguém espera ninguém. Dev 1 commita o scaffold em 10 minutos e os outros clonam.
 
 - **Dev 1**: scaffold Vite + deps + repo no GitHub
-- **Dev 2**: conta e chave OpenRouter, valida com `curl`
-- **Dev 3**: escreve o contrato do store e publica no grupo
-- **Designer**: baixa e organiza os kits Kenney em `public/models/`
-- **P.O.**: baixa o JSON da Bíblia e abre o documento de curadoria
+- **Dev 2**: conta e chave OpenRouter + YouVersion; valida ambos com `curl`; esqueleto de `src/services/`
+- **Dev 3**: escreve o contrato do store (incluindo `idioma`) e publica no grupo
+- **Designer**: baixa e organiza os kits Kenney/Quaternius em `public/models/`
+- **P.O.**: abre o documento de curadoria com referências de Êxodo
 
 ### 0:30–1:30 — Vertical slice
 
 Meta: personagem andando + NPC devolvendo uma frase da IA. Feio, mas ponta a ponta.
 
 - **Dev 1**: `<Canvas>`, plano com `RigidBody`, `<Ecctrl>` com um cubo. Se o cubo anda, o resto é decoração
-- **Dev 2**: `/api/npc` em streaming funcionando
-- **Dev 3**: caixa de diálogo e HUD na rota `/lab`, com mock
+- **Dev 2**: `/api/npc` em streaming + primeira chamada YouVersion funcionando
+- **Dev 3**: caixa de diálogo, HUD e seletor de idioma na rota `/lab`, com mock
 - **Designer**: identidade no Figma — cor, tipografia, tela inicial
-- **P.O.**: `exodo.json` com 40 versículos, 5 marcados como colecionáveis
+- **P.O.**: lista de ~40 refs de Êxodo, 5 marcadas como colecionáveis
 
 **Checkpoint 1:30 (P.O. cobra):** se o personagem não anda, cortem a física e usem movimento cinemático.
 
 ### 1:30–3:00 — Região Êxodo
 
 - **Dev 1**: carrega os `.glb`, gatilho de proximidade, colecionáveis girando
-- **Dev 2**: grounding validado — Moisés cita referência correta e recusa pergunta fora do contexto
+- **Dev 2**: grounding validado — Moisés cita referência correta no idioma ativo e recusa pergunta fora do contexto
 - **Dev 3**: diário de versículos + tela inicial com o visual do designer
 - **Designer**: preenche `mapas/exodo.ts` com o layout do deserto
-- **P.O.**: persona do Moisés + começa `daniel.json`
+- **P.O.**: persona do Moisés + começa referências de Daniel
 
 ### 3:00–4:00 — Momento Selah
 
@@ -239,7 +278,7 @@ Meta: personagem andando + NPC devolvendo uma frase da IA. Feio, mas ponta a pon
 
 - **Dev 1**: pausa do `<Ecctrl>`, `useSpring` na câmera, fade do áudio
 - **Dev 2**: `/api/avaliar` com a rubrica
-- **Dev 3**: UI do Selah (versículo sozinho, campo de resposta, feedback) + dashboard com contador de Selahs
+- **Dev 3**: UI do Selah (versículo sozinho, campo de resposta, feedback) + dashboard com contador de Selahs, versículos coletados, perguntas e nível de compreensão
 - **Designer**: arte do momento de pausa — luz, partícula, tipografia grande
 - **P.O.**: testa como criança testaria e reporta o que confunde
 
@@ -249,7 +288,7 @@ Reuso puro. Se a região 1 ficou bem feita, esta sai em 45 minutos.
 
 - **Dev 1**: hub com dois portais
 - **Designer**: `mapas/daniel.ts`
-- **Dev 2**: cache de fallback offline
+- **Dev 2**: cache de fallback offline (respostas NPC + snapshot YouVersion das regiões)
 - **Dev 3 + P.O.**: montam os slides
 
 ### 5:00–5:45 — Polimento
@@ -271,7 +310,8 @@ Três vezes, cronometrado. P.O. apresenta, Dev 1 opera o jogo, os outros ficam c
 ## Riscos e mitigações
 
 - **Dev 1 vira gargalo e os outros travam** → contrato do store nos primeiros 20 minutos, Dev 3 na rota `/lab`, Dev 2 no `curl`. Ninguém precisa do jogo rodando para trabalhar
-- **A rede cai na apresentação** → `respostas-cache.json` pré-gerado. Vídeo como último recurso
+- **A rede cai na apresentação** → `respostas-cache.json` + snapshot YouVersion pré-gerado. Vídeo como último recurso
+- **YouVersion indisponível / rate limit** → cache de sessão + snapshot local das refs das regiões ativas; o NPC nunca depende de fetch ao vivo na demo
 - **Rate limit do modelo grátis** → cascata configurada desde o início
 - **Escopo estoura** → 1 região polida vence 3 quebradas. Corte a região 2 às 4:30 se não estiver fluindo
 - **Performance no notebook do jurado** → sem sombras dinâmicas, `<Instances>` para vegetação, testar em máquina fraca antes do freeze
@@ -281,6 +321,6 @@ Três vezes, cronometrado. P.O. apresenta, Dev 1 opera o jogo, os outros ficam c
 
 1. Abram explicando o nome. *Selah* aparece 71 vezes na Bíblia como instrução para parar. Uma criança hoje recebe estímulo o dia inteiro sem uma única pausa, e é justamente a pausa que o texto pede. O nome entrega problema e solução na mesma frase
 2. Demonstrem **ao vivo** um Momento Selah. Deixem o silêncio acontecer na sala e não falem por cima dele
-3. Mostrem o NPC citando versículo real e a criança respondendo com as próprias palavras
+3. Mostrem o NPC citando versículo real (YouVersion, no idioma da criança) e a criança respondendo com as próprias palavras
 4. Mostrem o dashboard: **"não medimos tempo de tela, medimos Selahs"**
 5. Fechem no "roda em qualquer navegador, inclusive Chromebook de escola pública"

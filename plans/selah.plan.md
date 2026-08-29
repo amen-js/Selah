@@ -47,6 +47,9 @@ todos:
   - id: polimento
     content: Áudio com howler, Sky e Environment do drei, checagem de 60fps em máquina fraca
     status: pending
+  - id: mobile-opcional
+    content: "Se o núcleo da demo estiver concluído: Dev 1 adiciona controles touch e perfil gráfico mobile; Dev 3 adapta HUD para telas pequenas e safe areas. PWA/Capacitor não entram no caminho crítico da hackathon"
+    status: pending
   - id: fallback
     content: "Dev 2: gerar respostas-cache.json + cache local de versículos YouVersion; validar a demo inteira com Wi-Fi desligado"
     status: pending
@@ -218,6 +221,26 @@ flowchart TD
     Proxy -.->|"rede caiu"| Cache
 ```
 
+### Estratégia mobile e publicação em lojas — escopo opcional
+
+O projeto continua **web-first** com React, Vite e React Three Fiber; não migrar para React Native. A mesma aplicação deve aceitar teclado/mouse e touch por uma camada de controles desacoplada da movimentação do personagem.
+
+Se o núcleo da demo estiver pronto antes do congelamento, implementar nesta ordem:
+
+1. HUD responsivo, orientação horizontal e suporte às `safe-area-inset-*`
+2. Joystick virtual, câmera por arrasto e botões touch de interação/pulo
+3. Perfil gráfico mobile, reduzindo sombras, pós-processamento, resolução e distância de renderização
+4. PWA instalável, somente se os itens anteriores estiverem estáveis
+
+Publicação futura na Play Store e App Store será feita com **Capacitor**, empacotando o build web em projetos Android e iOS. Capacitor não é dependência necessária para a demo e só deve ser adicionado quando houver trabalho real de publicação. O aplicativo de loja deverá ter experiência própria de app — controles touch, tela cheia, assets essenciais locais, progresso persistente, ícone/splash e comportamento útil offline — e não apenas abrir o site dentro de um contêiner.
+
+```text
+React + Vite + R3F
+├── navegador / PWA
+├── Capacitor Android → Google Play
+└── Capacitor iOS → App Store
+```
+
 ## A IA precisa ser real, não cosmética
 
 **1. NPC ancorado no texto.** O prompt recebe o bloco de versículos obtidos via YouVersion no idioma ativo. O system prompt proíbe afirmar qualquer coisa fora desse contexto e exige citar a referência exata. Sem vector DB: em 7h, curadoria manual de 40–60 referências por região + texto vivo da API já é grounding legítimo.
@@ -295,6 +318,8 @@ Reuso puro. Se a região 1 ficou bem feita, esta sai em 45 minutos.
 
 Áudio com `howler`, `<Sky>` e `<Environment>` do drei. Bloom só se rodar a 60fps.
 
+Se toda a jornada principal já estiver funcionando e validada, usar apenas o tempo restante para suporte mobile: HUD responsivo, controles touch e perfil gráfico reduzido. Não instalar Capacitor durante a hackathon; a prioridade continua sendo uma demo web completa e estável.
+
 ### 5:45–6:15 — CONGELAMENTO DE CÓDIGO
 
 Regra sem exceção. O P.O. faz cumprir.
@@ -315,6 +340,9 @@ Três vezes, cronometrado. P.O. apresenta, Dev 1 opera o jogo, os outros ficam c
 - **Rate limit do modelo grátis** → cascata configurada desde o início
 - **Escopo estoura** → 1 região polida vence 3 quebradas. Corte a região 2 às 4:30 se não estiver fluindo
 - **Performance no notebook do jurado** → sem sombras dinâmicas, `<Instances>` para vegetação, testar em máquina fraca antes do freeze
+- **Mobile compromete o caminho crítico** → manter como tarefa opcional depois da jornada principal; preparar UI e controles desacoplados desde o início, mas adiar PWA e Capacitor
+- **WebGL excede memória no celular** → modelos `.glb` e texturas comprimidos, perfil gráfico mobile e testes em Safari iOS e Chrome Android reais
+- **App rejeitado como site reempacotado** → na publicação futura, entregar controles touch, persistência, offline, tela cheia e acabamento nativo antes de submeter às lojas
 - **Alucinação bíblica ao vivo** → prompt exige recusa educada fora do contexto. Testem perguntas maliciosas: um jurado vai tentar
 
 ## O que dizer no pitch

@@ -6,16 +6,16 @@ todos:
     content: Scaffold Vite + React 19 + TS, instalar three/fiber/drei/rapier/ecctrl/zustand/tailwind/hono, criar repo
     status: pending
   - id: assets
-    content: Baixar kits Kenney (CC0), personagem Quaternius e JSON da Bíblia ACF; commitar tudo no repo para não depender da rede depois
+    content: Baixar kits Kenney (CC0) e personagem Quaternius; commitar tudo no repo para não depender da rede depois
     status: pending
   - id: slice
     content: "Vertical slice: personagem com Ecctrl andando sobre terreno com Rapier + proxy Hono respondendo streaming do OpenRouter"
     status: pending
   - id: conteudo
-    content: Curar exodo.json e daniel.json com ~40 versículos cada, marcando 5 colecionáveis por região
+    content: Configurar integração com a API da YouVersion para buscar passagens/versículos dinamicamente com base no idioma do usuário (Êxodo e Daniel)
     status: pending
   - id: npc
-    content: "Sistema de NPC com grounding: system prompt que proíbe afirmar fora dos versículos injetados e exige citar referência"
+    content: "Sistema de NPC com grounding: system prompt que proíbe afirmar fora dos versículos obtidos da YouVersion e exige citar referência no idioma ativo"
     status: pending
   - id: regiao-exodo
     content: "Montar região Êxodo: mapa com kits, gatilho de diálogo por proximidade, colecionáveis giratórios"
@@ -86,7 +86,7 @@ Tecnicamente é barato: pausar o `<Ecctrl>`, um `useSpring` na câmera, `howler`
 
 O briefing exige "uso real de I.A" e "respeito ao texto bíblico". Três usos que atendem os dois:
 
-**1. NPC ancorado no texto (grounding).** O NPC não inventa. O prompt recebe um bloco de versículos reais da passagem, e o system prompt proíbe afirmar qualquer coisa fora deles, exigindo citar a referência. Sem vector DB — em 7h, curadoria manual de 40-60 versículos por região num JSON já é grounding legítimo e defensável.
+**1. NPC ancorado no texto (grounding).** O NPC não inventa. O prompt recebe o bloco de versículos obtidos em tempo real via **API da YouVersion** no idioma configurado/detectado do usuário (ex: português, inglês, espanhol). O system prompt proíbe afirmar qualquer coisa fora desse contexto e exige citar a referência exata.
 
 **2. Quiz aberto avaliado por LLM.** Em vez de múltipla escolha, a criança **escreve ou fala** o que entendeu e o LLM avalia com rubrica, devolvendo JSON estruturado. É aqui que a IA faz algo impossível sem ela.
 
@@ -110,7 +110,7 @@ npm i hono @hono/node-server openai@7.8.0 tsx concurrently
 - `**ecctrl**` é o item mais importante da lista: character controller de terceira pessoa pronto (pular, correr, câmera orbital, física). Economiza 1-2 horas que vocês não têm.
 - `**@react-three/rapier**` para colisão de terreno e gatilhos de área.
 - `**leva**` cria um painel de sliders para ajustar velocidade, altura de pulo, névoa e posição de luz **com o jogo rodando**, sem recompilar. Numa maratona de tuning cego isso paga os 10 minutos de instalação. Escondam com `<Leva hidden />` antes da demo.
-- **Hono** num processo separado (porta 8787) só para proxiar o OpenRouter. **A chave nunca vai para o cliente** — `VITE_` expõe no bundle.
+- **Hono** num processo separado (porta 8787) só para proxiar o OpenRouter e as chamadas à API da YouVersion. **A chave nunca vai para o cliente** — `VITE_` expõe no bundle.
 - `**openai**` (o SDK oficial) fala com o OpenRouter só trocando a `baseURL`. Evita escrever `fetch` com parsing manual de SSE, que é onde muito time perde uma hora:
 
 ```ts
@@ -128,30 +128,33 @@ const client = new OpenAI({
 
 Baixem tudo **na primeira meia hora** e commitem no repo. Se a rede oscilar às 14h, vocês estão salvos.
 
-### Texto bíblico
+### Texto Bíblico (API da YouVersion com suporte a idiomas)
 
-Repo `[thiagobodruk/biblia](https://github.com/thiagobodruk/biblia)` tem a Bíblia inteira em JSON. Usem a **Almeida Revista e Corrigida (ACF/AA)**, que é domínio público. Baixem o JSON, não dependam de API externa.
+Em vez de base estática única, o jogo consome a **API da YouVersion**:
+- **Detecção/Seleção de Idioma:** Detecta o idioma padrão do navegador da criança (ex.: `pt-BR`, `en-US`, `es-ES`) com opção de troca manual no menu.
+- **Versão Bíblica Dinâmica:** A API YouVersion busca os versículos nas versões correspondentes ao idioma selecionado (ex: NVI/ARA para português, NIV/ESV para inglês, RVR para espanhol).
+- **Cache Local & Fallback:** Os versículos requisitados para cada região são cacheados localmente na sessão para minimizar requisições e garantir funcionamento caso haja oscilação de rede.
 
 ## Arquitetura
 
 ```mermaid
 flowchart TD
-    Browser["Navegador (React 19 + Vite)"]
+    Browser["Navegador (React 19 + Vite)\n[Detecta Idioma do Usuário]"]
     R3F["Canvas R3F: cena, Rapier, ecctrl"]
     HUD["HUD DOM: dialogo, diario, metricas"]
-    Store["zustand: progresso, versiculos, sessao"]
+    Store["zustand: progresso, versiculos, idioma"]
     Proxy["Hono :8787"]
-    OR["OpenRouter"]
-    JSON["versiculos.json (curado, no repo)"]
-    Cache["respostas-cache.json (fallback demo)"]
+    OR["OpenRouter (LLM)"]
+    YV["API YouVersion (Textos Bíblicos)"]
+    Cache["cache-local.json (fallback offline)"]
 
     Browser --> R3F
     Browser --> HUD
     R3F --> Store
     HUD --> Store
     Store --> Proxy
-    JSON --> Proxy
     Proxy --> OR
+    Proxy --> YV
     Proxy -.->|"rede caiu"| Cache
 ```
 
@@ -178,7 +181,7 @@ Ninguém espera ninguém. A faz o scaffold e commita em 10 minutos; os outros cl
 
 - **A**: scaffold Vite + deps + repo no GitHub
 - **B**: conta OpenRouter, chave, testa `curl` no endpoint
-- **C**: baixa os kits Kenney e o JSON da Bíblia, commita em `public/models/` e `src/data/`
+- **C**: baixa os kits Kenney, configura chamadas e chaves/módulos da API YouVersion em `src/services/`
 - **D**: escreve o roteiro do pitch (sim, agora — não no final)
 
 ### 0:30–1:30 — Vertical slice
@@ -187,7 +190,7 @@ Meta: personagem andando num chão com física + NPC devolvendo uma frase da IA.
 
 - **A**: `<Canvas>`, luz, plano com `RigidBody`, `<Ecctrl>` com um cubo. Se o cubo anda, o resto é decoração
 - **B**: Hono com `/api/npc` em streaming, system prompt do Moisés
-- **C**: curadoria de `src/data/exodo.json` — 40 versículos + 5 marcados como colecionáveis
+- **C**: mapeamento das passagens de Êxodo na YouVersion (referências + 5 colecionáveis) com suporte a idiomas
 - **D**: layout do HUD e da caixa de diálogo em Tailwind
 
 **Checkpoint 1:30:** se o personagem não anda ainda, cortem a física e usem movimento cinemático simples.
@@ -212,7 +215,7 @@ Esta é a hora mais importante do dia. Se algo tiver que ser cortado, corte a re
 
 Reuso puro dos sistemas. Se a região 1 ficou bem feita, esta sai em 45 minutos.
 
-- **C**: `daniel.json` + mapa da Babilônia
+- **C**: mapeamento de Daniel na YouVersion + mapa da Babilônia
 - **A**: hub central com dois portais
 
 ### 5:00–5:45 — Polimento

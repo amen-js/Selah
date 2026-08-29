@@ -1,9 +1,9 @@
 ---
 name: Selah Jogo Bíblico
-overview: "Selah — jogo 3D de mundo aberto no navegador onde crianças exploram regiões bíblicas conversando com NPCs ancorados no texto bíblico real via YouVersion (multilíngue). A mecânica central é o Momento Selah. Plano de 7 horas com divisão de tarefas para 3 devs (1 com experiência em jogos), 1 designer e 1 P.O."
+overview: "Selah — jogo 3D de mundo aberto no navegador onde crianças exploram regiões bíblicas com NPCs virtuais que apresentam quizzes gerados por IA e ancorados no texto real via YouVersion (multilíngue). A mecânica central é o Momento Selah. Plano de 7 horas com divisão de tarefas para 3 devs (1 com experiência em jogos), 1 designer e 1 P.O."
 todos:
   - id: contrato
-    content: "Dev 3: escrever e publicar o contrato do store zustand (regiao, idioma, faixaEtaria, ttsAtivo, versiculosColetados, selahsCompletados, selahAtivo, abrirSelah/fecharSelah) nos primeiros 20 minutos"
+    content: "Dev 3: escrever e publicar o contrato do store zustand, incluindo faixa etária, TTS, quiz ativo e histórico local anônimo, nos primeiros 20 minutos"
     status: pending
   - id: setup
     content: "Dev 1: scaffold Vite + React 19 + TS com todas as deps e repo no GitHub"
@@ -15,10 +15,10 @@ todos:
     content: "Dev 1: vertical slice 3D — Canvas, RigidBody, Ecctrl com um cubo andando"
     status: pending
   - id: slice-ia
-    content: "Dev 2: servidor Hono com /api/npc em streaming via SDK openai apontado ao OpenRouter"
+    content: "Dev 2: servidor Hono com /api/quiz/gerar via SDK openai apontado ao OpenRouter, retornando JSON estruturado"
     status: pending
   - id: conteudo
-    content: "P.O.: curar referências de Êxodo e Daniel (~40 versículos + 5 colecionáveis cada) e escrever personas de Moisés e Daniel; Dev 2: mapear essas refs na YouVersion com suporte a idiomas"
+    content: "P.O.: selecionar e aprovar histórias e referências de Êxodo e Daniel por faixa etária; Dev 2: mapear somente essas refs na YouVersion com suporte a idiomas"
     status: pending
   - id: ui-lab
     content: "Dev 3: caixa de diálogo, HUD, seletor de idioma e diário na rota /lab com dados mockados, sem depender do canvas"
@@ -26,20 +26,26 @@ todos:
   - id: identidade
     content: "Designer: identidade visual do Selah no Figma — cor, tipografia, tela inicial, arte do momento de pausa"
     status: pending
-  - id: grounding
-    content: "Dev 2: grounding — system prompt que proíbe afirmar fora dos versículos injetados da YouVersion, exige citar referência no idioma ativo e recusa perguntas fora de contexto"
+  - id: geracao-segura
+    content: "Dev 2: geração segura — prompt restrito à passagem aprovada, schema de quiz, validação etária e bíblica, exatamente uma resposta correta e fallback curado"
     status: pending
   - id: regiao-exodo
     content: Dev 1 carrega os .glb e faz gatilho de proximidade; Designer preenche mapas/exodo.ts com o layout
     status: pending
   - id: selah
-    content: "Momento Selah: Dev 1 faz pausa do Ecctrl, useSpring na câmera e fade de áudio; Dev 3 faz a UI do versículo sozinho com campo de resposta e botão ouvir (TTS)"
+    content: "Momento Selah: Dev 1 faz pausa do Ecctrl, useSpring na câmera e fade de áudio; Dev 3 faz a UI do versículo, quiz A/B/C/D e botão ouvir (TTS)"
     status: pending
   - id: avaliar
-    content: "Dev 2: endpoint /api/avaliar com rubrica em JSON estruturado"
+    content: "Dev 2: endpoint /api/quiz/responder corrige quizId + alternativaId sem receber ou persistir dados pessoais"
     status: pending
   - id: metricas
-    content: "Dev 3: dashboard com contador de Selahs como métrica principal, versículos coletados, perguntas e nível de compreensão"
+    content: "Dev 3: dashboard e histórico exclusivamente local com Selahs, versículos e resultados; incluir Jogar sem salvar e Apagar progresso"
+    status: pending
+  - id: privacidade-infantil
+    content: "Dev 2 + Dev 3: OpenRouter com ZDR e sem prompt logging; aviso infantil de IA, tela para responsáveis, controle para desativar IA e fallback local"
+    status: pending
+  - id: pausa-parental
+    content: "Dev 3: após o Momento Selah, pausar a exploração até liberação local do responsável; Dev 1 mantém movimento e mundo bloqueados enquanto pausaParentalAtiva"
     status: pending
   - id: regiao-daniel
     content: Dev 1 monta o hub com portais; Designer preenche mapas/daniel.ts
@@ -49,6 +55,9 @@ todos:
     status: pending
   - id: polimento
     content: Áudio com howler, Sky e Environment do drei, checagem de 60fps em máquina fraca
+    status: pending
+  - id: mobile-opcional
+    content: "Se o núcleo da demo estiver concluído: Dev 1 adiciona controles touch e perfil gráfico mobile; Dev 3 adapta HUD para telas pequenas e safe areas. PWA/Capacitor não entram no caminho crítico da hackathon"
     status: pending
   - id: fallback
     content: "Dev 2: gerar respostas-cache.json + cache local de versículos YouVersion; validar a demo inteira com Wi-Fi desligado"
@@ -81,7 +90,7 @@ O jogador é uma criança que encontra um mapa antigo e viaja por regiões bíbl
 - **Daniel** — Babilônia, cova dos leões, fornalha. NPC: Daniel
 - **Jonas** — só se sobrar tempo (não conte com ela)
 
-Em cada região: 1 NPC conversacional, 5 versículos colecionáveis, 1 desafio final.
+Em cada região: 1 NPC virtual narrativo, 5 versículos colecionáveis e 1 desafio final. Os NPCs deixam claro que são personagens automatizados e apresentam quizzes gerados por IA; não há chat ou entrada de texto livre.
 
 ## O Momento Selah — a mecânica que dá nome ao jogo
 
@@ -90,9 +99,11 @@ Quando a criança alcança um versículo colecionável:
 1. O movimento trava e a música ambiente desce para quase silêncio
 2. A câmera fecha suavemente no ponto de luz do versículo
 3. O texto bíblico aparece sozinho, sem HUD, sem contador
-4. O NPC da região faz **uma** pergunta gerada pela IA sobre aquele versículo
-5. A criança responde com as próprias palavras; a IA avalia e devolve feedback
-6. O mundo volta a respirar
+4. O NPC da região apresenta **uma** pergunta A/B/C/D gerada pela IA sobre aquele versículo
+5. A criança escolhe uma alternativa e recebe uma explicação validada, adequada à faixa etária
+6. O jogo entra numa **Pausa Selah real**: exploração, controles e novos desafios ficam indisponíveis
+7. A criança é convidada a sair da tela, conversar ou refletir; somente o responsável libera localmente a próxima sessão
+8. Após a liberação, o mundo volta a respirar
 
 Isso amarra o nome à experiência, cria leitura real em vez de item de inventário, e faz o jurado **sentir** o contraste entre barulho e silêncio em vez de ler sobre ele num slide.
 
@@ -106,20 +117,22 @@ Tecnicamente é barato: pausar o `<Ecctrl>`, um `useSpring` na câmera, `howler`
 - **Como:** `speechSynthesis` da Web Speech API no navegador (grátis, sem backend, sem chave). O `lang` segue o `idioma` do store (`pt-BR`, `en-US`, `es-ES`)
 - **Quando:** se `faixaEtaria === "crianca"` ou `ttsAtivo === true`, o versículo toca ao abrir o Selah; botão “ouvir / pausar” sempre disponível na UI
 - **Quem:** Dev 2 entrega `src/services/tts.ts` (falar / pausar / cancelar); Dev 3 liga no store e no botão da UI do Selah
-- **Prioridade:** depois do `/api/avaliar` e do grounding. Se o tempo apertar, vira stretch — mas a ideia fica no pitch como acessibilidade explícita
-- **Não confundir** com input por voz (criança *fala* a resposta): isso continua nice-to-have separado; TTS aqui é *output* (máquina lê o texto)
+- **Prioridade:** depois da geração e validação do quiz. Se o tempo apertar, vira stretch — mas a ideia fica no pitch como acessibilidade explícita
+- **Não confundir** com input por voz: não há resposta aberta; TTS aqui é somente *output* (máquina lê o texto)
 
-**Contador de Selahs** é a métrica principal do dashboard. Tempo de tela é métrica de vício; Selah é métrica de encontro.
+**Contador de Selahs** é a métrica principal do dashboard. Tempo de tela é métrica de vício; Selah é métrica de encontro. A pausa não fica apenas dentro da narrativa: ela interrompe o ciclo de jogo e leva a proposta para a vida real, ajudando a reduzir o tempo contínuo de tela.
+
+O bloqueio vale somente para a exploração dentro do Selah — nunca bloqueia o navegador, o aparelho ou a possibilidade de fechar o jogo. A tela de pausa não usa contagem regressiva, culpa, urgência ou recompensa por permanecer conectado. A liberação do responsável acontece no próprio dispositivo e não envia PIN, horário ou qualquer outro dado ao backend.
 
 ## Time e divisão de responsabilidades
 
 O princípio que organiza tudo: **só o Dev 1 escreve código 3D**. Os outros dois trabalham em áreas que não exigem Three.js e não ficam bloqueados esperando a cena ficar pronta.
 
 - **Dev 1 — Engine (o que manja de jogos).** Canvas R3F, física Rapier, character controller, Momento Selah, portais, performance. É o gargalo crítico do projeto: **protejam o tempo dele**. Ele não faz deploy, não escreve prompt, não monta slide, não responde pergunta de ambiente dos outros
-- **Dev 2 — IA e backend.** Servidor Hono, integração OpenRouter, proxy YouVersion, streaming, grounding bíblico, avaliação de resposta, cache de fallback. Também dono da ideia de **fala do texto (TTS)** para faixa etária que não lê. É TypeScript de servidor puro (TTS no cliente via Web Speech), testável com `curl`, zero 3D
-- **Dev 3 — Interface e estado.** Toda a UI é React DOM posicionada por cima do canvas: caixa de diálogo, diário de versículos, seletor de idioma/faixa etária, botão “ouvir”, dashboard, tela inicial, telas de transição. Mais o store zustand. Zero 3D
+- **Dev 2 — IA e backend.** Servidor Hono, integração OpenRouter com ZDR, proxy YouVersion, geração e validação dos quizzes, correção, cache de fallback e serviço TTS no cliente. É TypeScript testável sem depender do 3D
+- **Dev 3 — Interface e estado.** Toda a UI é React DOM posicionada por cima do canvas: quiz, diário, seletores de idioma/faixa etária, botão ouvir, dashboard, transparência da IA, tela para responsáveis e transições. Mais o store zustand e sua persistência local. Zero 3D
 - **Designer.** Identidade do Selah, telas no Figma, curadoria dos assets Kenney e level design por dados (explicado abaixo)
-- **P.O.** Curadoria das referências bíblicas, personas dos NPCs, roteiro e slides do pitch, e **guardião do cronômetro** — é quem decide os cortes de escopo
+- **P.O.** Seleção e aprovação das histórias, referências e faixa etária, personas dos NPCs, fallback dos quizzes, roteiro e slides do pitch, e **guardião do cronômetro** — é quem decide os cortes de escopo
 
 ### Como o designer faz level design sem programar
 
@@ -148,6 +161,10 @@ type Estado = {
   versiculosColetados: string[];      // ["Ex 14:14", ...]
   selahsCompletados: number;
   selahAtivo: null | { ref: string; texto: string };
+  quizAtivo: null | Quiz;
+  historico: ResultadoQuiz[];
+  salvarProgresso: boolean;
+  pausaParentalAtiva: boolean;
   dialogoAberto: boolean;
   setIdioma: (idioma: string) => void;
   setFaixaEtaria: (faixa: "crianca" | "geral") => void;
@@ -156,6 +173,8 @@ type Estado = {
   fecharSelah: () => void;
 };
 ```
+
+O store usa `zustand/persist` sobre `localStorage`, sem conta ou identificador remoto. Salva somente IDs de passagens, Selahs e resultados A/B/C/D. Não salva prompts, respostas completas da LLM, texto bíblico integral sem permissão da licença, localização, escola, igreja ou qualquer inferência religiosa. O usuário pode jogar sem salvar e apagar todo o progresso; nenhum histórico é sincronizado com o backend ou enviado ao OpenRouter.
 
 Dev 1 só chama `abrirSelah()`. Dev 3 só lê `selahAtivo` para renderizar. Nenhum dos dois precisa do código do outro para trabalhar.
 
@@ -210,8 +229,9 @@ O jogo consome a **API da YouVersion** via proxy Hono (`src/services/`):
 - **Detecção / seleção de idioma:** detecta o idioma do navegador (`pt-BR`, `en-US`, `es-ES`) com opção de troca manual no menu
 - **Versão bíblica dinâmica:** YouVersion devolve o texto na versão correspondente ao idioma (ex.: NVI/ARA em português, NIV/ESV em inglês, RVR em espanhol)
 - **Cache local e fallback:** versículos de cada região ficam cacheados na sessão; se a rede oscilar, o jogo usa o cache. Para a demo offline, pré-gerar também um snapshot dos textos das regiões ativas
+- **Licença e atribuição:** usar apenas versões liberadas para o projeto, exibir o copyright exigido e validar se cada licença permite cache ou snapshot offline
 
-Curadoria do P.O. continua sendo lista de **referências** (livro/capítulo/versículo) + personas — o texto em si vem da API no idioma ativo.
+A P.O. mantém uma allowlist de histórias e referências com faixa etária, tema e status de aprovação. A LLM nunca escolhe passagens; recebe somente o texto aprovado da história ativa. Não usar login, highlights ou perfil da criança na YouVersion — apenas a autenticação da aplicação no backend.
 
 ## Arquitetura
 
@@ -219,44 +239,92 @@ Curadoria do P.O. continua sendo lista de **referências** (livro/capítulo/vers
 flowchart TD
     Browser["Navegador (React 19 + Vite)\n[Detecta idioma do usuário]"]
     R3F["Canvas R3F: cena, Rapier, ecctrl"]
-    HUD["HUD DOM: dialogo, diario, metricas"]
-    Store["zustand: progresso, versiculos, idioma"]
+    HUD["HUD DOM: quiz, diario, metricas, area parental"]
+    Store["zustand persist: progresso local anonimo"]
     Proxy["Hono :8787"]
     OR["OpenRouter (LLM)"]
     YV["API YouVersion (textos bíblicos)"]
-    Cache["cache local + respostas-cache.json"]
+    Approved["historias e passagens aprovadas pela P.O."]
+    Validator["schema + validacao etaria e biblica"]
+    Cache["quizzes aprovados + cache permitido"]
 
     Browser --> R3F
     Browser --> HUD
     R3F --> Store
     HUD --> Store
-    Store --> Proxy
-    Proxy --> OR
+    Store -->|"historiaId, idioma, faixa etaria"| Proxy
+    Approved --> Proxy
     Proxy --> YV
-    Proxy -.->|"rede caiu"| Cache
+    Proxy --> OR
+    OR --> Validator
+    Validator -->|"quiz aprovado"| Proxy
+    Validator -.->|"falhou"| Cache
+    Proxy --> HUD
+```
+
+### Estratégia mobile e publicação em lojas — escopo opcional
+
+O projeto continua **web-first** com React, Vite e React Three Fiber; não migrar para React Native. A mesma aplicação deve aceitar teclado/mouse e touch por uma camada de controles desacoplada da movimentação do personagem.
+
+Se o núcleo da demo estiver pronto antes do congelamento, implementar nesta ordem:
+
+1. HUD responsivo, orientação horizontal e suporte às `safe-area-inset-*`
+2. Joystick virtual, câmera por arrasto e botões touch de interação/pulo
+3. Perfil gráfico mobile, reduzindo sombras, pós-processamento, resolução e distância de renderização
+4. PWA instalável, somente se os itens anteriores estiverem estáveis
+
+Publicação futura na Play Store e App Store será feita com **Capacitor**, empacotando o build web em projetos Android e iOS. Capacitor não é dependência necessária para a demo e só deve ser adicionado quando houver trabalho real de publicação. O aplicativo de loja deverá ter experiência própria de app — controles touch, tela cheia, assets essenciais locais, progresso persistente, ícone/splash e comportamento útil offline — e não apenas abrir o site dentro de um contêiner.
+
+```text
+React + Vite + R3F
+├── navegador / PWA
+├── Capacitor Android → Google Play
+└── Capacitor iOS → App Store
 ```
 
 ## A IA precisa ser real, não cosmética
 
-**1. NPC ancorado no texto.** O prompt recebe o bloco de versículos obtidos via YouVersion no idioma ativo. O system prompt proíbe afirmar qualquer coisa fora desse contexto e exige citar a referência exata. Sem vector DB: em 7h, curadoria manual de 40–60 referências por região + texto vivo da API já é grounding legítimo.
+**1. Quiz ancorado no texto.** O prompt recebe uma passagem escolhida pela P.O. e obtida via YouVersion no idioma ativo. A LLM não escolhe a história e não pode usar conhecimento externo, inventar fatos ou complementar a narrativa.
 
-**2. Avaliação aberta por LLM.** A criança escreve com as próprias palavras (input por voz via Web Speech API se sobrar tempo — distinto do TTS de leitura) e o LLM avalia com rubrica:
+**2. Geração estruturada e validada.** A LLM gera uma pergunta adequada à faixa etária, quatro alternativas, exatamente uma resposta correta, explicação e referência. O backend valida o schema e o suporte textual antes de mostrar o conteúdo:
 
 ```ts
-{ compreendeu: boolean, nivel: 1|2|3, feedback: string, versiculoSugerido: string }
+type Quiz = {
+  id: string;
+  passagemId: string;
+  pergunta: string;
+  alternativas: { id: "A" | "B" | "C" | "D"; texto: string }[];
+  respostaCorretaId: "A" | "B" | "C" | "D";
+  explicacao: string;
+  referencia: string;
+};
 ```
 
-**3. Adaptação de dificuldade** conforme o histórico de respostas.
+Se a saída for inválida, inadequada ou não sustentada pela passagem, ela é descartada e o jogo usa um quiz previamente aprovado. A correção é determinística; a resposta da criança nunca volta à LLM.
+
+**3. Adaptação sem perfil remoto.** A dificuldade pode considerar resultados agregados guardados exclusivamente no navegador, enviando ao backend apenas `facil`, `medio` ou `dificil`, nunca o histórico completo.
+
+### Privacidade e segurança infantil
+
+- Antes do jogo, responsáveis recebem explicação simples sobre IA, dados locais e faixa etária; podem desativar IA e usar somente quizzes em cache
+- Responsáveis configuram localmente a liberação da Pausa Selah e podem encerrar a pausa por uma área protegida; nenhum PIN ou configuração parental sai do dispositivo
+- Na primeira interação, o NPC informa à criança que é um personagem virtual automatizado que usa IA para criar desafios
+- Sem cadastro infantil, publicidade, analytics comportamental, fingerprinting ou coleta deliberada de identificadores
+- OpenRouter com Zero Data Retention obrigatório por requisição, `data_collection: "deny"` e prompt logging desativado
+- O proxy não registra corpo de requisições ou respostas; mantém apenas métricas técnicas sem conteúdo
+- Progresso e histórico ficam somente no navegador, com opções **Jogar sem salvar** e **Apagar progresso**
+- Sem loot boxes, streaks, urgência artificial ou recompensas por permanecer conectado; durante a Pausa Selah, ficar com a tela aberta não acelera nem concede vantagem
+- Antes de lançamento público, realizar revisão jurídica e avaliação formal de impacto à privacidade, segurança e saúde infantil
 
 ### Endpoints
 
-- `POST /api/npc` — `{ regiao, mensagem, historico, idioma }`, injeta versículos da região via YouVersion, responde em streaming
-- `POST /api/avaliar` — devolve o JSON da rubrica
-- `GET /api/versiculo` — `{ ref, idioma }` → texto via YouVersion (com cache)
+- `POST /api/quiz/gerar` — `{ historiaId, passagemId, idioma, faixaEtaria, dificuldade }` → quiz validado ou fallback; não recebe histórico da criança
+- `POST /api/quiz/responder` — `{ quizId, alternativaId }` → `{ acertou, explicacao, referencia }`; não persiste a resposta
+- `GET /api/versiculo` — `{ passagemId, idioma }` → texto autorizado via YouVersion, atribuição e cache permitido pela licença
 
 ### Modelos
 
-Gratuitos disponíveis hoje: `google/gemma-4-31b-it:free`, `minimax/minimax-m3:free`, `z-ai/glm-5.2:free`. Configurem cascata de fallback — rate limit de modelo grátis em dia de hackathon é risco real.
+Escolher modelos no OpenRouter somente entre endpoints com ZDR disponível no dia da implementação. Configurar cascata restrita a esses provedores; se nenhum estiver disponível ou a validação falhar, usar quiz local aprovado.
 
 ## Cronograma — 7 horas
 
@@ -265,40 +333,40 @@ Gratuitos disponíveis hoje: `google/gemma-4-31b-it:free`, `minimax/minimax-m3:f
 Ninguém espera ninguém. Dev 1 commita o scaffold em 10 minutos e os outros clonam.
 
 - **Dev 1**: scaffold Vite + deps + repo no GitHub
-- **Dev 2**: conta e chave OpenRouter + YouVersion; valida ambos com `curl`; esqueleto de `src/services/`
-- **Dev 3**: escreve o contrato do store (incluindo `idioma`, `faixaEtaria`, `ttsAtivo`) e publica no grupo
+- **Dev 2**: conta e chave OpenRouter + YouVersion; ativa ZDR, desativa prompt logging, valida ambos com `curl`; esqueleto de `src/services/`
+- **Dev 3**: escreve o contrato do store persistente local (incluindo `idioma`, `faixaEtaria`, `ttsAtivo`, quiz e histórico anônimo) e publica no grupo
 - **Designer**: baixa e organiza os kits Kenney/Quaternius em `public/models/`
-- **P.O.**: abre o documento de curadoria com referências de Êxodo
+- **P.O.**: abre o documento de curadoria com histórias, faixa etária e referências aprovadas de Êxodo
 
 ### 0:30–1:30 — Vertical slice
 
-Meta: personagem andando + NPC devolvendo uma frase da IA. Feio, mas ponta a ponta.
+Meta: personagem andando + NPC apresentando um quiz JSON gerado pela IA. Feio, mas ponta a ponta.
 
 - **Dev 1**: `<Canvas>`, plano com `RigidBody`, `<Ecctrl>` com um cubo. Se o cubo anda, o resto é decoração
-- **Dev 2**: `/api/npc` em streaming + primeira chamada YouVersion funcionando
-- **Dev 3**: caixa de diálogo, HUD e seletor de idioma na rota `/lab`, com mock
+- **Dev 2**: `/api/quiz/gerar` com schema + primeira chamada YouVersion funcionando
+- **Dev 3**: quiz A/B/C/D, HUD e seletor de idioma na rota `/lab`, com mock
 - **Designer**: identidade no Figma — cor, tipografia, tela inicial
-- **P.O.**: lista de ~40 refs de Êxodo, 5 marcadas como colecionáveis
+- **P.O.**: histórias de Êxodo aprovadas por faixa etária, com ~40 refs e 5 colecionáveis
 
 **Checkpoint 1:30 (P.O. cobra):** se o personagem não anda, cortem a física e usem movimento cinemático.
 
 ### 1:30–3:00 — Região Êxodo
 
 - **Dev 1**: carrega os `.glb`, gatilho de proximidade, colecionáveis girando
-- **Dev 2**: grounding validado — Moisés cita referência correta no idioma ativo e recusa pergunta fora do contexto
-- **Dev 3**: diário de versículos + tela inicial com o visual do designer
+- **Dev 2**: geração validada — quatro alternativas, uma correta, explicação sustentada pelo texto e fallback aprovado
+- **Dev 3**: diário, histórico local, Jogar sem salvar e Apagar progresso + tela inicial com o visual do designer
 - **Designer**: preenche `mapas/exodo.ts` com o layout do deserto
-- **P.O.**: persona do Moisés + começa referências de Daniel
+- **P.O.**: persona narrativa do Moisés, revisa quizzes de fallback e começa histórias aprovadas de Daniel
 
 ### 3:00–4:00 — Momento Selah
 
 **A hora mais importante do dia.** Se algo tiver que cair, é a região 2, nunca isto.
 
-- **Dev 1**: pausa do `<Ecctrl>`, `useSpring` na câmera, fade do áudio
-- **Dev 2**: `/api/avaliar` com a rubrica; se sobrar tempo nesta hora, esqueleto de `src/services/tts.ts` (Web Speech) para o versículo
-- **Dev 3**: UI do Selah (versículo sozinho, campo de resposta, feedback, botão “ouvir”) + dashboard com contador de Selahs, versículos coletados, perguntas e nível de compreensão; liga `faixaEtaria` / `ttsAtivo` do store
+- **Dev 1**: pausa do `<Ecctrl>`, `useSpring` na câmera, fade do áudio e bloqueio da exploração enquanto `pausaParentalAtiva`
+- **Dev 2**: `/api/quiz/responder`, validação etária/bíblica e teste de falha fechada; se sobrar tempo, `src/services/tts.ts` para leitura do versículo e quiz
+- **Dev 3**: UI do Selah (versículo, alternativas, explicação e botão ouvir), Pausa Selah com liberação local do responsável, transparência da IA e dashboard local
 - **Designer**: arte do momento de pausa — luz, partícula, tipografia grande
-- **P.O.**: testa como criança testaria (incluindo “sem ler, só ouvindo”) e reporta o que confunde
+- **P.O.**: testa como criança testaria, inclusive sem ler e só ouvindo, tenta provocar geração inadequada e reporta o que confunde
 
 ### 4:00–5:00 — Região Daniel + hub
 
@@ -306,12 +374,14 @@ Reuso puro. Se a região 1 ficou bem feita, esta sai em 45 minutos.
 
 - **Dev 1**: hub com dois portais
 - **Designer**: `mapas/daniel.ts`
-- **Dev 2**: cache de fallback offline (respostas NPC + snapshot YouVersion das regiões)
+- **Dev 2**: quizzes aprovados de fallback + snapshot YouVersion das regiões quando permitido pelas licenças
 - **Dev 3 + P.O.**: montam os slides
 
 ### 5:00–5:45 — Polimento
 
 Áudio com `howler`, `<Sky>` e `<Environment>` do drei. Bloom só se rodar a 60fps. Se o TTS ainda não entrou: Dev 2 + Dev 3 fecham o botão “ouvir” no Selah com `speechSynthesis` — demo de 30 segundos no pitch.
+
+Se toda a jornada principal já estiver funcionando e validada, usar apenas o tempo restante para suporte mobile: HUD responsivo, controles touch e perfil gráfico reduzido. Não instalar Capacitor durante a hackathon; a prioridade continua sendo uma demo web completa e estável.
 
 ### 5:45–6:15 — CONGELAMENTO DE CÓDIGO
 
@@ -331,15 +401,23 @@ Três vezes, cronometrado. P.O. apresenta, Dev 1 opera o jogo, os outros ficam c
 - **A rede cai na apresentação** → `respostas-cache.json` + snapshot YouVersion pré-gerado. Vídeo como último recurso
 - **YouVersion indisponível / rate limit** → cache de sessão + snapshot local das refs das regiões ativas; o NPC nunca depende de fetch ao vivo na demo
 - **Rate limit do modelo grátis** → cascata configurada desde o início
+- **Modelo/provedor retém conteúdo** → exigir ZDR e `data_collection: "deny"`; se não houver endpoint compatível, usar fallback local
 - **Escopo estoura** → 1 região polida vence 3 quebradas. Corte a região 2 às 4:30 se não estiver fluindo
 - **Performance no notebook do jurado** → sem sombras dinâmicas, `<Instances>` para vegetação, testar em máquina fraca antes do freeze
-- **Alucinação bíblica ao vivo** → prompt exige recusa educada fora do contexto. Testem perguntas maliciosas: um jurado vai tentar
+- **Mobile compromete o caminho crítico** → manter como tarefa opcional depois da jornada principal; preparar UI e controles desacoplados desde o início, mas adiar PWA e Capacitor
+- **WebGL excede memória no celular** → modelos `.glb` e texturas comprimidos, perfil gráfico mobile e testes em Safari iOS e Chrome Android reais
+- **App rejeitado como site reempacotado** → na publicação futura, entregar controles touch, persistência, offline, tela cheia e acabamento nativo antes de submeter às lojas
+- **Quiz inadequado ou biblicamente incorreto** → allowlist da P.O., schema estrito, validação antes da exibição e fallback aprovado; testar saídas adversariais antes da demo
+- **Histórico local expõe preferências em dispositivo compartilhado** → sem nomes ou texto livre, opção Jogar sem salvar, botão Apagar progresso e nenhuma sincronização remota
+- **Pausa parental vira frustração ou dark pattern** → explicar a regra antes do jogo, bloquear somente a exploração, permitir fechar livremente e não premiar tempo com a tela aberta
+- **Licença não permite cache de uma tradução** → guardar somente IDs e atribuição; gerar snapshot apenas das versões expressamente autorizadas
 
 ## O que dizer no pitch
 
 1. Abram explicando o nome. *Selah* aparece 71 vezes na Bíblia como instrução para parar. Uma criança hoje recebe estímulo o dia inteiro sem uma única pausa, e é justamente a pausa que o texto pede. O nome entrega problema e solução na mesma frase
 2. Demonstrem **ao vivo** um Momento Selah. Deixem o silêncio acontecer na sala e não falem por cima dele
-3. Mostrem o NPC citando versículo real (YouVersion, no idioma da criança) e a criança respondendo com as próprias palavras
-4. Se o TTS estiver pronto: mostrem a criança **ouvindo** o versículo no Momento Selah — acessibilidade para quem ainda não lê
-5. Mostrem o dashboard: **"não medimos tempo de tela, medimos Selahs"**
-6. Fechem no "roda em qualquer navegador, inclusive Chromebook de escola pública"
+3. Mostrem que o jogo permanece em pausa até a liberação do responsável: a mecânica sai da tela e cria um intervalo real
+4. Mostrem o NPC virtual explicando que usa IA e apresentando um quiz novo, validado e baseado no versículo real da YouVersion no idioma da criança
+5. Se o TTS estiver pronto: mostrem a criança **ouvindo** o versículo e o quiz — acessibilidade para quem ainda não lê
+6. Mostrem o dashboard: **"não medimos tempo de tela, medimos Selahs"**
+7. Fechem no "roda em qualquer navegador, inclusive Chromebook de escola pública"

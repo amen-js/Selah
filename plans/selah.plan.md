@@ -44,6 +44,9 @@ todos:
   - id: privacidade-infantil
     content: "Dev 2 + Dev 3: OpenRouter com ZDR e sem prompt logging; aviso infantil de IA, tela para responsáveis, controle para desativar IA e fallback local"
     status: pending
+  - id: pausa-parental
+    content: "Dev 3: após o Momento Selah, pausar a exploração até liberação local do responsável; Dev 1 mantém movimento e mundo bloqueados enquanto pausaParentalAtiva"
+    status: pending
   - id: regiao-daniel
     content: Dev 1 monta o hub com portais; Designer preenche mapas/daniel.ts
     status: pending
@@ -95,13 +98,17 @@ Quando a criança alcança um versículo colecionável:
 3. O texto bíblico aparece sozinho, sem HUD, sem contador
 4. O NPC da região apresenta **uma** pergunta A/B/C/D gerada pela IA sobre aquele versículo
 5. A criança escolhe uma alternativa e recebe uma explicação validada, adequada à faixa etária
-6. O mundo volta a respirar
+6. O jogo entra numa **Pausa Selah real**: exploração, controles e novos desafios ficam indisponíveis
+7. A criança é convidada a sair da tela, conversar ou refletir; somente o responsável libera localmente a próxima sessão
+8. Após a liberação, o mundo volta a respirar
 
 Isso amarra o nome à experiência, cria leitura real em vez de item de inventário, e faz o jurado **sentir** o contraste entre barulho e silêncio em vez de ler sobre ele num slide.
 
 Tecnicamente é barato: pausar o `<Ecctrl>`, um `useSpring` na câmera, `howler` com fade no volume, e a UI de diálogo já construída.
 
-**Contador de Selahs** é a métrica principal do dashboard. Tempo de tela é métrica de vício; Selah é métrica de encontro.
+**Contador de Selahs** é a métrica principal do dashboard. Tempo de tela é métrica de vício; Selah é métrica de encontro. A pausa não fica apenas dentro da narrativa: ela interrompe o ciclo de jogo e leva a proposta para a vida real, ajudando a reduzir o tempo contínuo de tela.
+
+O bloqueio vale somente para a exploração dentro do Selah — nunca bloqueia o navegador, o aparelho ou a possibilidade de fechar o jogo. A tela de pausa não usa contagem regressiva, culpa, urgência ou recompensa por permanecer conectado. A liberação do responsável acontece no próprio dispositivo e não envia PIN, horário ou qualquer outro dado ao backend.
 
 ## Time e divisão de responsabilidades
 
@@ -141,6 +148,7 @@ type Estado = {
   quizAtivo: null | Quiz;
   historico: ResultadoQuiz[];
   salvarProgresso: boolean;
+  pausaParentalAtiva: boolean;
   dialogoAberto: boolean;
   setIdioma: (idioma: string) => void;
   abrirSelah: (ref: string) => void;
@@ -281,12 +289,13 @@ Se a saída for inválida, inadequada ou não sustentada pela passagem, ela é d
 ### Privacidade e segurança infantil
 
 - Antes do jogo, responsáveis recebem explicação simples sobre IA, dados locais e faixa etária; podem desativar IA e usar somente quizzes em cache
+- Responsáveis configuram localmente a liberação da Pausa Selah e podem encerrar a pausa por uma área protegida; nenhum PIN ou configuração parental sai do dispositivo
 - Na primeira interação, o NPC informa à criança que é um personagem virtual automatizado que usa IA para criar desafios
 - Sem cadastro infantil, publicidade, analytics comportamental, fingerprinting ou coleta deliberada de identificadores
 - OpenRouter com Zero Data Retention obrigatório por requisição, `data_collection: "deny"` e prompt logging desativado
 - O proxy não registra corpo de requisições ou respostas; mantém apenas métricas técnicas sem conteúdo
 - Progresso e histórico ficam somente no navegador, com opções **Jogar sem salvar** e **Apagar progresso**
-- Sem loot boxes, streaks, urgência artificial ou recompensas por permanecer conectado; recompensas representam aprendizado e avanço na história
+- Sem loot boxes, streaks, urgência artificial ou recompensas por permanecer conectado; durante a Pausa Selah, ficar com a tela aberta não acelera nem concede vantagem
 - Antes de lançamento público, realizar revisão jurídica e avaliação formal de impacto à privacidade, segurança e saúde infantil
 
 ### Endpoints
@@ -335,9 +344,9 @@ Meta: personagem andando + NPC apresentando um quiz JSON gerado pela IA. Feio, m
 
 **A hora mais importante do dia.** Se algo tiver que cair, é a região 2, nunca isto.
 
-- **Dev 1**: pausa do `<Ecctrl>`, `useSpring` na câmera, fade do áudio
+- **Dev 1**: pausa do `<Ecctrl>`, `useSpring` na câmera, fade do áudio e bloqueio da exploração enquanto `pausaParentalAtiva`
 - **Dev 2**: `/api/quiz/responder`, validação etária/bíblica e teste de falha fechada para o fallback
-- **Dev 3**: UI do Selah (versículo, alternativas e explicação) + transparência da IA, tela para responsáveis e dashboard local
+- **Dev 3**: UI do Selah (versículo, alternativas e explicação), Pausa Selah com liberação local do responsável, transparência da IA e dashboard local
 - **Designer**: arte do momento de pausa — luz, partícula, tipografia grande
 - **P.O.**: testa como criança testaria, tenta provocar geração inadequada e reporta o que confunde
 
@@ -382,12 +391,14 @@ Três vezes, cronometrado. P.O. apresenta, Dev 1 opera o jogo, os outros ficam c
 - **App rejeitado como site reempacotado** → na publicação futura, entregar controles touch, persistência, offline, tela cheia e acabamento nativo antes de submeter às lojas
 - **Quiz inadequado ou biblicamente incorreto** → allowlist da P.O., schema estrito, validação antes da exibição e fallback aprovado; testar saídas adversariais antes da demo
 - **Histórico local expõe preferências em dispositivo compartilhado** → sem nomes ou texto livre, opção Jogar sem salvar, botão Apagar progresso e nenhuma sincronização remota
+- **Pausa parental vira frustração ou dark pattern** → explicar a regra antes do jogo, bloquear somente a exploração, permitir fechar livremente e não premiar tempo com a tela aberta
 - **Licença não permite cache de uma tradução** → guardar somente IDs e atribuição; gerar snapshot apenas das versões expressamente autorizadas
 
 ## O que dizer no pitch
 
 1. Abram explicando o nome. *Selah* aparece 71 vezes na Bíblia como instrução para parar. Uma criança hoje recebe estímulo o dia inteiro sem uma única pausa, e é justamente a pausa que o texto pede. O nome entrega problema e solução na mesma frase
 2. Demonstrem **ao vivo** um Momento Selah. Deixem o silêncio acontecer na sala e não falem por cima dele
-3. Mostrem o NPC virtual explicando que usa IA e apresentando um quiz novo, validado e baseado no versículo real da YouVersion no idioma da criança
-4. Mostrem o dashboard: **"não medimos tempo de tela, medimos Selahs"**
-5. Fechem no "roda em qualquer navegador, inclusive Chromebook de escola pública"
+3. Mostrem que o jogo permanece em pausa até a liberação do responsável: a mecânica sai da tela e cria um intervalo real
+4. Mostrem o NPC virtual explicando que usa IA e apresentando um quiz novo, validado e baseado no versículo real da YouVersion no idioma da criança
+5. Mostrem o dashboard: **"não medimos tempo de tela, medimos Selahs"**
+6. Fechem no "roda em qualquer navegador, inclusive Chromebook de escola pública"

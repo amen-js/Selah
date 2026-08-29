@@ -12,6 +12,8 @@ Em planejamento / início de desenvolvimento.
 
 O plano de produto e execução do hackathon está em [`plans/selah.plan.md`](plans/selah.plan.md).
 
+O documento de design do jogo está em [`docs/GDD.md`](docs/GDD.md).
+
 ## Equipe
 
 | Papel | Nome | GitHub |

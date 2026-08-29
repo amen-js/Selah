@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Build / output
+dist/
+build/
+out/
+.next/
+.turbo/
+.cache/
+coverage/
+
+# Logs / OS
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+
+# Editor / IDE
+.cursor/
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Misc
+*.local
+.vercel

@@ -3,7 +3,7 @@ name: Selah Jogo Bíblico
 overview: "Selah — jogo 3D de mundo aberto no navegador onde crianças exploram regiões bíblicas conversando com NPCs ancorados no texto bíblico real via YouVersion (multilíngue). A mecânica central é o Momento Selah. Plano de 7 horas com divisão de tarefas para 3 devs (1 com experiência em jogos), 1 designer e 1 P.O."
 todos:
   - id: contrato
-    content: "Dev 3: escrever e publicar o contrato do store zustand (regiao, idioma, versiculosColetados, selahsCompletados, selahAtivo, abrirSelah/fecharSelah) nos primeiros 20 minutos"
+    content: "Dev 3: escrever e publicar o contrato do store zustand (regiao, idioma, faixaEtaria, ttsAtivo, versiculosColetados, selahsCompletados, selahAtivo, abrirSelah/fecharSelah) nos primeiros 20 minutos"
     status: pending
   - id: setup
     content: "Dev 1: scaffold Vite + React 19 + TS com todas as deps e repo no GitHub"
@@ -33,7 +33,7 @@ todos:
     content: Dev 1 carrega os .glb e faz gatilho de proximidade; Designer preenche mapas/exodo.ts com o layout
     status: pending
   - id: selah
-    content: "Momento Selah: Dev 1 faz pausa do Ecctrl, useSpring na câmera e fade de áudio; Dev 3 faz a UI do versículo sozinho com campo de resposta"
+    content: "Momento Selah: Dev 1 faz pausa do Ecctrl, useSpring na câmera e fade de áudio; Dev 3 faz a UI do versículo sozinho com campo de resposta e botão ouvir (TTS)"
     status: pending
   - id: avaliar
     content: "Dev 2: endpoint /api/avaliar com rubrica em JSON estruturado"
@@ -43,6 +43,9 @@ todos:
     status: pending
   - id: regiao-daniel
     content: Dev 1 monta o hub com portais; Designer preenche mapas/daniel.ts
+    status: pending
+  - id: tts-selah
+    content: "Dev 2 (ideia no escopo): fala do texto (TTS) via Web Speech API no Momento Selah — versículo + pergunta/feedback — para faixa etária que ainda não lê (crianças); Dev 3 expõe toggle no store/UI"
     status: pending
   - id: polimento
     content: Áudio com howler, Sky e Environment do drei, checagem de 60fps em máquina fraca
@@ -95,6 +98,17 @@ Isso amarra o nome à experiência, cria leitura real em vez de item de inventá
 
 Tecnicamente é barato: pausar o `<Ecctrl>`, um `useSpring` na câmera, `howler` com fade no volume, e a UI de diálogo já construída.
 
+### Fala do texto (TTS) — acessibilidade para quem ainda não lê
+
+**Ideia no escopo (Dev 2).** Uma determinada faixa etária — principalmente crianças que ainda não sabem ler — precisa **ouvir** o texto, não só vê-lo. Sem isso, o Momento Selah exclui parte do público-alvo.
+
+- **O quê:** ler em voz alta o versículo do Momento Selah e, se der tempo, a pergunta/feedback do NPC
+- **Como:** `speechSynthesis` da Web Speech API no navegador (grátis, sem backend, sem chave). O `lang` segue o `idioma` do store (`pt-BR`, `en-US`, `es-ES`)
+- **Quando:** se `faixaEtaria === "crianca"` ou `ttsAtivo === true`, o versículo toca ao abrir o Selah; botão “ouvir / pausar” sempre disponível na UI
+- **Quem:** Dev 2 entrega `src/services/tts.ts` (falar / pausar / cancelar); Dev 3 liga no store e no botão da UI do Selah
+- **Prioridade:** depois do `/api/avaliar` e do grounding. Se o tempo apertar, vira stretch — mas a ideia fica no pitch como acessibilidade explícita
+- **Não confundir** com input por voz (criança *fala* a resposta): isso continua nice-to-have separado; TTS aqui é *output* (máquina lê o texto)
+
 **Contador de Selahs** é a métrica principal do dashboard. Tempo de tela é métrica de vício; Selah é métrica de encontro.
 
 ## Time e divisão de responsabilidades
@@ -102,8 +116,8 @@ Tecnicamente é barato: pausar o `<Ecctrl>`, um `useSpring` na câmera, `howler`
 O princípio que organiza tudo: **só o Dev 1 escreve código 3D**. Os outros dois trabalham em áreas que não exigem Three.js e não ficam bloqueados esperando a cena ficar pronta.
 
 - **Dev 1 — Engine (o que manja de jogos).** Canvas R3F, física Rapier, character controller, Momento Selah, portais, performance. É o gargalo crítico do projeto: **protejam o tempo dele**. Ele não faz deploy, não escreve prompt, não monta slide, não responde pergunta de ambiente dos outros
-- **Dev 2 — IA e backend.** Servidor Hono, integração OpenRouter, proxy YouVersion, streaming, grounding bíblico, avaliação de resposta, cache de fallback. É TypeScript de servidor puro, testável com `curl`, zero 3D
-- **Dev 3 — Interface e estado.** Toda a UI é React DOM posicionada por cima do canvas: caixa de diálogo, diário de versículos, seletor de idioma, dashboard, tela inicial, telas de transição. Mais o store zustand. Zero 3D
+- **Dev 2 — IA e backend.** Servidor Hono, integração OpenRouter, proxy YouVersion, streaming, grounding bíblico, avaliação de resposta, cache de fallback. Também dono da ideia de **fala do texto (TTS)** para faixa etária que não lê. É TypeScript de servidor puro (TTS no cliente via Web Speech), testável com `curl`, zero 3D
+- **Dev 3 — Interface e estado.** Toda a UI é React DOM posicionada por cima do canvas: caixa de diálogo, diário de versículos, seletor de idioma/faixa etária, botão “ouvir”, dashboard, tela inicial, telas de transição. Mais o store zustand. Zero 3D
 - **Designer.** Identidade do Selah, telas no Figma, curadoria dos assets Kenney e level design por dados (explicado abaixo)
 - **P.O.** Curadoria das referências bíblicas, personas dos NPCs, roteiro e slides do pitch, e **guardião do cronômetro** — é quem decide os cortes de escopo
 
@@ -129,11 +143,15 @@ Isto é o que permite os três trabalharem em paralelo sem colidir. Dev 3 escrev
 type Estado = {
   regiao: "hub" | "exodo" | "daniel";
   idioma: string;                     // "pt-BR" | "en-US" | "es-ES" | ...
+  faixaEtaria: "crianca" | "geral";   // ativa TTS automático no Selah quando "crianca"
+  ttsAtivo: boolean;                  // toggle manual de fala do texto
   versiculosColetados: string[];      // ["Ex 14:14", ...]
   selahsCompletados: number;
   selahAtivo: null | { ref: string; texto: string };
   dialogoAberto: boolean;
   setIdioma: (idioma: string) => void;
+  setFaixaEtaria: (faixa: "crianca" | "geral") => void;
+  setTtsAtivo: (ativo: boolean) => void;
   abrirSelah: (ref: string) => void;
   fecharSelah: () => void;
 };
@@ -222,7 +240,7 @@ flowchart TD
 
 **1. NPC ancorado no texto.** O prompt recebe o bloco de versículos obtidos via YouVersion no idioma ativo. O system prompt proíbe afirmar qualquer coisa fora desse contexto e exige citar a referência exata. Sem vector DB: em 7h, curadoria manual de 40–60 referências por região + texto vivo da API já é grounding legítimo.
 
-**2. Avaliação aberta por LLM.** A criança escreve com as próprias palavras (Web Speech API para voz se sobrar tempo) e o LLM avalia com rubrica:
+**2. Avaliação aberta por LLM.** A criança escreve com as próprias palavras (input por voz via Web Speech API se sobrar tempo — distinto do TTS de leitura) e o LLM avalia com rubrica:
 
 ```ts
 { compreendeu: boolean, nivel: 1|2|3, feedback: string, versiculoSugerido: string }
@@ -248,7 +266,7 @@ Ninguém espera ninguém. Dev 1 commita o scaffold em 10 minutos e os outros clo
 
 - **Dev 1**: scaffold Vite + deps + repo no GitHub
 - **Dev 2**: conta e chave OpenRouter + YouVersion; valida ambos com `curl`; esqueleto de `src/services/`
-- **Dev 3**: escreve o contrato do store (incluindo `idioma`) e publica no grupo
+- **Dev 3**: escreve o contrato do store (incluindo `idioma`, `faixaEtaria`, `ttsAtivo`) e publica no grupo
 - **Designer**: baixa e organiza os kits Kenney/Quaternius em `public/models/`
 - **P.O.**: abre o documento de curadoria com referências de Êxodo
 
@@ -277,10 +295,10 @@ Meta: personagem andando + NPC devolvendo uma frase da IA. Feio, mas ponta a pon
 **A hora mais importante do dia.** Se algo tiver que cair, é a região 2, nunca isto.
 
 - **Dev 1**: pausa do `<Ecctrl>`, `useSpring` na câmera, fade do áudio
-- **Dev 2**: `/api/avaliar` com a rubrica
-- **Dev 3**: UI do Selah (versículo sozinho, campo de resposta, feedback) + dashboard com contador de Selahs, versículos coletados, perguntas e nível de compreensão
+- **Dev 2**: `/api/avaliar` com a rubrica; se sobrar tempo nesta hora, esqueleto de `src/services/tts.ts` (Web Speech) para o versículo
+- **Dev 3**: UI do Selah (versículo sozinho, campo de resposta, feedback, botão “ouvir”) + dashboard com contador de Selahs, versículos coletados, perguntas e nível de compreensão; liga `faixaEtaria` / `ttsAtivo` do store
 - **Designer**: arte do momento de pausa — luz, partícula, tipografia grande
-- **P.O.**: testa como criança testaria e reporta o que confunde
+- **P.O.**: testa como criança testaria (incluindo “sem ler, só ouvindo”) e reporta o que confunde
 
 ### 4:00–5:00 — Região Daniel + hub
 
@@ -293,7 +311,7 @@ Reuso puro. Se a região 1 ficou bem feita, esta sai em 45 minutos.
 
 ### 5:00–5:45 — Polimento
 
-Áudio com `howler`, `<Sky>` e `<Environment>` do drei. Bloom só se rodar a 60fps.
+Áudio com `howler`, `<Sky>` e `<Environment>` do drei. Bloom só se rodar a 60fps. Se o TTS ainda não entrou: Dev 2 + Dev 3 fecham o botão “ouvir” no Selah com `speechSynthesis` — demo de 30 segundos no pitch.
 
 ### 5:45–6:15 — CONGELAMENTO DE CÓDIGO
 
@@ -322,5 +340,6 @@ Três vezes, cronometrado. P.O. apresenta, Dev 1 opera o jogo, os outros ficam c
 1. Abram explicando o nome. *Selah* aparece 71 vezes na Bíblia como instrução para parar. Uma criança hoje recebe estímulo o dia inteiro sem uma única pausa, e é justamente a pausa que o texto pede. O nome entrega problema e solução na mesma frase
 2. Demonstrem **ao vivo** um Momento Selah. Deixem o silêncio acontecer na sala e não falem por cima dele
 3. Mostrem o NPC citando versículo real (YouVersion, no idioma da criança) e a criança respondendo com as próprias palavras
-4. Mostrem o dashboard: **"não medimos tempo de tela, medimos Selahs"**
-5. Fechem no "roda em qualquer navegador, inclusive Chromebook de escola pública"
+4. Se o TTS estiver pronto: mostrem a criança **ouvindo** o versículo no Momento Selah — acessibilidade para quem ainda não lê
+5. Mostrem o dashboard: **"não medimos tempo de tela, medimos Selahs"**
+6. Fechem no "roda em qualquer navegador, inclusive Chromebook de escola pública"

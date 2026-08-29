@@ -3,7 +3,7 @@ name: Selah Jogo Bíblico
 overview: "Selah — jogo 3D de mundo aberto no navegador onde crianças exploram regiões bíblicas com NPCs virtuais que apresentam quizzes gerados por IA e ancorados no texto real via YouVersion (multilíngue). A mecânica central é o Momento Selah. Plano de 7 horas com divisão de tarefas para 3 devs (1 com experiência em jogos), 1 designer e 1 P.O."
 todos:
   - id: contrato
-    content: "Dev 3: escrever e publicar o contrato do store zustand, incluindo quiz ativo e histórico local anônimo, nos primeiros 20 minutos"
+    content: "Dev 3: escrever e publicar o contrato do store zustand, incluindo faixa etária, TTS, quiz ativo e histórico local anônimo, nos primeiros 20 minutos"
     status: pending
   - id: setup
     content: "Dev 1: scaffold Vite + React 19 + TS com todas as deps e repo no GitHub"
@@ -33,7 +33,7 @@ todos:
     content: Dev 1 carrega os .glb e faz gatilho de proximidade; Designer preenche mapas/exodo.ts com o layout
     status: pending
   - id: selah
-    content: "Momento Selah: Dev 1 faz pausa do Ecctrl, useSpring na câmera e fade de áudio; Dev 3 faz a UI do versículo e quiz A/B/C/D"
+    content: "Momento Selah: Dev 1 faz pausa do Ecctrl, useSpring na câmera e fade de áudio; Dev 3 faz a UI do versículo, quiz A/B/C/D e botão ouvir (TTS)"
     status: pending
   - id: avaliar
     content: "Dev 2: endpoint /api/quiz/responder corrige quizId + alternativaId sem receber ou persistir dados pessoais"
@@ -49,6 +49,9 @@ todos:
     status: pending
   - id: regiao-daniel
     content: Dev 1 monta o hub com portais; Designer preenche mapas/daniel.ts
+    status: pending
+  - id: tts-selah
+    content: "Dev 2 (ideia no escopo): fala do texto (TTS) via Web Speech API no Momento Selah — versículo + pergunta/feedback — para faixa etária que ainda não lê (crianças); Dev 3 expõe toggle no store/UI"
     status: pending
   - id: polimento
     content: Áudio com howler, Sky e Environment do drei, checagem de 60fps em máquina fraca
@@ -106,6 +109,17 @@ Isso amarra o nome à experiência, cria leitura real em vez de item de inventá
 
 Tecnicamente é barato: pausar o `<Ecctrl>`, um `useSpring` na câmera, `howler` com fade no volume, e a UI de diálogo já construída.
 
+### Fala do texto (TTS) — acessibilidade para quem ainda não lê
+
+**Ideia no escopo (Dev 2).** Uma determinada faixa etária — principalmente crianças que ainda não sabem ler — precisa **ouvir** o texto, não só vê-lo. Sem isso, o Momento Selah exclui parte do público-alvo.
+
+- **O quê:** ler em voz alta o versículo do Momento Selah e, se der tempo, a pergunta/feedback do NPC
+- **Como:** `speechSynthesis` da Web Speech API no navegador (grátis, sem backend, sem chave). O `lang` segue o `idioma` do store (`pt-BR`, `en-US`, `es-ES`)
+- **Quando:** se `faixaEtaria === "crianca"` ou `ttsAtivo === true`, o versículo toca ao abrir o Selah; botão “ouvir / pausar” sempre disponível na UI
+- **Quem:** Dev 2 entrega `src/services/tts.ts` (falar / pausar / cancelar); Dev 3 liga no store e no botão da UI do Selah
+- **Prioridade:** depois da geração e validação do quiz. Se o tempo apertar, vira stretch — mas a ideia fica no pitch como acessibilidade explícita
+- **Não confundir** com input por voz: não há resposta aberta; TTS aqui é somente *output* (máquina lê o texto)
+
 **Contador de Selahs** é a métrica principal do dashboard. Tempo de tela é métrica de vício; Selah é métrica de encontro. A pausa não fica apenas dentro da narrativa: ela interrompe o ciclo de jogo e leva a proposta para a vida real, ajudando a reduzir o tempo contínuo de tela.
 
 O bloqueio vale somente para a exploração dentro do Selah — nunca bloqueia o navegador, o aparelho ou a possibilidade de fechar o jogo. A tela de pausa não usa contagem regressiva, culpa, urgência ou recompensa por permanecer conectado. A liberação do responsável acontece no próprio dispositivo e não envia PIN, horário ou qualquer outro dado ao backend.
@@ -115,8 +129,8 @@ O bloqueio vale somente para a exploração dentro do Selah — nunca bloqueia o
 O princípio que organiza tudo: **só o Dev 1 escreve código 3D**. Os outros dois trabalham em áreas que não exigem Three.js e não ficam bloqueados esperando a cena ficar pronta.
 
 - **Dev 1 — Engine (o que manja de jogos).** Canvas R3F, física Rapier, character controller, Momento Selah, portais, performance. É o gargalo crítico do projeto: **protejam o tempo dele**. Ele não faz deploy, não escreve prompt, não monta slide, não responde pergunta de ambiente dos outros
-- **Dev 2 — IA e backend.** Servidor Hono, integração OpenRouter com ZDR, proxy YouVersion, geração e validação dos quizzes, correção e cache de fallback. É TypeScript de servidor puro, testável com `curl`, zero 3D
-- **Dev 3 — Interface e estado.** Toda a UI é React DOM posicionada por cima do canvas: quiz, diário de versículos, seletor de idioma, dashboard, transparência da IA, tela para responsáveis e telas de transição. Mais o store zustand e sua persistência local. Zero 3D
+- **Dev 2 — IA e backend.** Servidor Hono, integração OpenRouter com ZDR, proxy YouVersion, geração e validação dos quizzes, correção, cache de fallback e serviço TTS no cliente. É TypeScript testável sem depender do 3D
+- **Dev 3 — Interface e estado.** Toda a UI é React DOM posicionada por cima do canvas: quiz, diário, seletores de idioma/faixa etária, botão ouvir, dashboard, transparência da IA, tela para responsáveis e transições. Mais o store zustand e sua persistência local. Zero 3D
 - **Designer.** Identidade do Selah, telas no Figma, curadoria dos assets Kenney e level design por dados (explicado abaixo)
 - **P.O.** Seleção e aprovação das histórias, referências e faixa etária, personas dos NPCs, fallback dos quizzes, roteiro e slides do pitch, e **guardião do cronômetro** — é quem decide os cortes de escopo
 
@@ -142,6 +156,8 @@ Isto é o que permite os três trabalharem em paralelo sem colidir. Dev 3 escrev
 type Estado = {
   regiao: "hub" | "exodo" | "daniel";
   idioma: string;                     // "pt-BR" | "en-US" | "es-ES" | ...
+  faixaEtaria: "crianca" | "geral";   // ativa TTS automático no Selah quando "crianca"
+  ttsAtivo: boolean;                  // toggle manual de fala do texto
   versiculosColetados: string[];      // ["Ex 14:14", ...]
   selahsCompletados: number;
   selahAtivo: null | { ref: string; texto: string };
@@ -151,6 +167,8 @@ type Estado = {
   pausaParentalAtiva: boolean;
   dialogoAberto: boolean;
   setIdioma: (idioma: string) => void;
+  setFaixaEtaria: (faixa: "crianca" | "geral") => void;
+  setTtsAtivo: (ativo: boolean) => void;
   abrirSelah: (ref: string) => void;
   fecharSelah: () => void;
 };
@@ -316,7 +334,7 @@ Ninguém espera ninguém. Dev 1 commita o scaffold em 10 minutos e os outros clo
 
 - **Dev 1**: scaffold Vite + deps + repo no GitHub
 - **Dev 2**: conta e chave OpenRouter + YouVersion; ativa ZDR, desativa prompt logging, valida ambos com `curl`; esqueleto de `src/services/`
-- **Dev 3**: escreve o contrato do store persistente local (incluindo `idioma`, quiz e histórico anônimo) e publica no grupo
+- **Dev 3**: escreve o contrato do store persistente local (incluindo `idioma`, `faixaEtaria`, `ttsAtivo`, quiz e histórico anônimo) e publica no grupo
 - **Designer**: baixa e organiza os kits Kenney/Quaternius em `public/models/`
 - **P.O.**: abre o documento de curadoria com histórias, faixa etária e referências aprovadas de Êxodo
 
@@ -345,10 +363,10 @@ Meta: personagem andando + NPC apresentando um quiz JSON gerado pela IA. Feio, m
 **A hora mais importante do dia.** Se algo tiver que cair, é a região 2, nunca isto.
 
 - **Dev 1**: pausa do `<Ecctrl>`, `useSpring` na câmera, fade do áudio e bloqueio da exploração enquanto `pausaParentalAtiva`
-- **Dev 2**: `/api/quiz/responder`, validação etária/bíblica e teste de falha fechada para o fallback
-- **Dev 3**: UI do Selah (versículo, alternativas e explicação), Pausa Selah com liberação local do responsável, transparência da IA e dashboard local
+- **Dev 2**: `/api/quiz/responder`, validação etária/bíblica e teste de falha fechada; se sobrar tempo, `src/services/tts.ts` para leitura do versículo e quiz
+- **Dev 3**: UI do Selah (versículo, alternativas, explicação e botão ouvir), Pausa Selah com liberação local do responsável, transparência da IA e dashboard local
 - **Designer**: arte do momento de pausa — luz, partícula, tipografia grande
-- **P.O.**: testa como criança testaria, tenta provocar geração inadequada e reporta o que confunde
+- **P.O.**: testa como criança testaria, inclusive sem ler e só ouvindo, tenta provocar geração inadequada e reporta o que confunde
 
 ### 4:00–5:00 — Região Daniel + hub
 
@@ -361,7 +379,7 @@ Reuso puro. Se a região 1 ficou bem feita, esta sai em 45 minutos.
 
 ### 5:00–5:45 — Polimento
 
-Áudio com `howler`, `<Sky>` e `<Environment>` do drei. Bloom só se rodar a 60fps.
+Áudio com `howler`, `<Sky>` e `<Environment>` do drei. Bloom só se rodar a 60fps. Se o TTS ainda não entrou: Dev 2 + Dev 3 fecham o botão “ouvir” no Selah com `speechSynthesis` — demo de 30 segundos no pitch.
 
 Se toda a jornada principal já estiver funcionando e validada, usar apenas o tempo restante para suporte mobile: HUD responsivo, controles touch e perfil gráfico reduzido. Não instalar Capacitor durante a hackathon; a prioridade continua sendo uma demo web completa e estável.
 
@@ -400,5 +418,6 @@ Três vezes, cronometrado. P.O. apresenta, Dev 1 opera o jogo, os outros ficam c
 2. Demonstrem **ao vivo** um Momento Selah. Deixem o silêncio acontecer na sala e não falem por cima dele
 3. Mostrem que o jogo permanece em pausa até a liberação do responsável: a mecânica sai da tela e cria um intervalo real
 4. Mostrem o NPC virtual explicando que usa IA e apresentando um quiz novo, validado e baseado no versículo real da YouVersion no idioma da criança
-5. Mostrem o dashboard: **"não medimos tempo de tela, medimos Selahs"**
-6. Fechem no "roda em qualquer navegador, inclusive Chromebook de escola pública"
+5. Se o TTS estiver pronto: mostrem a criança **ouvindo** o versículo e o quiz — acessibilidade para quem ainda não lê
+6. Mostrem o dashboard: **"não medimos tempo de tela, medimos Selahs"**
+7. Fechem no "roda em qualquer navegador, inclusive Chromebook de escola pública"

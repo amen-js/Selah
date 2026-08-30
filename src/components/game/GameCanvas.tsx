@@ -31,6 +31,7 @@ import type { FocoCameraSelah } from './camera/types'
 import {
   AtmosferaCriacao,
   coletavelCriacaoDisponivelNoMomento,
+  EfeitosCriacao,
   Elementos3DCriacao,
   type MomentoCriacao,
   type MomentoCriacaoId,
@@ -267,6 +268,7 @@ function World({
       />
       {regiao === 'criacao' && (
         <>
+          <EfeitosCriacao momentoId={momentoCriacaoId} />
           <Elementos3DCriacao momentoId={momentoCriacaoId} />
           <ObjetivoNarrativoCriacao
             momentoId={momentoCriacaoId}

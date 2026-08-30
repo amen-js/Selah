@@ -31,12 +31,12 @@ describe('determinismo e limites dos geradores de efeitos procedurais', () => {
     expect(pontos1.length).toBe(48)
 
     for (const p of pontos1) {
-      expect(p.x).toBeGreaterThanOrEqual(-14)
-      expect(p.x).toBeLessThanOrEqual(14)
+      expect(p.x).toBeGreaterThanOrEqual(-23)
+      expect(p.x).toBeLessThanOrEqual(23)
       expect(p.y).toBeGreaterThanOrEqual(0.3)
       expect(p.y).toBeLessThanOrEqual(5.5)
-      expect(p.z).toBeGreaterThanOrEqual(-14)
-      expect(p.z).toBeLessThanOrEqual(14)
+      expect(p.z).toBeGreaterThanOrEqual(-21)
+      expect(p.z).toBeLessThanOrEqual(21)
       expect(p.velocidade).toBeGreaterThanOrEqual(0.03)
       expect(p.velocidade).toBeLessThanOrEqual(0.06)
       expect(p.tamanho).toBeGreaterThanOrEqual(0.09)

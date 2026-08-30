@@ -149,8 +149,8 @@ export const instanciasAssetsCriacao: readonly InstanciaAssetCriacao[] = [
     momentoMinimo: 'adao-e-eva',
     posicao: noTerreno(-2.1, -5, 0.02),
     rotacao: 0.18,
-    escala: 1,
-    animacao: 'humano-idle',
+    escala: 0.94,
+    animacao: 'adao-idle',
   },
   {
     id: 'eva-jardim',
@@ -158,8 +158,8 @@ export const instanciasAssetsCriacao: readonly InstanciaAssetCriacao[] = [
     momentoMinimo: 'adao-e-eva',
     posicao: noTerreno(2.1, -5, 0.02),
     rotacao: -0.18,
-    escala: 1,
-    animacao: 'humano-idle',
+    escala: 0.92,
+    animacao: 'eva-idle',
   },
   {
     id: 'arvore-grande-escolha',

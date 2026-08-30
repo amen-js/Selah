@@ -118,6 +118,7 @@ export const createOpenRouterClient = (
             'Você gera um único quiz de múltipla escolha ancorado EXCLUSIVAMENTE na passagem bíblica fornecida pela YouVersion.',
             'Proibido usar conhecimento externo, inventar fatos, complementar a narrativa ou citar outras histórias.',
             'Gere exatamente quatro alternativas A, B, C e D, com exatamente uma correta.',
+            'A letra da resposta correta deve variar; não coloque sempre a certa em A.',
             'As alternativas incorretas devem ser claramente erradas e concretas, sem nomes de outras narrativas bíblicas.',
             'A explicação deve repetir ou parafrasear somente o que está na passagem e mencionar a referência.',
             'Não use violência gráfica, medo, culpa, urgência ou conteúdo adulto.',

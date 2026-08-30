@@ -8,7 +8,7 @@ import {
 import { passagemPermitida, type FaixaEtaria, type Idioma } from '../data/passagens.ts'
 import type { OpenRouterClient } from './openrouter.ts'
 import type { QuizSessionStore } from './quizSession.ts'
-import { quizPublico, validarQuiz, type QuizGerado } from './validation.ts'
+import { embaralharAlternativas, quizPublico, validarQuiz, type QuizGerado } from './validation.ts'
 import type { YouVersionClient } from './youversion.ts'
 
 export interface GerarQuizInput {
@@ -39,8 +39,9 @@ export const createQuizService = ({
   sessoes: QuizSessionStore
 }) => {
   const publicar = (quiz: QuizAprovado, origem: 'ia' | 'fallback') => {
-    sessoes.guardar(quiz)
-    return quizPublico(quiz, origem)
+    const embaralhado: QuizAprovado = { ...quiz, ...embaralharAlternativas(quiz) }
+    sessoes.guardar(embaralhado)
+    return quizPublico(embaralhado, origem)
   }
 
   const promoverGerado = (

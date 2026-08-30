@@ -7,6 +7,15 @@ export type FormaFallback = 'caixa' | 'cone' | 'cilindro' | 'esfera'
 export type ColliderMapa = 'cuboid' | 'hull' | 'trimesh' | false
 export type ModoArte2D = 'billboard' | 'chao'
 
+export interface ColisorCuboidMapa {
+  forma: 'cuboid'
+  /** Half extents in world units, independent from the visual model scale. */
+  meiaExtensao: Ponto3D
+  deslocamento?: Ponto3D
+}
+
+export type ColisorPersonalizadoMapa = ColisorCuboidMapa
+
 export interface Arte2DMapa {
   id: string
   arquivo: string
@@ -25,6 +34,7 @@ export interface PropMapa {
   rotacao?: number
   escala?: Escala3D
   collider?: ColliderMapa
+  colisor?: ColisorPersonalizadoMapa
   fallback: {
     forma: FormaFallback
     cor: string

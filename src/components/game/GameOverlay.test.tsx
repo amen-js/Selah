@@ -48,7 +48,9 @@ describe('GameOverlay', () => {
     useGameStore.setState({ pausaParentalAtiva: true })
     render(<GameOverlay gateway={createLabGateway('sucesso')} />)
 
-    expect(screen.getByRole('dialog', { name: /agora a pausa acontece/i })).toBeInTheDocument()
+    expect(
+      screen.getByRole('dialog', { name: /um momento com quem cuida de você/i }),
+    ).toBeInTheDocument()
     expect(
       screen.queryByLabelText('Informações e ações da exploração'),
     ).not.toBeInTheDocument()

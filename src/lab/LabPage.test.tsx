@@ -7,6 +7,7 @@ import { LabPage } from './LabPage'
 describe('LabPage', () => {
   beforeEach(() => {
     useGameStore.getState().apagarProgresso()
+    useGameStore.getState().setIdioma('pt-BR')
   })
 
   it('renders the UI laboratory without a 3D canvas', () => {
@@ -32,9 +33,11 @@ describe('LabPage', () => {
 
     await user.selectOptions(screen.getByRole('combobox', { name: 'Cenário do laboratório' }), 'fallback')
     await user.click(screen.getByRole('button', { name: 'Iniciar Momento Selah' }))
-    await user.click(await screen.findByRole('button', { name: 'Continuar para o quiz' }))
+    await user.click(
+      await screen.findByRole('button', { name: 'Continuar para a pergunta' }),
+    )
 
-    expect(screen.getByText(/quiz local aprovado/i)).toBeInTheDocument()
+    expect(screen.getByText('Pergunta bíblica revisada')).toBeInTheDocument()
   })
 
   it('resets all local laboratory state', async () => {

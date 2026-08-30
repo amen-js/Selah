@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 
+import { translate } from '../i18n'
 import type { SelahGateway } from '../services/selahGateway'
 import { useGameStore } from '../stores/gameStore'
 import type { AlternativaId } from '../types/selah'
@@ -81,9 +82,7 @@ export function useSelahFlow({
         ) {
           return
         }
-        definirErroSelah(
-          'Não foi possível carregar este Momento Selah. Tente novamente mais tarde.',
-        )
+        definirErroSelah(translate(idioma, 'flow.loadError'))
       })
 
   }, [
@@ -122,7 +121,9 @@ export function useSelahFlow({
         )
       }
     } catch {
-      definirErroSelah('Não foi possível verificar a resposta. Tente novamente.')
+      definirErroSelah(
+        translate(useGameStore.getState().idioma, 'flow.answerError'),
+      )
     }
   }
 

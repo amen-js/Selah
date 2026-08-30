@@ -24,10 +24,15 @@ import { portaisPorRegiao } from '../../mapas/portais'
 import { obterMapaRegiao } from '../../mapas/regioes'
 import type { MapaRegiao } from '../../mapas/types'
 import { useGameStore } from '../../stores/gameStore'
+import type { Regiao } from '../../types/selah'
 import { SelahCameraRig } from './camera/SelahCameraRig'
 import { resolverFocoCameraSelah } from './camera/selahFocus'
 import type { FocoCameraSelah } from './camera/types'
 import {
+  AtmosferaCriacao,
+  type MomentoCriacao,
+  type MomentoCriacaoId,
+  ProgressaoCriacaoRuntime,
   PropMapaRenderer,
   type PosicaoJogador,
 } from './creation'
@@ -151,6 +156,7 @@ function Player({
 
 type WorldProps = {
   playing: boolean
+  regiao: Regiao
   mapa: MapaRegiao
   portais: readonly PortalMapa[]
   onPortalProximo: (portal: PortalMapa | null) => void
@@ -159,6 +165,7 @@ type WorldProps = {
 
 function World({
   playing,
+  regiao,
   mapa,
   portais,
   onPortalProximo,
@@ -167,19 +174,33 @@ function World({
   const posicaoJogadorRef = useRef<PosicaoJogador | null>(null)
   const gatilhoSelah = useGameStore((state) => state.selahAtivo?.gatilho ?? null)
   const pausaParentalAtiva = useGameStore((state) => state.pausaParentalAtiva)
+  const [momentoCriacaoId, setMomentoCriacaoId] =
+    useState<MomentoCriacaoId>('vazio')
   const { meiaLargura, meiaProfundidade } = mapa.limites
   const focoCamera = useMemo(
     () => resolverFocoCameraSelah(gatilhoSelah, mapa.coletaveis),
     [gatilhoSelah, mapa.coletaveis],
   )
+  const atualizarMomentoCriacao = useCallback((momento: MomentoCriacao) => {
+    setMomentoCriacaoId(momento.id)
+  }, [])
 
   return (
     <>
-      <color attach="background" args={['#b8d7ca']} />
-      <fog attach="fog" args={['#b8d7ca', 16, 36]} />
-
-      <hemisphereLight args={['#fff1c7', '#365c48', 2.2]} />
-      <directionalLight position={[8, 12, 5]} intensity={2.5} color="#fff4d6" />
+      {regiao === 'criacao' ? (
+        <AtmosferaCriacao momentoId={momentoCriacaoId} />
+      ) : (
+        <>
+          <color attach="background" args={['#b8d7ca']} />
+          <fog attach="fog" args={['#b8d7ca', 16, 36]} />
+          <hemisphereLight args={['#fff1c7', '#365c48', 2.2]} />
+          <directionalLight
+            position={[8, 12, 5]}
+            intensity={2.5}
+            color="#fff4d6"
+          />
+        </>
+      )}
 
       {mapa.chaoColisor !== false && (
         <RigidBody type="fixed" colliders={false}>
@@ -207,6 +228,13 @@ function World({
         posicaoJogadorRef={posicaoJogadorRef}
         enabled={playing}
       />
+      {regiao === 'criacao' && (
+        <ProgressaoCriacaoRuntime
+          posicaoJogadorRef={posicaoJogadorRef}
+          enabled={playing}
+          onMomentoChange={atualizarMomentoCriacao}
+        />
+      )}
       <PortaisRegiao
         portais={portais}
         playerRef={posicaoJogadorRef}
@@ -357,6 +385,7 @@ export function GameCanvas({ playing, onCanvasReady }: GameCanvasProps) {
               <World
                 key={regiao}
                 playing={mundoAtivo}
+                regiao={regiao}
                 mapa={mapa}
                 portais={portaisPorRegiao[regiao]}
                 onPortalProximo={setPortalProximo}

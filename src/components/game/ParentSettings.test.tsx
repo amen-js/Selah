@@ -7,22 +7,28 @@ import { ParentSettings } from './ParentSettings'
 describe('ParentSettings', () => {
   beforeEach(() => {
     useGameStore.getState().apagarProgresso()
+    useGameStore.getState().setIdioma('pt-BR')
     useGameStore.getState().setPainelAberto('configuracoes')
   })
 
   it('explains local data and automated quiz behavior', () => {
     render(<ParentSettings />)
 
-    expect(screen.getByText(/sem cadastro infantil/i)).toBeInTheDocument()
-    expect(screen.getByText(/fallback aprovado/i)).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Fechar configurações' })).toHaveFocus()
+    expect(screen.getByText(/preferências ficam neste dispositivo/i)).toBeInTheDocument()
+    expect(screen.getByText(/perguntas bíblicas revisadas/i)).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: 'Fechar configurações parentais' }),
+    ).toHaveFocus()
   })
 
   it('updates the age group', async () => {
     const user = userEvent.setup()
     render(<ParentSettings />)
 
-    await user.selectOptions(screen.getByRole('combobox', { name: 'Faixa etária' }), 'crianca')
+    await user.selectOptions(
+      screen.getByRole('combobox', { name: 'Selecionar faixa etária' }),
+      'crianca',
+    )
     expect(useGameStore.getState().faixaEtaria).toBe('crianca')
   })
 
@@ -31,9 +37,11 @@ describe('ParentSettings', () => {
     render(<ParentSettings />)
 
     await user.click(screen.getByRole('checkbox', { name: 'Leitura em voz alta' }))
-    await user.click(screen.getByRole('checkbox', { name: 'Usar IA para novos quizzes' }))
-    await user.click(screen.getByRole('checkbox', { name: 'Salvar progresso neste dispositivo' }))
-    await user.click(screen.getByRole('checkbox', { name: 'Compartilhar métricas agregadas' }))
+    await user.click(screen.getByRole('checkbox', { name: 'Reflexões com IA' }))
+    await user.click(screen.getByRole('checkbox', { name: 'Salvar progresso' }))
+    await user.click(
+      screen.getByRole('checkbox', { name: 'Compartilhar métricas anônimas' }),
+    )
 
     expect(useGameStore.getState()).toMatchObject({
       ttsAtivo: true,
@@ -49,10 +57,14 @@ describe('ParentSettings', () => {
     useGameStore.setState({ versiculosColetados: ['genesis-1-3'] })
     render(<ParentSettings />)
 
-    await user.click(screen.getByRole('button', { name: 'Apagar progresso' }))
+    await user.click(
+      screen.getByRole('button', { name: 'Apagar todo o progresso local' }),
+    )
     expect(useGameStore.getState().versiculosColetados).toEqual(['genesis-1-3'])
 
-    await user.click(screen.getByRole('button', { name: 'Confirmar exclusão do progresso' }))
+    await user.click(
+      screen.getByRole('button', { name: 'Confirmar exclusão do progresso local' }),
+    )
     expect(useGameStore.getState().versiculosColetados).toEqual([])
     expect(localStorage.getItem(GAME_STORAGE_KEY)).toBeNull()
   })
@@ -61,7 +73,25 @@ describe('ParentSettings', () => {
     const user = userEvent.setup()
     render(<ParentSettings />)
 
-    await user.click(screen.getByRole('button', { name: 'Fechar configurações' }))
+    await user.click(
+      screen.getByRole('button', { name: 'Fechar configurações parentais' }),
+    )
     expect(useGameStore.getState().painelAberto).toBeNull()
+  })
+
+  it('translates an open panel through the shared language selector', async () => {
+    const user = userEvent.setup()
+    useGameStore.getState().setIdioma('en-US')
+    render(<ParentSettings />)
+
+    expect(screen.getByRole('dialog', { name: 'Settings' })).toBeInTheDocument()
+    await user.selectOptions(
+      screen.getByRole('combobox', { name: 'Interface language' }),
+      'es-ES',
+    )
+
+    expect(screen.getByRole('dialog', { name: 'Configuración' })).toBeInTheDocument()
+    expect(screen.getByText('Grupo de edad')).toBeInTheDocument()
+    expect(useGameStore.getState().idioma).toBe('es-ES')
   })
 })

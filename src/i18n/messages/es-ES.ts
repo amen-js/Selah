@@ -61,6 +61,7 @@ export const esES = {
   'journal.empty': 'Tu viaje apenas comienza.',
   'journal.passages.title': 'Pasajes encontrados',
   'journal.passages.none': 'Aún no has reunido ningún pasaje.',
+  'journal.passage.eyebrow': 'Pasaje',
   'journal.passage.label': 'Pasaje {passageId}',
   'journal.quizzes.title': 'Reflexiones respondidas',
   'journal.quizzes.none': 'Aún no has respondido ninguna reflexión.',

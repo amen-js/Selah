@@ -1,5 +1,6 @@
 import { useState } from 'react'
 
+import { useTranslation } from '../../i18n'
 import { useGameStore } from '../../stores/gameStore'
 import type { FaixaEtaria } from '../../types/selah'
 import { LanguageSelector } from './LanguageSelector'
@@ -29,6 +30,7 @@ function ToggleRow({ label, description, checked, onChange }: ToggleRowProps) {
 }
 
 export function ParentSettings() {
+  const { t } = useTranslation()
   const [confirmandoExclusao, setConfirmandoExclusao] = useState(false)
   const faixaEtaria = useGameStore((state) => state.faixaEtaria)
   const ttsAtivo = useGameStore((state) => state.ttsAtivo)
@@ -53,83 +55,80 @@ export function ParentSettings() {
       >
         <header className="panel__header">
           <div>
-            <p className="eyebrow">Área local para responsáveis</p>
-            <h2 id="settings-title">Configurações da experiência</h2>
+            <p className="eyebrow">{t('settings.eyebrow')}</p>
+            <h2 id="settings-title">{t('settings.title')}</h2>
           </div>
           <button
             autoFocus
             className="secondary-button"
             type="button"
-            aria-label="Fechar configurações"
+            aria-label={t('settings.closeAria')}
             onClick={() => setPainelAberto(null)}
           >
-            Fechar
+            {t('common.close')}
           </button>
         </header>
 
         <div className="settings-list">
           <section className="setting-row" aria-labelledby="privacy-title">
             <div>
-              <strong id="privacy-title">Privacidade por padrão</strong>
-              <p>
-                Sem cadastro infantil, nomes, escola, igreja ou histórico enviado. O progresso fica
-                somente neste navegador quando você permitir.
-              </p>
+              <strong id="privacy-title">{t('settings.privacy.title')}</strong>
+              <p>{t('settings.privacy.description')}</p>
             </div>
           </section>
 
           <div className="setting-row">
             <div>
-              <strong>Idioma</strong>
-              <p>Define o texto bíblico, o quiz e a voz disponível.</p>
+              <strong>{t('settings.language.title')}</strong>
+              <p>{t('settings.language.description')}</p>
             </div>
             <LanguageSelector />
           </div>
 
           <label className="setting-row">
             <span>
-              <strong>Faixa etária</strong>
-              <p>Para crianças, a leitura do versículo pode começar automaticamente.</p>
+              <strong>{t('settings.age.title')}</strong>
+              <p>{t('settings.age.description')}</p>
             </span>
             <select
-              aria-label="Faixa etária"
+              aria-label={t('settings.age.label')}
               value={faixaEtaria}
               onChange={(event) => setFaixaEtaria(event.target.value as FaixaEtaria)}
             >
-              <option value="geral">Leitura geral</option>
-              <option value="crianca">Criança</option>
+              <option value="geral">{t('settings.age.general')}</option>
+              <option value="crianca">{t('settings.age.child')}</option>
             </select>
           </label>
 
           <ToggleRow
-            label="Leitura em voz alta"
-            description="Permite ouvir o versículo e os textos do Momento Selah."
+            label={t('settings.tts.label')}
+            description={t('settings.tts.description')}
             checked={ttsAtivo}
             onChange={setTtsAtivo}
           />
           <ToggleRow
-            label="Usar IA para novos quizzes"
-            description="Quando desligado, somente um fallback aprovado é usado."
+            label={t('settings.ai.label')}
+            description={t('settings.ai.description')}
             checked={iaAtiva}
             onChange={setIaAtiva}
           />
           <ToggleRow
-            label="Salvar progresso neste dispositivo"
-            description="Guarda apenas IDs, contadores e respostas A/B/C/D."
+            label={t('settings.save.label')}
+            description={t('settings.save.description')}
             checked={salvarProgresso}
             onChange={setSalvarProgresso}
           />
           <ToggleRow
-            label="Compartilhar métricas agregadas"
-            description="Envia somente totais de Selahs e acertos, sem perfil ou identificador."
+            label={t('settings.metrics.label')}
+            description={t('settings.metrics.description')}
             checked={compartilharMetricas}
             onChange={setCompartilharMetricas}
           />
 
           <section className="setting-row">
             <div>
-              <strong>Apagar dados locais</strong>
-              <p>Remove preferências, passagens, contadores e histórico deste navegador.</p>
+              <strong>{t('settings.delete.title')}</strong>
+              <p>{t('settings.delete.description')}</p>
             </div>
             {confirmandoExclusao ? (
               <div className="hud__actions">
@@ -138,25 +137,25 @@ export function ParentSettings() {
                   type="button"
                   onClick={() => setConfirmandoExclusao(false)}
                 >
-                  Cancelar
+                  {t('settings.delete.cancel')}
                 </button>
                 <button
                   className="secondary-button danger-button"
                   type="button"
-                  aria-label="Confirmar exclusão do progresso"
+                  aria-label={t('settings.delete.confirmAria')}
                   onClick={apagarProgresso}
                 >
-                  Confirmar
+                  {t('settings.delete.confirm')}
                 </button>
               </div>
             ) : (
               <button
                 className="secondary-button danger-button"
                 type="button"
-                aria-label="Apagar progresso"
+                aria-label={t('settings.delete.aria')}
                 onClick={() => setConfirmandoExclusao(true)}
               >
-                Apagar progresso
+                {t('settings.delete.action')}
               </button>
             )}
           </section>

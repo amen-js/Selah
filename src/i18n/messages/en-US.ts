@@ -61,6 +61,7 @@ export const enUS = {
   'journal.empty': 'Your journey is just beginning.',
   'journal.passages.title': 'Passages found',
   'journal.passages.none': 'No passages collected yet.',
+  'journal.passage.eyebrow': 'Passage',
   'journal.passage.label': 'Passage {passageId}',
   'journal.quizzes.title': 'Reflections answered',
   'journal.quizzes.none': 'No reflections answered yet.',

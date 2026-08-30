@@ -17,7 +17,7 @@ describe('GameOverlay', () => {
 
     expect(screen.getByLabelText('Informações e ações da exploração')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Abrir métricas locais' }))
-    expect(screen.getByRole('dialog', { name: 'Medimos Momentos Selah' })).toBeInTheDocument()
+    expect(screen.getByRole('dialog', { name: 'Métricas locais' })).toBeInTheDocument()
   })
 
   it('renders the transparent NPC dialog from shared state', () => {

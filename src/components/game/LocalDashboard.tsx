@@ -1,3 +1,4 @@
+import { useTranslation } from '../../i18n'
 import {
   selectTaxaAcertos,
   selectTaxaConclusao,
@@ -5,55 +6,57 @@ import {
 } from '../../stores/gameStore'
 
 export function LocalDashboard() {
+  const { t } = useTranslation()
   const iniciados = useGameStore((state) => state.selahsIniciados)
   const completados = useGameStore((state) => state.selahsCompletados)
   const respostas = useGameStore((state) => state.historico.length)
   const taxaConclusao = useGameStore(selectTaxaConclusao)
   const taxaAcertos = useGameStore(selectTaxaAcertos)
   const setPainelAberto = useGameStore((state) => state.setPainelAberto)
+  const acertosLabel = t(
+    respostas === 1 ? 'dashboard.accuracy.one' : 'dashboard.accuracy.other',
+    { count: respostas },
+  )
 
   return (
     <div className="modal-backdrop overlay-interactive">
       <section className="panel" role="dialog" aria-modal="true" aria-labelledby="metrics-title">
         <header className="panel__header">
           <div>
-            <p className="eyebrow">Não medimos tempo de tela</p>
-            <h2 id="metrics-title">Medimos Momentos Selah</h2>
+            <p className="eyebrow">{t('dashboard.eyebrow')}</p>
+            <h2 id="metrics-title">{t('dashboard.title')}</h2>
           </div>
           <button
             autoFocus
             className="secondary-button"
             type="button"
-            aria-label="Fechar métricas"
+            aria-label={t('dashboard.closeAria')}
             onClick={() => setPainelAberto(null)}
           >
-            Fechar
+            {t('common.close')}
           </button>
         </header>
 
         <div className="dashboard-grid">
           <article className="metric-card">
-            <span className="muted">Selahs iniciados</span>
+            <span className="muted">{t('dashboard.started')}</span>
             <strong>{iniciados}</strong>
           </article>
           <article className="metric-card">
-            <span className="muted">Selahs concluídos</span>
+            <span className="muted">{t('dashboard.completed')}</span>
             <strong>{completados}</strong>
           </article>
           <article className="metric-card">
-            <span className="muted">Taxa de conclusão</span>
+            <span className="muted">{t('dashboard.completionRate')}</span>
             <strong data-testid="completion-rate">{taxaConclusao}%</strong>
           </article>
           <article className="metric-card">
-            <span className="muted">Acertos em {respostas} quizzes</span>
+            <span className="muted">{acertosLabel}</span>
             <strong data-testid="accuracy-rate">{taxaAcertos}%</strong>
           </article>
         </div>
 
-        <p className="muted">
-          Estes números são calculados localmente. O envio agregado só ocorre após consentimento do
-          responsável.
-        </p>
+        <p className="muted">{t('dashboard.note')}</p>
       </section>
     </div>
   )

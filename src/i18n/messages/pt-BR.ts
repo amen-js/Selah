@@ -59,6 +59,7 @@ export const ptBR = {
   'journal.empty': 'Sua jornada ainda está começando.',
   'journal.passages.title': 'Passagens encontradas',
   'journal.passages.none': 'Nenhuma passagem coletada ainda.',
+  'journal.passage.eyebrow': 'Passagem',
   'journal.passage.label': 'Passagem {passageId}',
   'journal.quizzes.title': 'Reflexões respondidas',
   'journal.quizzes.none': 'Nenhuma reflexão respondida ainda.',

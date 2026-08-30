@@ -10,6 +10,7 @@ export const idsAssetsCanteiroNoe = [
   'canteiro-balde',
   'canteiro-barril',
   'canteiro-caixa',
+  'vale-pedra-morro',
   'canteiro-tabuas',
   'canteiro-madeira',
   'canteiro-tronco',
@@ -20,7 +21,7 @@ export type AssetNoeId = (typeof idsAssetsCanteiroNoe)[number]
 
 export interface FallbackAssetNoe {
   tipo: 'primitivo'
-  geometria: 'cuboid' | 'cylinder'
+  geometria: 'cuboid' | 'cylinder' | 'icosahedron'
   /** Full visual dimensions in world metres. */
   dimensoes: Vetor3AssetNoe
   cor: `#${string}`
@@ -35,13 +36,23 @@ export type ColisorAssetNoe =
       deslocamentoMetros: Vetor3AssetNoe
     }
 
-export interface LicencaAssetNoe {
-  urlFonte: string
-  criador: 'Kenney'
-  identificador: 'CC0-1.0'
-  arquivoOrigem: string
-  sha256: string
-}
+export type LicencaAssetNoe =
+  | {
+      origem: 'pack-oficial'
+      urlFonte: string
+      criador: 'Kenney'
+      identificador: 'CC0-1.0'
+      arquivoOrigem: string
+      sha256: string
+    }
+  | {
+      origem: 'fornecido-pelo-projeto'
+      urlFonte: 'project-supplied://selah/2026-08-30'
+      criador: 'não-declarado'
+      identificador: 'Project-supplied'
+      arquivoOrigem: 'pedra_morro.glb'
+      sha256: string
+    }
 
 export interface EntradaManifestoAssetNoe {
   id: AssetNoeId
@@ -50,6 +61,7 @@ export interface EntradaManifestoAssetNoe {
   urlRuntime: string
   bytes: number
   escalaVisual: number
+  deslocamentoVisualMetros?: Vetor3AssetNoe
   fallback: FallbackAssetNoe
   colisor: ColisorAssetNoe
   licenca: LicencaAssetNoe
@@ -91,6 +103,7 @@ function entradaKenney({
     areaId: AREA_CANTEIRO,
     urlRuntime: `${DIRETORIO_RUNTIME}/${arquivo}`,
     licenca: {
+      origem: 'pack-oficial',
       urlFonte: FONTE_OFICIAL,
       criador: 'Kenney',
       identificador: 'CC0-1.0',
@@ -109,6 +122,7 @@ export const manifestoAssetsNoe: ManifestoAssetsNoe = {
     urlRuntime: `${DIRETORIO_RUNTIME}/Textures/colormap.png`,
     bytes: 7_440,
     licenca: {
+      origem: 'pack-oficial',
       urlFonte: FONTE_OFICIAL,
       criador: 'Kenney',
       identificador: 'CC0-1.0',
@@ -226,6 +240,31 @@ export const manifestoAssetsNoe: ManifestoAssetsNoe = {
       sha256:
         '346eebd23986793b992ca6e05e9f98d6f5db96a9bfa3aa7c8360ac8b7920def8',
     }),
+    {
+      id: 'vale-pedra-morro',
+      areaId: AREA_CANTEIRO,
+      momentoMinimo: 'chamado-canteiro',
+      urlRuntime: '/models/noah/terrain/project-supplied/pedra-morro.glb',
+      bytes: 355_528,
+      escalaVisual: 1,
+      deslocamentoVisualMetros: [0, 4.1, 0],
+      fallback: {
+        tipo: 'primitivo',
+        geometria: 'icosahedron',
+        dimensoes: [8.2, 8.03, 8.19],
+        cor: '#77756f',
+      },
+      colisor: semColisor,
+      licenca: {
+        origem: 'fornecido-pelo-projeto',
+        urlFonte: 'project-supplied://selah/2026-08-30',
+        criador: 'não-declarado',
+        identificador: 'Project-supplied',
+        arquivoOrigem: 'pedra_morro.glb',
+        sha256:
+          '75d3800fd13daa98ecd8bed65bef2318a9c269d8d3bef6a0ebb35b3bbb668ca0',
+      },
+    },
     entradaKenney({
       id: 'canteiro-tabuas',
       arquivo: 'resource-planks.glb',

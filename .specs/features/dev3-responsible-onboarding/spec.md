@@ -34,8 +34,9 @@ first journey so that the child begins with deliberate privacy and AI choices.
    show the responsible onboarding above the world and SHALL NOT request pointer lock.
 2. **ONB-02:** WHEN the responsible adult changes the language THEN all onboarding
    copy and accessible labels SHALL update immediately.
-3. **ONB-03:** WHEN the onboarding opens with a fresh store THEN saving and metrics
-   sharing SHALL be disabled, while the current age-group and AI defaults remain visible.
+3. **ONB-03:** WHEN the onboarding opens with a fresh store THEN the child age
+   group SHALL be selected, saving and metrics sharing SHALL be disabled, and
+   the AI default SHALL remain visible.
 4. **ONB-04:** WHEN the responsible adult changes age group, AI, saving, or metrics
    THEN the shared store SHALL reflect each choice.
 5. **ONB-05:** WHEN the responsible adult confirms the setup THEN the completion
@@ -73,8 +74,9 @@ confirm, enter the world, then delete progress and verify that setup is required
 
 - Fresh storage showed only the labelled responsible-adult dialog, with focus on
   its heading and no background HUD controls exposed to keyboard or assistive technology.
-- Saving and metrics started disabled; AI started enabled; changing age group,
-  AI, saving, and metrics updated the shared store.
+- Child mode started selected, saving and metrics started disabled, and AI
+  started enabled; changing age group, AI, saving, and metrics updated the
+  shared store.
 - Portuguese changed immediately to English while the dialog was open, including
   labels, explanations, and the confirmation action.
 - Confirming setup persisted the completion preference and revealed the normal

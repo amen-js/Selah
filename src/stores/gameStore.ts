@@ -215,7 +215,7 @@ export interface EstadoJogo extends EstadoBase {
 const criarEstadoInicial = (): EstadoBase => ({
   regiao: 'hub',
   idioma: detectarIdioma(),
-  faixaEtaria: 'geral',
+  faixaEtaria: 'crianca',
   ttsAtivo: false,
   narracaoAtiva: false,
   iaAtiva: true,

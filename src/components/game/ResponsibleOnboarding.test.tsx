@@ -18,6 +18,9 @@ describe('ResponsibleOnboarding', () => {
     ).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Configuração do responsável' })).toHaveFocus()
     expect(screen.getByText(/depois de cada reflexão/i)).toBeInTheDocument()
+    expect(
+      screen.getByRole('combobox', { name: 'Selecionar faixa etária' }),
+    ).toHaveValue('crianca')
     expect(screen.getByRole('switch', { name: 'Reflexões com IA' })).toBeChecked()
     expect(screen.getByRole('switch', { name: 'Salvar progresso' })).not.toBeChecked()
     expect(

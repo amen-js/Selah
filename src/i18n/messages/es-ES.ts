@@ -6,6 +6,22 @@ export const esES = {
     'Selah — una aventura bíblica 3D de exploración y reflexión.',
   'root.loadingLab': 'Cargando laboratorio…',
 
+  'scene.loading.aria': 'Carga de la escena 3D',
+  'scene.loading.eyebrow': 'Antes del primer paso',
+  'scene.loading.title': 'El mundo está despertando',
+  'scene.loading.description':
+    'Trazando caminos, encendiendo la luz y preparando el jardín para ti.',
+  'scene.loading.progressLabel': 'Preparación del mundo',
+  'scene.loading.progressAria': '{progress}% completado',
+  'scene.loading.progress': '{progress}%',
+  'scene.loading.status': 'Reuniendo los detalles de la Creación',
+  'scene.error.aria': 'Error al preparar la escena 3D',
+  'scene.error.eyebrow': 'Un momento para respirar',
+  'scene.error.title': 'El jardín necesita otro momento',
+  'scene.error.description':
+    'No pudimos preparar el mundo ahora. Tu configuración sigue segura.',
+  'scene.error.retry': 'Intentar de nuevo',
+
   'language.selector.label': 'Idioma de la interfaz',
   'language.ptBR': 'Português',
   'language.enUS': 'English',
@@ -184,8 +200,6 @@ export const esES = {
   'selah.tts.pauseAction': 'Pausar lectura',
   'selah.tts.resumeAria': 'Continuar lectura en voz alta',
   'selah.tts.resumeAction': 'Continuar lectura',
-  'selah.tts.disclosure':
-    'Voz generada por IA; si no está disponible, se usará la voz del dispositivo.',
   'selah.tts.fallbackStatus': 'Usando la voz de este dispositivo.',
   'selah.tts.error': 'No se pudo reproducir este pasaje.',
   'selah.quiz.continueAria': 'Continuar a la pregunta',

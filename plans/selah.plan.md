@@ -4,31 +4,31 @@ overview: "Selah — jogo 3D de mundo aberto no navegador onde crianças explora
 todos:
   - id: contrato
     content: "Dev 3: escrever e publicar o contrato do store zustand, incluindo faixa etária, TTS, quiz ativo, histórico local e consentimento de métricas, nos primeiros 20 minutos"
-    status: pending
+    status: completed
   - id: setup
     content: "Dev 1: scaffold Vite + React 19 + TS com todas as deps e repo no GitHub"
     status: completed
   - id: assets
     content: "Designer: baixar kits Kenney e Quaternius (CC0) para public/models/ e commitar; Dev 2: configurar cliente YouVersion em src/services/ + chave no proxy Hono"
-    status: pending
+    status: completed
   - id: slice-3d
     content: "Dev 1: vertical slice 3D — Canvas, RigidBody, Ecctrl com um cubo andando"
     status: completed
   - id: slice-ia
     content: "Dev 2: servidor Hono com /api/quiz/gerar via SDK openai apontado ao OpenRouter, retornando JSON estruturado"
-    status: pending
+    status: completed
   - id: conteudo
     content: "P.O.: selecionar e aprovar histórias e referências de Criação, Noé e José por faixa etária; Dev 2: mapear somente essas refs na YouVersion com suporte a idiomas"
     status: pending
   - id: ui-lab
     content: "Dev 3: caixa de diálogo, HUD, seletor de idioma e diário na rota /lab com dados mockados, sem depender do canvas"
-    status: pending
+    status: completed
   - id: identidade
     content: "Designer: identidade visual do Selah no Figma — cor, tipografia, tela inicial, arte do momento de pausa"
     status: pending
   - id: geracao-segura
     content: "Dev 2: geração segura — prompt restrito à passagem aprovada, schema de quiz, validação etária e bíblica, exatamente uma resposta correta e fallback curado"
-    status: pending
+    status: completed
   - id: regiao-criacao
     content: Dev 1 carrega os .glb e faz gatilho de proximidade; Designer preenche mapas/criacao.ts com o layout
     status: completed
@@ -37,13 +37,13 @@ todos:
     status: completed
   - id: avaliar
     content: "Dev 2: endpoint /api/quiz/responder corrige quizId + alternativaId sem receber ou persistir dados pessoais"
-    status: pending
+    status: completed
   - id: metricas
     content: "Dev 2 + Dev 3: dashboard local e telemetria agregada de Selahs iniciados/concluídos e resultado de quiz; incluir consentimento do responsável, Jogar sem salvar e Apagar progresso"
-    status: pending
+    status: completed
   - id: privacidade-infantil
     content: "Dev 2 + Dev 3: OpenRouter com ZDR e sem prompt logging; aviso infantil de IA, tela para responsáveis, controle para desativar IA e fallback local"
-    status: pending
+    status: completed
   - id: pausa-parental
     content: "Dev 3: após o Momento Selah, pausar a exploração até liberação local do responsável; Dev 1 mantém movimento e mundo bloqueados enquanto pausaParentalAtiva"
     status: completed
@@ -55,7 +55,7 @@ todos:
     status: pending
   - id: tts-selah
     content: "Dev 2 (ideia no escopo): fala do texto (TTS) via Web Speech API no Momento Selah — versículo + pergunta/feedback — para faixa etária que ainda não lê (crianças); Dev 3 expõe toggle no store/UI"
-    status: pending
+    status: completed
   - id: polimento
     content: Áudio com howler, Sky e Environment do drei, checagem de 60fps em máquina fraca
     status: pending
@@ -64,7 +64,7 @@ todos:
     status: pending
   - id: fallback
     content: "Dev 2: gerar respostas-cache.json + cache local de versículos YouVersion; validar a demo inteira com Wi-Fi desligado"
-    status: pending
+    status: completed
   - id: deploy
     content: Deploy do front e do proxy, gravar vídeo de backup de 2 minutos, congelar o código às 5:45
     status: pending
@@ -274,6 +274,30 @@ flowchart TD
     Validator -.->|"falhou"| Cache
     Proxy --> HUD
 ```
+
+### Estrutura de pastas e divisão de responsabilidades
+
+Para reduzir conflitos entre as frentes da hackathon, a estrutura abaixo é a convenção oficial. Cada pessoa deve limitar suas alterações à sua área, salvo alinhamento explícito quando um contrato compartilhado precisar mudar.
+
+```text
+src/
+├── game/                 # Dev 1 — Canvas, jogador, física, regiões e interações 3D
+├── maps/                 # Dev 1 + Designer — layout declarativo de criação, Noé e José
+├── components/
+│   └── ui/               # Dev 3 — HUD, diálogo, quiz, diário e telas parentais
+├── stores/               # Dev 3 — contratos e estado global Zustand
+├── services/             # Dev 2 — clientes do proxy, YouVersion e TTS
+├── content/              # P.O. + Dev 2 — histórias aprovadas, passagens e quizzes fallback
+└── types/                # Contratos compartilhados entre jogo, UI e serviços
+server/
+├── routes/               # Dev 2 — endpoints de quiz, versículo e métricas
+├── services/             # Dev 2 — integrações OpenRouter e YouVersion
+└── validators/           # Dev 2 — schemas e validações etárias, bíblicas e de privacidade
+public/
+└── models/               # Designer + Dev 1 — assets 3D CC0 baixados para uso offline
+```
+
+Responsáveis principais: **Dev 1** atua em `src/game/` e `src/maps/`; **Dev 2** em `server/`, `src/services/` e, junto à P.O., `src/content/`; **Dev 3** em `src/components/ui/` e `src/stores/`; o **Designer** mantém os assets em `public/models/` e colabora nos layouts declarativos de `src/maps/`. Mudanças em `src/types/` e no contrato do store devem ser comunicadas ao time antes de serem integradas.
 
 ### Estratégia mobile e publicação em lojas — escopo opcional
 

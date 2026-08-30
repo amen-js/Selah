@@ -177,6 +177,7 @@ type WorldProps = {
   onProgressaoCriacaoChange?: (
     snapshot: SnapshotProgressaoCriacao | null,
   ) => void
+  onInatividadeCriacaoChange?: (inativo: boolean) => void
   onInteracaoCriacaoProxima: (tipo: TipoInteracaoCriacao | null) => void
 }
 
@@ -188,6 +189,7 @@ function World({
   onPortalProximo,
   onPortalAcionado,
   onProgressaoCriacaoChange,
+  onInatividadeCriacaoChange,
   onInteracaoCriacaoProxima,
 }: WorldProps) {
   const posicaoJogadorRef = useRef<PosicaoJogador | null>(null)
@@ -351,6 +353,7 @@ function World({
             posicaoJogadorRef={posicaoJogadorRef}
             enabled={playing}
             onMomentoChange={atualizarMomentoCriacao}
+            onInatividadeChange={onInatividadeCriacaoChange}
             onObjetivoProximo={atualizarObjetivoProximo}
           />
         </>
@@ -417,6 +420,7 @@ type GameCanvasProps = {
   onProgressaoCriacaoChange?: (
     snapshot: SnapshotProgressaoCriacao | null,
   ) => void
+  onInatividadeCriacaoChange?: (inativo: boolean) => void
 }
 
 export function GameCanvas({
@@ -424,6 +428,7 @@ export function GameCanvas({
   onCanvasReady,
   onSceneReady,
   onProgressaoCriacaoChange,
+  onInatividadeCriacaoChange,
 }: GameCanvasProps) {
   const regiao = useGameStore((state) => state.regiao)
   const setRegiao = useGameStore((state) => state.setRegiao)
@@ -454,10 +459,10 @@ export function GameCanvas({
   }, [mapa, setRegiao])
 
   useEffect(() => {
-    if (regiao !== 'criacao') {
-      onProgressaoCriacaoChange?.(null)
-    }
-  }, [onProgressaoCriacaoChange, regiao])
+    if (regiao === 'criacao') return
+    onProgressaoCriacaoChange?.(null)
+    onInatividadeCriacaoChange?.(false)
+  }, [onInatividadeCriacaoChange, onProgressaoCriacaoChange, regiao])
 
   const acionarPortal = useCallback((portal: PortalMapa) => {
     const destino = resolverDestinoPortal(portal)
@@ -532,6 +537,7 @@ export function GameCanvas({
                 onPortalProximo={setPortalProximo}
                 onPortalAcionado={acionarPortal}
                 onProgressaoCriacaoChange={onProgressaoCriacaoChange}
+                onInatividadeCriacaoChange={onInatividadeCriacaoChange}
                 onInteracaoCriacaoProxima={setInteracaoCriacaoProxima}
               />
             ) : (

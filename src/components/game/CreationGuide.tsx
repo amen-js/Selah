@@ -5,11 +5,15 @@ import { traduzirJornadaCriacao } from './creationJourneyUi'
 interface CreationGuideProps {
   snapshot: SnapshotProgressaoCriacao
   exploracaoAtiva: boolean
+  linha?: {
+    readonly texto: string
+  }
 }
 
 export function CreationGuide({
   snapshot,
   exploracaoAtiva,
+  linha,
 }: CreationGuideProps) {
   const { idioma, t } = useTranslation()
 
@@ -33,7 +37,7 @@ export function CreationGuide({
     >
       <span className="creation-guide__label">{rotulo}</span>
       <strong className="creation-guide__title">{texto.titulo}</strong>
-      <p>{texto.objetivo}</p>
+      <p>{linha?.texto ?? texto.objetivo}</p>
     </aside>
   )
 }

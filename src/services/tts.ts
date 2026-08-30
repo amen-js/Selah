@@ -1,4 +1,5 @@
-import type { VersiculoPublico } from '../types/selah'
+import type { NarracaoCriacaoId } from '../content/creationNarrations'
+import type { Idioma, VersiculoPublico } from '../types/selah'
 
 export type TtsEstado =
   | 'idle'
@@ -7,6 +8,12 @@ export type TtsEstado =
   | 'paused'
   | 'fallback'
   | 'error'
+
+export interface NarracaoTtsInput {
+  narracaoId: NarracaoCriacaoId
+  idioma: Idioma
+  textoFallback: string
+}
 
 type TtsListener = (estado: TtsEstado) => void
 
@@ -25,6 +32,7 @@ export interface TtsController {
   estado: () => TtsEstado
   assinar: (listener: TtsListener) => () => void
   falar: (versiculo: VersiculoPublico) => Promise<void>
+  narrar: (narracao: NarracaoTtsInput) => Promise<void>
   pausar: () => void
   retomar: () => void
   cancelar: () => void
@@ -38,6 +46,17 @@ interface TtsControllerOptions {
   revokeObjectURL?: ((url: string) => void) | null
   utteranceFactory?: ((texto: string) => SpeechSynthesisUtterance) | null
   baseUrl?: string
+}
+
+interface FalaTts {
+  idioma: Idioma
+  texto: string
+}
+
+interface SolicitacaoTts {
+  caminho: '/api/tts' | '/api/tts/narracao'
+  corpo: Record<string, string>
+  fala: FalaTts
 }
 
 const vozScore = (voz: SpeechSynthesisVoice, idioma: string): number => {
@@ -114,7 +133,7 @@ export const createTtsController = (options: TtsControllerOptions = {}): TtsCont
   let estadoAtual: TtsEstado = 'idle'
   let operacao = 0
   let modo: 'neural' | 'local' | null = null
-  let versiculoAtual: VersiculoPublico | null = null
+  let falaAtual: FalaTts | null = null
   let abortController: AbortController | null = null
   let audio: AudioPlayer | null = null
   let audioUrl: string | null = null
@@ -141,7 +160,7 @@ export const createTtsController = (options: TtsControllerOptions = {}): TtsCont
     }
   }
 
-  const iniciarFallback = (versiculo: VersiculoPublico, idOperacao: number) => {
+  const iniciarFallback = (falaAtualizada: FalaTts, idOperacao: number) => {
     if (idOperacao !== operacao) return
     liberarAudio()
     if (!synth || !utteranceFactory) {
@@ -152,11 +171,11 @@ export const createTtsController = (options: TtsControllerOptions = {}): TtsCont
 
     try {
       synth.cancel()
-      const fala = utteranceFactory(versiculo.texto)
-      fala.lang = versiculo.idioma
+      const fala = utteranceFactory(falaAtualizada.texto)
+      fala.lang = falaAtualizada.idioma
       fala.rate = 1.02
       fala.pitch = 1.05
-      fala.voice = selecionarVoz(synth, versiculo.idioma)
+      fala.voice = selecionarVoz(synth, falaAtualizada.idioma)
       fala.onend = () => {
         if (idOperacao !== operacao || modo !== 'local') return
         modo = null
@@ -183,13 +202,13 @@ export const createTtsController = (options: TtsControllerOptions = {}): TtsCont
     liberarAudio()
     synth?.cancel()
     modo = null
-    versiculoAtual = null
+    falaAtual = null
     definirEstado('idle')
   }
 
-  const falar = async (versiculo: VersiculoPublico): Promise<void> => {
+  const reproduzir = async ({ caminho, corpo, fala }: SolicitacaoTts): Promise<void> => {
     cancelar()
-    versiculoAtual = versiculo
+    falaAtual = fala
     const idOperacao = operacao
 
     if (!suportado) {
@@ -197,7 +216,7 @@ export const createTtsController = (options: TtsControllerOptions = {}): TtsCont
       return
     }
     if (!neuralDisponivel || !fetchFn || !audioFactory || !createObjectURL) {
-      iniciarFallback(versiculo, idOperacao)
+      iniciarFallback(fala, idOperacao)
       return
     }
 
@@ -206,16 +225,13 @@ export const createTtsController = (options: TtsControllerOptions = {}): TtsCont
     const signal = abortController.signal
 
     try {
-      const response = await fetchFn(`${baseUrl}/api/tts`, {
+      const response = await fetchFn(`${baseUrl}${caminho}`, {
         method: 'POST',
         headers: {
           accept: 'audio/mpeg',
           'content-type': 'application/json',
         },
-        body: JSON.stringify({
-          passagemId: versiculo.passagemId,
-          idioma: versiculo.idioma,
-        }),
+        body: JSON.stringify(corpo),
         signal,
       })
       if (idOperacao !== operacao) return
@@ -240,7 +256,7 @@ export const createTtsController = (options: TtsControllerOptions = {}): TtsCont
       player.onerror = () => {
         if (idOperacao !== operacao || modo !== 'neural') return
         modo = null
-        iniciarFallback(versiculo, idOperacao)
+        iniciarFallback(fala, idOperacao)
       }
       await player.play()
       if (idOperacao !== operacao) return
@@ -249,9 +265,35 @@ export const createTtsController = (options: TtsControllerOptions = {}): TtsCont
       if (idOperacao !== operacao || signal.aborted) return
       abortController = null
       modo = null
-      iniciarFallback(versiculo, idOperacao)
+      iniciarFallback(fala, idOperacao)
     }
   }
+
+  const falar = (versiculo: VersiculoPublico): Promise<void> =>
+    reproduzir({
+      caminho: '/api/tts',
+      corpo: {
+        passagemId: versiculo.passagemId,
+        idioma: versiculo.idioma,
+      },
+      fala: {
+        idioma: versiculo.idioma,
+        texto: versiculo.texto,
+      },
+    })
+
+  const narrar = (narracao: NarracaoTtsInput): Promise<void> =>
+    reproduzir({
+      caminho: '/api/tts/narracao',
+      corpo: {
+        narracaoId: narracao.narracaoId,
+        idioma: narracao.idioma,
+      },
+      fala: {
+        idioma: narracao.idioma,
+        texto: narracao.textoFallback,
+      },
+    })
 
   const pausar = () => {
     if (estadoAtual === 'playing' && modo === 'neural' && audio) {
@@ -279,9 +321,9 @@ export const createTtsController = (options: TtsControllerOptions = {}): TtsCont
           if (idOperacao === operacao && modo === 'neural') definirEstado('playing')
         },
         () => {
-          if (idOperacao === operacao && versiculoAtual) {
+          if (idOperacao === operacao && falaAtual) {
             modo = null
-            iniciarFallback(versiculoAtual, idOperacao)
+            iniciarFallback(falaAtual, idOperacao)
           }
         },
       )
@@ -296,6 +338,7 @@ export const createTtsController = (options: TtsControllerOptions = {}): TtsCont
       return () => listeners.delete(listener)
     },
     falar,
+    narrar,
     pausar,
     retomar,
     cancelar,

@@ -1,3 +1,4 @@
+import { useCreationNarration } from '../../hooks/useCreationNarration'
 import { useTranslation } from '../../i18n'
 import { selahGateway, type SelahGateway } from '../../services/selahGateway'
 import { ttsController, type TtsController } from '../../services/tts'
@@ -18,6 +19,7 @@ interface GameOverlayProps {
   appVersion?: string
   progressaoCriacao?: SnapshotProgressaoCriacao
   exploracaoAtiva?: boolean
+  inatividadeCriacao?: boolean
   dialogo?: {
     personagem: string
     mensagem: string
@@ -30,6 +32,7 @@ export function GameOverlay({
   appVersion,
   progressaoCriacao,
   exploracaoAtiva = false,
+  inatividadeCriacao = false,
   dialogo,
 }: GameOverlayProps) {
   const { t } = useTranslation()
@@ -37,6 +40,20 @@ export function GameOverlay({
   const pausaParentalAtiva = useGameStore((state) => state.pausaParentalAtiva)
   const dialogoAberto = useGameStore((state) => state.dialogoAberto)
   const painelAberto = useGameStore((state) => state.painelAberto)
+  const guiaAtiva = Boolean(
+    progressaoCriacao &&
+      exploracaoAtiva &&
+      !pausaParentalAtiva &&
+      !selahAtivo &&
+      !dialogoAberto &&
+      painelAberto === null,
+  )
+  const { linha } = useCreationNarration({
+    snapshot: progressaoCriacao,
+    inatividade: inatividadeCriacao,
+    ativo: guiaAtiva,
+    tts,
+  })
   const dialogoAtual = dialogo ?? {
     personagem: 'Lumi',
     mensagem: t('dialog.default.message'),
@@ -61,10 +78,11 @@ export function GameOverlay({
   return (
     <div className="game-overlay">
       <Hud snapshot={progressaoCriacao} />
-      {progressaoCriacao && !dialogoAberto && painelAberto === null && (
+      {progressaoCriacao && guiaAtiva && (
         <CreationGuide
           snapshot={progressaoCriacao}
-          exploracaoAtiva={exploracaoAtiva}
+          exploracaoAtiva={guiaAtiva}
+          linha={linha}
         />
       )}
       {dialogoAberto && <DialogBox {...dialogoAtual} />}

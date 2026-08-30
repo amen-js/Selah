@@ -58,6 +58,7 @@ const tts: TtsController = {
     emitirTts('loading')
     emitirTts('playing')
   }),
+  narrar: vi.fn(),
   pausar: vi.fn(() => emitirTts('paused')),
   retomar: vi.fn(() => emitirTts('playing')),
   cancelar: vi.fn(() => emitirTts('idle')),

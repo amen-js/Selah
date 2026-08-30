@@ -1,6 +1,11 @@
 import { act, render, screen } from '@testing-library/react'
 
+import {
+  buscarNarracaoCriacao,
+  type NarracaoCriacaoId,
+} from '../../content/creationNarrations'
 import { useGameStore } from '../../stores/gameStore'
+import type { Idioma } from '../../types/selah'
 import { momentosCriacao } from './creation/progression'
 import type { SnapshotProgressaoCriacao } from './creation/progression'
 import { CreationGuide } from './CreationGuide'
@@ -13,6 +18,15 @@ const snapshotVazio: SnapshotProgressaoCriacao = {
     concluida: false,
   },
 }
+
+const casosNarrativos: Array<{
+  narracaoId: NarracaoCriacaoId
+  idioma: Idioma
+}> = [
+  { narracaoId: 'criacao.vazio.inicial', idioma: 'pt-BR' },
+  { narracaoId: 'criacao.vazio.apoio', idioma: 'pt-BR' },
+  { narracaoId: 'criacao.vazio.transicao', idioma: 'en-US' },
+]
 
 const snapshotConcluido: SnapshotProgressaoCriacao = {
   momento: momentosCriacao[momentosCriacao.length - 1],
@@ -42,9 +56,44 @@ describe('CreationGuide', () => {
     ).toBeInTheDocument()
   })
 
-  it('renders nothing while exploration is inactive', () => {
+  it.each(casosNarrativos)(
+    'renders the resolved $narracaoId line in $idioma without controls',
+    ({ narracaoId, idioma }) => {
+      useGameStore.getState().setIdioma(idioma)
+      const linha = buscarNarracaoCriacao(narracaoId, idioma)
+      expect(linha).toBeDefined()
+      if (!linha) throw new Error('A narração aprovada deveria existir')
+
+      const { container } = render(
+        <CreationGuide
+          snapshot={snapshotVazio}
+          exploracaoAtiva
+          linha={linha}
+        />,
+      )
+
+      expect(screen.getByRole('status')).toHaveTextContent(linha.texto)
+      expect(
+        screen.queryByText('Dê alguns passos e descubra o primeiro caminho.'),
+      ).not.toBeInTheDocument()
+      expect(
+        container.querySelectorAll(
+          'a[href], button, input, select, textarea, [tabindex]',
+        ),
+      ).toHaveLength(0)
+    },
+  )
+
+  it('renders nothing while exploration is inactive, even with a narrative line', () => {
+    const linha = buscarNarracaoCriacao('criacao.vazio.inicial', 'pt-BR')
+    expect(linha).toBeDefined()
+
     render(
-      <CreationGuide snapshot={snapshotVazio} exploracaoAtiva={false} />,
+      <CreationGuide
+        snapshot={snapshotVazio}
+        exploracaoAtiva={false}
+        linha={linha}
+      />,
     )
 
     expect(screen.queryByRole('status')).not.toBeInTheDocument()

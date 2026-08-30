@@ -1,6 +1,6 @@
 # Creation OpenRouter Narration Specification
 
-**Status**: Approved
+**Status**: Verified
 
 ## Problem Statement
 
@@ -11,11 +11,11 @@ scripture, but that endpoint intentionally rejects arbitrary narration text.
 
 ## Goals
 
-- [ ] Present the approved initial, support and transition script for all nine
+- [x] Present the approved initial, support and transition script for all nine
       Creation moments in localized, two-line Voice Guide bubbles.
-- [ ] Narrate eligible guide lines with the existing OpenRouter TTS model and
+- [x] Narrate eligible guide lines with the existing OpenRouter TTS model and
       voice, preserving a compatible local device voice as fallback.
-- [ ] Keep narration cancellable, non-blocking, privacy-safe and subordinate to
+- [x] Keep narration cancellable, non-blocking, privacy-safe and subordinate to
       Selah, dialogue, settings, onboarding and parental pause.
 
 ## Out of Scope
@@ -127,25 +127,25 @@ requests with a mocked OpenRouter client.
 
 | Requirement ID | Story | Status |
 | --- | --- | --- |
-| CNARR-01 | P1: localized initial and transition guide lines | Pending |
-| CNARR-02 | P1: approved-ID OpenRouter neural synthesis | Pending |
-| CNARR-03 | P1: local voice fallback | Pending |
-| CNARR-04 | P1: cancellation and overlay priority | Pending |
-| CNARR-05 | P1: narration preference and non-blocking text | Pending |
-| CNARR-06 | P2: activity-aware support line | Pending |
-| CNARR-07 | P2: timeout, rate limit, validation and no-store | Pending |
-| CNARR-08 | P2: `/lab` deterministic simulation | Pending |
+| CNARR-01 | P1: localized initial and transition guide lines | Verified |
+| CNARR-02 | P1: approved-ID OpenRouter neural synthesis | Verified |
+| CNARR-03 | P1: local voice fallback | Verified |
+| CNARR-04 | P1: cancellation and overlay priority | Verified |
+| CNARR-05 | P1: narration preference and non-blocking text | Verified |
+| CNARR-06 | P2: activity-aware support line | Verified |
+| CNARR-07 | P2: timeout, rate limit, validation and no-store | Verified |
+| CNARR-08 | P2: `/lab` deterministic simulation | Verified |
 
-**Coverage**: 8 total, 0 mapped to tasks, 8 awaiting approved design.
+**Coverage**: 8 total, 8 implemented and verified.
 
 ## Success Criteria
 
-- [ ] Moments 1 and 2 demonstrate initial, support and transition narration in
+- [x] Moments 1 and 2 demonstrate initial, support and transition narration in
       pt-BR, en-US and es-ES without loading Canvas.
-- [ ] The production Creation route cancels narration across every blocking
+- [x] The production Creation route cancels narration across every blocking
       overlay and moment/language change.
-- [ ] No arbitrary text reaches OpenRouter and no synthesized audio is cached.
-- [ ] Lint, full tests, production build and desktop/mobile browser UAT pass.
+- [x] No arbitrary text reaches OpenRouter and no synthesized audio is cached.
+- [x] Lint, full tests, production build and desktop/mobile browser UAT pass.
 
 ## Approved Timing Decision
 

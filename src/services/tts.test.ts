@@ -10,6 +10,20 @@ const versiculo: VersiculoPublico = {
   atribuicao: 'Texto de teste.',
 }
 
+const narracaoVazio = {
+  narracaoId: 'criacao.vazio.inicial' as const,
+  idioma: 'pt-BR' as const,
+  textoFallback:
+    'No começo, tudo era escuro e bem silencioso... Não havia nada aqui. Dê alguns passos e vamos descobrir o primeiro caminho juntos!',
+}
+
+const narracaoLuz = {
+  narracaoId: 'criacao.luz.inicial' as const,
+  idioma: 'pt-BR' as const,
+  textoFallback:
+    'Olhe só! Pontos brilhantes surgiram. Vamos seguir os sinais luminosos e ver a luz aparecer?',
+}
+
 const createAudio = () => ({
   play: vi.fn().mockResolvedValue(undefined),
   pause: vi.fn(),
@@ -176,6 +190,166 @@ describe('createTtsController', () => {
       passagemId: versiculo.passagemId,
       idioma: 'en-US',
     })
+    expect(tts.estado()).toBe('playing')
+  })
+
+  it('requests approved narration by ID and language only', async () => {
+    const audio = createAudio()
+    const audioFactory = vi.fn((src: string) => {
+      audio.src = src
+      return audio
+    })
+    const fetchFn = vi.fn<typeof fetch>().mockResolvedValue(
+      new Response(new Uint8Array([73, 68, 51]), {
+        status: 200,
+        headers: { 'content-type': 'audio/mpeg' },
+      }),
+    )
+    const tts = createTtsController({
+      synth: null,
+      fetchFn,
+      audioFactory,
+      createObjectURL: () => 'blob:creation-guide',
+      revokeObjectURL: vi.fn(),
+      baseUrl: 'http://localhost:8787/',
+    })
+
+    await tts.narrar(narracaoVazio)
+
+    expect(fetchFn).toHaveBeenCalledOnce()
+    expect(fetchFn).toHaveBeenCalledWith(
+      'http://localhost:8787/api/tts/narracao',
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({
+          narracaoId: narracaoVazio.narracaoId,
+          idioma: narracaoVazio.idioma,
+        }),
+      }),
+    )
+    expect(JSON.parse(String(fetchFn.mock.calls[0]?.[1]?.body))).toEqual({
+      narracaoId: narracaoVazio.narracaoId,
+      idioma: narracaoVazio.idioma,
+    })
+    expect(audioFactory).toHaveBeenCalledWith('blob:creation-guide')
+    expect(audio.play).toHaveBeenCalledOnce()
+    expect(tts.estado()).toBe('playing')
+  })
+
+  it('falls back locally with the exact approved localized narration', async () => {
+    const speak = vi.fn()
+    const compatibleVoice = { name: 'Luciana Natural', lang: 'pt-BR' } as SpeechSynthesisVoice
+    const synth = {
+      speak,
+      pause: vi.fn(),
+      resume: vi.fn(),
+      cancel: vi.fn(),
+      getVoices: () => [compatibleVoice],
+    }
+    let utterance: SpeechSynthesisUtterance | null = null
+    const tts = createTtsController({
+      synth,
+      fetchFn: vi.fn<typeof fetch>().mockResolvedValue(new Response(null, { status: 503 })),
+      audioFactory: (src) => ({ ...createAudio(), src }),
+      createObjectURL: () => 'blob:unused',
+      revokeObjectURL: vi.fn(),
+      utteranceFactory: (texto) => {
+        utterance = {
+          text: texto,
+          lang: '',
+          rate: 1,
+          pitch: 1,
+          voice: null,
+          onend: null,
+          onerror: null,
+        } as unknown as SpeechSynthesisUtterance
+        return utterance
+      },
+    })
+
+    await tts.narrar(narracaoVazio)
+
+    expect(speak).toHaveBeenCalledWith(utterance)
+    expect(utterance).toMatchObject({
+      text: narracaoVazio.textoFallback,
+      lang: narracaoVazio.idioma,
+      voice: compatibleVoice,
+    })
+    expect(tts.estado()).toBe('fallback')
+  })
+
+  it('cancels scripture audio and stale guide requests before replacement narration', async () => {
+    let resolveStaleGuide: ((response: Response) => void) | undefined
+    let staleGuideSignal: AbortSignal | undefined
+    const staleGuideResponse = new Promise<Response>((resolve) => {
+      resolveStaleGuide = resolve
+    })
+    const fetchFn = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(
+        new Response(new Uint8Array([1]), {
+          status: 200,
+          headers: { 'content-type': 'audio/mpeg' },
+        }),
+      )
+      .mockImplementationOnce((_input, init) => {
+        staleGuideSignal = init?.signal as AbortSignal | undefined
+        return staleGuideResponse
+      })
+      .mockResolvedValueOnce(
+        new Response(new Uint8Array([2]), {
+          status: 200,
+          headers: { 'content-type': 'audio/mpeg' },
+        }),
+      )
+    const verseAudio = createAudio()
+    const replacementAudio = createAudio()
+    const audioFactory = vi
+      .fn<(src: string) => ReturnType<typeof createAudio>>()
+      .mockImplementationOnce((src) => {
+        verseAudio.src = src
+        return verseAudio
+      })
+      .mockImplementationOnce((src) => {
+        replacementAudio.src = src
+        return replacementAudio
+      })
+    const createObjectURL = vi
+      .fn<(blob: Blob) => string>()
+      .mockReturnValueOnce('blob:verse')
+      .mockReturnValueOnce('blob:replacement-guide')
+    const revokeObjectURL = vi.fn()
+    const tts = createTtsController({
+      synth: null,
+      fetchFn,
+      audioFactory,
+      createObjectURL,
+      revokeObjectURL,
+    })
+
+    await tts.falar(versiculo)
+    const staleGuide = tts.narrar(narracaoVazio)
+
+    expect(verseAudio.pause).toHaveBeenCalledOnce()
+    expect(verseAudio.load).toHaveBeenCalledOnce()
+    expect(verseAudio.src).toBe('')
+    expect(revokeObjectURL).toHaveBeenCalledWith('blob:verse')
+    expect(staleGuideSignal).toBeInstanceOf(AbortSignal)
+
+    await tts.narrar(narracaoLuz)
+    expect(staleGuideSignal?.aborted).toBe(true)
+
+    resolveStaleGuide?.(
+      new Response(new Uint8Array([3]), {
+        status: 200,
+        headers: { 'content-type': 'audio/mpeg' },
+      }),
+    )
+    await staleGuide
+
+    expect(audioFactory).toHaveBeenCalledTimes(2)
+    expect(createObjectURL).toHaveBeenCalledTimes(2)
+    expect(replacementAudio.play).toHaveBeenCalledOnce()
     expect(tts.estado()).toBe('playing')
   })
 

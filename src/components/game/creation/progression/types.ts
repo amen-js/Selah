@@ -1,4 +1,4 @@
-import type { Ponto3D } from '../../../../mapas/types'
+import type { Ponto3D } from '../../../../mapas/types.ts'
 
 export type MomentoCriacaoId =
   | 'vazio'

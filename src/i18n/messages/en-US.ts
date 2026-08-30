@@ -263,6 +263,8 @@ export const enUS = {
   'lab.scenario.fallback': 'Approved fallback',
   'lab.scenario.error': 'Network error',
   'lab.creationMoment.label': 'Creation moment',
+  'lab.creationActivity.pause': 'Simulate inactivity',
+  'lab.creationActivity.resume': 'Resume activity',
   'lab.startSelah': 'Open Selah',
   'lab.showDialog': 'Show dialogue',
   'lab.activatePause': 'Activate parental pause',

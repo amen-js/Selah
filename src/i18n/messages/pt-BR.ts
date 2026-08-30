@@ -180,8 +180,6 @@ export const ptBR = {
   'selah.tts.pauseAction': 'Pausar leitura',
   'selah.tts.resumeAria': 'Continuar leitura em voz alta',
   'selah.tts.resumeAction': 'Continuar leitura',
-  'selah.tts.disclosure':
-    'Voz gerada por IA; se estiver indisponível, será usada a voz do dispositivo.',
   'selah.tts.fallbackStatus': 'Usando a voz deste dispositivo.',
   'selah.tts.error': 'Não foi possível reproduzir esta passagem.',
   'selah.quiz.continueAria': 'Continuar para a pergunta',

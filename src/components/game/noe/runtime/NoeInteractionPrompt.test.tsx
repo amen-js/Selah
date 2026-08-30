@@ -26,6 +26,14 @@ describe('NoeInteractionPrompt', () => {
     )
   })
 
+  it('orienta a confirmação pelo botão touch', () => {
+    render(<NoeInteractionPrompt tipo="tarefa" touch />)
+
+    expect(screen.getByRole('status')).toHaveTextContent(
+      'Toque em Ação para interagir',
+    )
+  })
+
   it('não renderiza sem candidato acionável', () => {
     render(<NoeInteractionPrompt tipo={null} />)
     expect(screen.queryByRole('status')).toBeNull()

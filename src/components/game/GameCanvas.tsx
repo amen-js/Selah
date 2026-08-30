@@ -73,6 +73,13 @@ import {
   type TipoInteracaoNoe,
   type EstadoProgressaoNoe,
 } from './noe'
+import {
+  combinarControlesJogador,
+  criarEstadoControleMobile,
+  resetarControleMobile,
+  MobileControlsOverlay,
+  type EstadoControleMobile,
+} from './mobile'
 import { RiggedPlayer } from './player'
 import { Arte2DRegiao, Cenario3DRegiao, ColetaveisRegiao } from './region'
 
@@ -99,6 +106,7 @@ const keyboardMap: KeyboardControlsEntry<GameControl>[] = [
 
 type PlayerProps = {
   playing: boolean
+  controleMobile: EstadoControleMobile
   posicaoJogadorRef: RefObject<PosicaoJogador | null>
   focoCamera: FocoCameraSelah | null
   manterFoco: boolean
@@ -107,6 +115,7 @@ type PlayerProps = {
 
 function Player({
   playing,
+  controleMobile,
   posicaoJogadorRef,
   focoCamera,
   manterFoco,
@@ -128,6 +137,7 @@ function Player({
         rightward: false,
         jump: false,
         run: false,
+        joystick: { x: 0, y: 0 },
       })
       character.body.setLinvel(
         { x: 0, y: character.currLinVel.y, z: 0 },
@@ -141,7 +151,11 @@ function Player({
     if (!character) return
 
     posicaoJogadorRef.current = character.currPos
-    if (playing) character.setMovement(getControls())
+    if (playing) {
+      character.setMovement(
+        combinarControlesJogador(getControls(), controleMobile),
+      )
+    }
   }, -1)
 
   return (
@@ -173,6 +187,7 @@ function Player({
       </Ecctrl>
       <SelahCameraRig
         controller={controller}
+        controleMobile={controleMobile}
         foco={focoCamera}
         manterFoco={manterFoco}
       />
@@ -182,6 +197,7 @@ function Player({
 
 type WorldProps = {
   playing: boolean
+  controleMobile: EstadoControleMobile
   regiao: Regiao
   mapa: MapaRegiao
   portais: readonly PortalMapa[]
@@ -200,6 +216,7 @@ type WorldProps = {
 
 function World({
   playing,
+  controleMobile,
   regiao,
   mapa,
   portais,
@@ -459,6 +476,7 @@ function World({
 
       <Player
         playing={playing}
+        controleMobile={controleMobile}
         posicaoJogadorRef={posicaoJogadorRef}
         focoCamera={focoCamera}
         manterFoco={pausaParentalAtiva}
@@ -484,6 +502,8 @@ function RegionFallback() {
 
 type GameCanvasProps = {
   playing: boolean
+  touchControls?: boolean
+  onPause?: () => void
   onCanvasReady?: (canvas: HTMLCanvasElement) => void
   onSceneReady?: () => void
   onProgressaoCriacaoChange?: (
@@ -495,6 +515,8 @@ type GameCanvasProps = {
 
 export function GameCanvas({
   playing,
+  touchControls = false,
+  onPause,
   onCanvasReady,
   onSceneReady,
   onProgressaoCriacaoChange,
@@ -523,6 +545,7 @@ export function GameCanvas({
   const cooldownPortalRef = useRef(criarEstadoCooldownPortal())
   const temporizadoresRef = useRef<number[]>([])
   const canvasElementRef = useRef<HTMLCanvasElement | null>(null)
+  const [controleMobile] = useState(criarEstadoControleMobile)
   const mundoAtivo =
     playing &&
     faseTransicao === 'inativo' &&
@@ -551,6 +574,7 @@ export function GameCanvas({
       setVedacaoNoe(null)
       onAtividadeNoeChange?.(false)
 
+      if (touchControls) return
       const canvas = canvasElementRef.current
       if (!canvas) return
       try {
@@ -560,7 +584,7 @@ export function GameCanvas({
         // Browsers without Pointer Lock return to the regular paused screen.
       }
     },
-    [onAtividadeNoeChange, vedacaoNoe],
+    [onAtividadeNoeChange, touchControls, vedacaoNoe],
   )
 
   const encerrarDialogoNoe = useCallback(
@@ -569,6 +593,7 @@ export function GameCanvas({
       setDialogoNoe(null)
       onAtividadeNoeChange?.(false)
 
+      if (touchControls) return
       const canvas = canvasElementRef.current
       if (!canvas) return
       try {
@@ -578,8 +603,14 @@ export function GameCanvas({
         // Browsers without Pointer Lock return to the regular paused screen.
       }
     },
-    [dialogoNoe, onAtividadeNoeChange],
+    [dialogoNoe, onAtividadeNoeChange, touchControls],
   )
+
+  useEffect(() => {
+    if (!mundoAtivo || !touchControls) {
+      resetarControleMobile(controleMobile)
+    }
+  }, [controleMobile, mundoAtivo, touchControls])
 
   const limparTemporizadores = useCallback(() => {
     for (const temporizador of temporizadoresRef.current) {
@@ -678,6 +709,7 @@ export function GameCanvas({
               <World
                 key={regiao}
                 playing={mundoAtivo}
+                controleMobile={controleMobile}
                 regiao={regiao}
                 mapa={mapa}
                 portais={portaisPorRegiao[regiao]}
@@ -698,6 +730,7 @@ export function GameCanvas({
         </Suspense>
       </Canvas>
       <PortalPrompt
+        touch={touchControls}
         portal={
           mundoAtivo && !interacaoCriacaoProxima && !interacaoNoeProxima
             ? portalProximo
@@ -705,9 +738,11 @@ export function GameCanvas({
         }
       />
       <CreationInteractionPrompt
+        touch={touchControls}
         tipo={mundoAtivo ? interacaoCriacaoProxima : null}
       />
       <NoeInteractionPrompt
+        touch={touchControls}
         tipo={mundoAtivo ? interacaoNoeProxima : null}
       />
       <NoeObjectiveGuide
@@ -717,6 +752,11 @@ export function GameCanvas({
       <PortalTransitionOverlay
         fase={faseTransicao}
         destino={destinoTransicao}
+      />
+      <MobileControlsOverlay
+        enabled={touchControls && mundoAtivo}
+        input={controleMobile}
+        onPause={onPause}
       />
       {vedacaoNoe && (
         <VedacaoBetume

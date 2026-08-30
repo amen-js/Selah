@@ -63,6 +63,7 @@ export const enUS = {
   'app.controls.camera': 'Camera',
   'app.controls.pause': 'Pause',
   'app.controls.pauseHint': 'Press P at any time to pause.',
+  'mobile.controls.action': 'Action',
 
   'onboarding.eyebrow': 'Before the first journey',
   'onboarding.title': 'Responsible adult setup',
@@ -130,6 +131,7 @@ export const enUS = {
   'creation.interaction.selah': 'Selah Moment',
   'creation.interaction.point': 'Creation Point',
   'creation.interaction.enter': 'Press E or Enter to continue',
+  'creation.interaction.touch': 'Tap Action to continue',
   'creation.complete.title': 'Creation has been revealed',
   'creation.complete.objective':
     'Everything is full of life. Take in the world and continue your journey when ready.',
@@ -139,6 +141,7 @@ export const enUS = {
   'noe.interaction.task': "Noah's task",
   'noe.interaction.selah': 'Selah Moment',
   'noe.interaction.enter': 'Press E or Enter to interact',
+  'noe.interaction.touch': 'Tap Action to interact',
   'noe.slice.aria': 'Worksite chapter completed',
   'noe.slice.eyebrow': 'Stage completed',
   'noe.slice.title': 'The worksite is ready',
@@ -213,6 +216,7 @@ export const enUS = {
   'portal.prompt.aria': 'Portal to {region}',
   'portal.prompt.eyebrow': 'Portal',
   'portal.prompt.enter': 'Press E or Enter to enter',
+  'portal.prompt.touch': 'Tap Action to enter',
   'portal.prompt.soon': 'Coming soon',
   'portal.transition.aria': 'Region transition',
   'portal.transition.exiting': 'Preparing your passage…',

@@ -47,6 +47,8 @@ vi.mock('./components/game/GameCanvas', async () => {
       onSceneReady,
       onProgressaoCriacaoChange,
       onInatividadeCriacaoChange,
+      touchControls,
+      onPause,
     }: {
       playing: boolean
       onCanvasReady?: (canvas: HTMLCanvasElement) => void
@@ -55,6 +57,8 @@ vi.mock('./components/game/GameCanvas', async () => {
         snapshot: SnapshotProgressaoCriacao | null,
       ) => void
       onInatividadeCriacaoChange?: (inativo: boolean) => void
+      touchControls?: boolean
+      onPause?: () => void
     }) => {
       if (canvasMock.shouldThrow) throw new Error('webgl-scene-failed')
       canvasMock.onProgressaoCriacaoChange = onProgressaoCriacaoChange ?? null
@@ -66,7 +70,19 @@ vi.mock('./components/game/GameCanvas', async () => {
         onSceneReady?.()
       }, [onCanvasReady, onSceneReady])
 
-      return <div data-testid="game-canvas" data-playing={String(playing)} />
+      return (
+        <div
+          data-testid="game-canvas"
+          data-playing={String(playing)}
+          data-touch-controls={String(touchControls)}
+        >
+          {touchControls && (
+            <button type="button" onClick={onPause}>
+              Pausar no celular
+            </button>
+          )}
+        </div>
+      )
     },
   }
 })
@@ -112,6 +128,7 @@ describe('App integration', () => {
   let pointerLockElement: Element | null
   let exitPointerLock: ReturnType<typeof vi.fn>
   let requestPointerLock: ReturnType<typeof vi.fn>
+  let coarsePointer: boolean
 
   beforeEach(() => {
     selahAudioMock.useSelahAudio.mockClear()
@@ -119,6 +136,24 @@ describe('App integration', () => {
     useGameStore.getState().setIdioma('pt-BR')
     useGameStore.getState().concluirConfiguracaoInicial()
     pointerLockElement = null
+    coarsePointer = false
+    Object.defineProperty(window, 'matchMedia', {
+      configurable: true,
+      value: vi.fn((query: string) => ({
+        matches: query === '(pointer: coarse)' && coarsePointer,
+        media: query,
+        onchange: null,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      })),
+    })
+    Object.defineProperty(navigator, 'maxTouchPoints', {
+      configurable: true,
+      value: 0,
+    })
     requestPointerLock = vi.fn()
     canvasMock.element = document.createElement('canvas')
     canvasMock.shouldThrow = false
@@ -422,5 +457,52 @@ describe('App integration', () => {
     expect(exitPointerLock).toHaveBeenCalledOnce()
     expect(screen.getByTestId('game-canvas')).toHaveAttribute('data-playing', 'false')
     expect(screen.getByRole('button', { name: 'Continuar jornada' })).toBeInTheDocument()
+  })
+
+  it('starts and pauses touch exploration without Pointer Lock', () => {
+    coarsePointer = true
+    render(<App />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Entrar no mundo' }))
+
+    expect(requestPointerLock).not.toHaveBeenCalled()
+    expect(screen.getByRole('main')).toHaveClass('has-touch-controls')
+    expect(screen.getByTestId('game-canvas')).toHaveAttribute(
+      'data-touch-controls',
+      'true',
+    )
+    expect(screen.getByTestId('game-canvas')).toHaveAttribute(
+      'data-playing',
+      'true',
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Pausar no celular' }))
+
+    expect(screen.getByTestId('game-canvas')).toHaveAttribute(
+      'data-playing',
+      'false',
+    )
+    expect(screen.getByRole('button', { name: 'Continuar jornada' })).toBeInTheDocument()
+  })
+
+  it('offers touch controls on a hybrid device with a fine primary pointer', () => {
+    Object.defineProperty(navigator, 'maxTouchPoints', {
+      configurable: true,
+      value: 5,
+    })
+
+    render(<App />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Entrar no mundo' }))
+
+    expect(requestPointerLock).not.toHaveBeenCalled()
+    expect(screen.getByTestId('game-canvas')).toHaveAttribute(
+      'data-touch-controls',
+      'true',
+    )
+    expect(screen.getByTestId('game-canvas')).toHaveAttribute(
+      'data-playing',
+      'true',
+    )
   })
 })

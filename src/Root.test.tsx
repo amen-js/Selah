@@ -2,6 +2,10 @@ import { render, screen } from '@testing-library/react'
 
 import { Root } from './Root'
 
+vi.mock('./App', () => ({
+  default: () => <div>Jogo principal</div>,
+}))
+
 describe('Root', () => {
   it('renders the laboratory only for the development route', () => {
     render(<Root pathname="/lab" isDev />)
@@ -13,6 +17,6 @@ describe('Root', () => {
     render(<Root pathname="/lab" isDev={false} />)
 
     expect(screen.queryByText(/nenhum canvas 3D/i)).not.toBeInTheDocument()
-    expect(screen.getByText('Get started')).toBeInTheDocument()
+    expect(screen.getByText('Jogo principal')).toBeInTheDocument()
   })
 })

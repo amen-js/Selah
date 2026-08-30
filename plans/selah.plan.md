@@ -13,7 +13,7 @@ todos:
     status: pending
   - id: slice-3d
     content: "Dev 1: vertical slice 3D — Canvas, RigidBody, Ecctrl com um cubo andando"
-    status: pending
+    status: completed
   - id: slice-ia
     content: "Dev 2: servidor Hono com /api/quiz/gerar via SDK openai apontado ao OpenRouter, retornando JSON estruturado"
     status: pending

@@ -1,7 +1,8 @@
 import { Clone, useGLTF } from '@react-three/drei'
 import { RigidBody } from '@react-three/rapier'
-import { Suspense } from 'react'
+import { Suspense, useMemo } from 'react'
 import type { PropMapa } from '../../../mapas/types'
+import { clonarPecaModelo } from './clonarPecaModelo'
 import { obterTransformacaoProp } from './propTransforms'
 
 export interface PropMapaRendererProps {
@@ -36,8 +37,25 @@ export function PropFallback({ prop }: PropMapaItemProps) {
   )
 }
 
-function PropModelo({ modelo }: { modelo: string }) {
+function PropModelo({
+  modelo,
+  modeloNo,
+  prop,
+}: {
+  modelo: string
+  modeloNo?: string
+  prop: PropMapa
+}) {
   const { scene } = useGLTF(modelo)
+  const peca = useMemo(
+    () => (modeloNo ? clonarPecaModelo(scene, modeloNo) : null),
+    [modeloNo, scene],
+  )
+
+  if (modeloNo) {
+    if (!peca) return <PropFallback prop={prop} />
+    return <primitive object={peca} castShadow receiveShadow />
+  }
 
   return <Clone object={scene} castShadow receiveShadow />
 }
@@ -45,10 +63,15 @@ function PropModelo({ modelo }: { modelo: string }) {
 function PropVisual({ prop }: PropMapaItemProps) {
   const escala = obterTransformacaoProp(prop).scale
   const modelo = prop.modelo?.trim()
+  const modeloNo = prop.modeloNo?.trim()
 
   return (
     <group scale={escala}>
-      {modelo ? <PropModelo modelo={modelo} /> : <PropFallback prop={prop} />}
+      {modelo ? (
+        <PropModelo modelo={modelo} modeloNo={modeloNo} prop={prop} />
+      ) : (
+        <PropFallback prop={prop} />
+      )}
     </group>
   )
 }

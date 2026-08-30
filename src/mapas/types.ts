@@ -20,6 +20,7 @@ export interface Arte2DMapa {
 export interface PropMapa {
   id: string
   modelo?: string
+  modeloNo?: string
   posicao: Ponto3D
   rotacao?: number
   escala?: Escala3D

@@ -13,6 +13,7 @@ export {
   type EscalaRenderizacao,
   type TransformacaoProp,
 } from './propTransforms'
+export { clonarPecaModelo } from './clonarPecaModelo'
 export { distancia3D, estaNoRaio } from './proximidade'
 export type { PosicaoJogador } from './proximidade'
 export { podeAcionarColetavel } from './podeAcionarColetavel'

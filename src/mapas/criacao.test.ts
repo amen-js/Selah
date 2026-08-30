@@ -1,6 +1,12 @@
 import { mapaCriacao } from './criacao'
 
-const referenciasEsperadas = ['GEN.1.1', 'GEN.1.3', 'GEN.1.11', 'GEN.1.20', 'GEN.1.27']
+const referenciasEsperadas = [
+  'genesis-1-1',
+  'genesis-1-3',
+  'genesis-1-11',
+  'genesis-1-24',
+  'genesis-1-27',
+]
 
 describe('mapa da criação', () => {
   it('contém exatamente cinco colecionáveis', () => {

@@ -59,12 +59,12 @@ export const mapaCriacao: MapaRegiao = {
       fallback: { forma: 'caixa', cor: '#a3c96b' },
     },
   ],
-  // Referências OSIS provisórias; aguardam aprovação da P.O. Não há texto bíblico neste mapa.
+  // IDs públicos aprovados pelo proxy; a referência USFM permanece no backend.
   coletaveis: [
     {
       id: 'coletavel-primeiro-dia',
       historiaId: 'criacao',
-      passagemId: 'GEN.1.1',
+      passagemId: 'genesis-1-1',
       posicao: [-11, 1, -11],
       raioAtivacao: 1.5,
       cor: '#f5d76e',
@@ -72,7 +72,7 @@ export const mapaCriacao: MapaRegiao = {
     {
       id: 'coletavel-luz',
       historiaId: 'criacao',
-      passagemId: 'GEN.1.3',
+      passagemId: 'genesis-1-3',
       posicao: [10, 1, -10],
       raioAtivacao: 1.5,
       cor: '#ffe9a6',
@@ -80,7 +80,7 @@ export const mapaCriacao: MapaRegiao = {
     {
       id: 'coletavel-vegetacao',
       historiaId: 'criacao',
-      passagemId: 'GEN.1.11',
+      passagemId: 'genesis-1-11',
       posicao: [-11, 1, 9],
       raioAtivacao: 1.5,
       cor: '#8dc76b',
@@ -88,7 +88,7 @@ export const mapaCriacao: MapaRegiao = {
     {
       id: 'coletavel-animais',
       historiaId: 'criacao',
-      passagemId: 'GEN.1.20',
+      passagemId: 'genesis-1-24',
       posicao: [11, 1, 8],
       raioAtivacao: 1.5,
       cor: '#83c9d8',
@@ -96,7 +96,7 @@ export const mapaCriacao: MapaRegiao = {
     {
       id: 'coletavel-humanidade',
       historiaId: 'criacao',
-      passagemId: 'GEN.1.27',
+      passagemId: 'genesis-1-27',
       posicao: [0, 1, 0],
       raioAtivacao: 1.5,
       cor: '#d8a36e',

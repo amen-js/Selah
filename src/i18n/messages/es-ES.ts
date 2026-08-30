@@ -92,6 +92,9 @@ export const esES = {
   'hud.metrics.label': 'Métricas',
   'hud.settings.open': 'Abrir configuración parental',
   'hud.settings.label': 'Familia',
+  'hud.creation.moment': 'Momento {current} de {total}',
+  'hud.creation.progressAria':
+    '{completed} de {total} momentos completados',
 
   'creation.guide.label': 'Voz Guía',
   'creation.journey.vazio.title': 'El vacío',

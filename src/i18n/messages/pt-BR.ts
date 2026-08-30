@@ -90,6 +90,9 @@ export const ptBR = {
   'hud.metrics.label': 'Métricas',
   'hud.settings.open': 'Abrir configurações parentais',
   'hud.settings.label': 'Pais',
+  'hud.creation.moment': 'Momento {current} de {total}',
+  'hud.creation.progressAria':
+    '{completed} de {total} momentos concluídos',
 
   'creation.guide.label': 'Voz Guia',
   'creation.journey.vazio.title': 'O vazio',

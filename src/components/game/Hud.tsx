@@ -1,6 +1,9 @@
 import { useTranslation, type TranslationKey } from '../../i18n'
 import { useGameStore } from '../../stores/gameStore'
 import type { Regiao } from '../../types/selah'
+import { momentosCriacao } from './creation/progression/catalogo'
+import type { SnapshotProgressaoCriacao } from './creation/progression/types'
+import { traduzirJornadaCriacao } from './creationJourneyUi'
 import { LanguageSelector } from './LanguageSelector'
 
 const rotulosRegiao: Record<Regiao, TranslationKey> = {
@@ -10,8 +13,12 @@ const rotulosRegiao: Record<Regiao, TranslationKey> = {
   jose: 'hud.region.jose',
 }
 
-export function Hud() {
-  const { t } = useTranslation()
+interface HudProps {
+  snapshot?: SnapshotProgressaoCriacao
+}
+
+export function Hud({ snapshot }: HudProps) {
+  const { idioma, t } = useTranslation()
   const regiao = useGameStore((state) => state.regiao)
   const totalPassagens = useGameStore((state) => state.versiculosColetados.length)
   const setPainelAberto = useGameStore((state) => state.setPainelAberto)
@@ -19,6 +26,15 @@ export function Hud() {
     totalPassagens === 1 ? 'hud.passages.one' : 'hud.passages.other',
     { count: totalPassagens },
   )
+  const totalMomentos = momentosCriacao.length
+  const textoJornada = snapshot
+    ? traduzirJornadaCriacao(snapshot.momento.id, idioma)
+    : null
+  const momentosConcluidos = snapshot
+    ? snapshot.estado.concluida
+      ? totalMomentos
+      : snapshot.estado.momentosConcluidos.length
+    : 0
 
   return (
     <header className="hud" aria-label={t('hud.aria')}>
@@ -32,6 +48,28 @@ export function Hud() {
           <span>{passagens}</span>
         </div>
       </div>
+
+      {snapshot && textoJornada && (
+        <div className="hud__journey">
+          <div className="hud__journey-copy">
+            <span className="hud__journey-position">
+              {t('hud.creation.moment', {
+                current: snapshot.momento.ordem,
+                total: totalMomentos,
+              })}
+            </span>
+            <strong>{textoJornada.titulo}</strong>
+          </div>
+          <progress
+            max={totalMomentos}
+            value={momentosConcluidos}
+            aria-label={t('hud.creation.progressAria', {
+              completed: momentosConcluidos,
+              total: totalMomentos,
+            })}
+          />
+        </div>
+      )}
 
       <nav
         className="hud__actions overlay-interactive"

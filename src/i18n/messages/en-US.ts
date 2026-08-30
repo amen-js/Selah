@@ -92,6 +92,9 @@ export const enUS = {
   'hud.metrics.label': 'Metrics',
   'hud.settings.open': 'Open parental settings',
   'hud.settings.label': 'Parents',
+  'hud.creation.moment': 'Moment {current} of {total}',
+  'hud.creation.progressAria':
+    '{completed} of {total} moments completed',
 
   'creation.guide.label': 'Voice Guide',
   'creation.journey.vazio.title': 'The void',

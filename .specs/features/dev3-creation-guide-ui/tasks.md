@@ -85,10 +85,11 @@ responsive styling and component tests.
 
 ### T4: Add Creation moment progress to the HUD
 
+**Status**: Implemented
 **What**: Extend `Hud` to render moment order, total and title when a snapshot
 is present.
 **Where**: `src/components/game/Hud.tsx`, `src/components/game/Hud.test.tsx`,
-`src/index.css`
+`src/i18n/messages/*.ts`, `src/index.css`
 **Depends on**: T3
 **Reuses**: existing HUD pills and Creation catalogue length
 **Requirements**: CGUI-02, CGUI-08
@@ -98,11 +99,11 @@ is present.
 
 **Done when**:
 
-- [ ] HUD shows `Momento 1 de 9` independently of passage count.
-- [ ] HUD updates to moment 2 when the snapshot changes.
-- [ ] HUD exposes completed progress with a native progress element.
-- [ ] HUD remains unchanged without a snapshot.
-- [ ] `npm run test:run -- src/components/game/Hud.test.tsx` passes at least 8 tests.
+- [x] HUD shows `Momento 1 de 9` independently of passage count.
+- [x] HUD updates to moment 2 when the snapshot changes.
+- [x] HUD exposes completed progress with a native progress element.
+- [x] HUD remains unchanged without a snapshot.
+- [x] `npm run test:run -- src/components/game/Hud.test.tsx` passes at least 8 tests.
 
 **Commit**: `feat(ui): show Creation journey progress`
 

@@ -1,6 +1,6 @@
 # Creation OpenRouter Narration Specification
 
-**Status**: Draft for approval
+**Status**: Approved
 
 ## Problem Statement
 
@@ -147,7 +147,7 @@ requests with a mocked OpenRouter client.
 - [ ] No arbitrary text reaches OpenRouter and no synthesized audio is cached.
 - [ ] Lint, full tests, production build and desktop/mobile browser UAT pass.
 
-## Decision Requiring Approval
+## Approved Timing Decision
 
-The proposed inactivity threshold is **12 seconds** of no meaningful movement or
-interaction. This value is configurable and can be adjusted after playtesting.
+The inactivity threshold is **12 seconds** of no meaningful movement or
+interaction. It may be adjusted later only from playtesting evidence.

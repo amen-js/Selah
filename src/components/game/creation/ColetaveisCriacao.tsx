@@ -3,6 +3,7 @@ import { useRef, type RefObject } from 'react'
 import type { Group } from 'three'
 import { useGameStore } from '../../../stores/gameStore'
 import type { ColetavelMapa } from '../../../mapas/types'
+import { podeAcionarColetavel } from './podeAcionarColetavel'
 import { estaNoRaio, type PosicaoJogador } from './proximidade'
 
 export const RAIO_ATIVACAO_PADRAO = 2.5
@@ -22,6 +23,7 @@ function ColetavelCriacao({
 }: ColetavelCriacaoProps) {
   const grupoRef = useRef<Group>(null)
   const acionadoRef = useRef(false)
+  const tempoAnimadoRef = useRef(0)
   const cor = coletavel.cor ?? '#fff0a8'
   const raio = coletavel.raioAtivacao ?? RAIO_ATIVACAO_PADRAO
   const posicao: [number, number, number] = [
@@ -30,23 +32,27 @@ function ColetavelCriacao({
     coletavel.posicao[2],
   ]
 
-  useFrame(({ clock }, delta) => {
+  useFrame((_, delta) => {
     const grupo = grupoRef.current
-    if (grupo) {
+    if (grupo && enabled) {
+      tempoAnimadoRef.current += delta
       grupo.rotation.y += delta * 1.8
-      grupo.position.y = posicao[1] + Math.sin(clock.elapsedTime * 2 + indice * 0.9) * 0.16
+      grupo.position.y =
+        posicao[1] + Math.sin(tempoAnimadoRef.current * 2 + indice * 0.9) * 0.16
     }
 
     if (!enabled || acionadoRef.current) return
 
     const estado = useGameStore.getState()
     if (
-      estado.selahAtivo ||
-      estado.pausaParentalAtiva ||
-      estado.versiculosColetados.includes(coletavel.passagemId)
-    ) {
-      return
-    }
+      !podeAcionarColetavel({
+        enabled,
+        jaAcionado: acionadoRef.current,
+        selahAtivo: estado.selahAtivo !== null,
+        pausaParentalAtiva: estado.pausaParentalAtiva,
+        passagemColetada: estado.versiculosColetados.includes(coletavel.passagemId),
+      })
+    ) return
 
     const posicaoJogador = posicaoJogadorRef.current
     if (!posicaoJogador || !estaNoRaio(posicaoJogador, coletavel.posicao, raio)) return
@@ -91,8 +97,6 @@ export function ColetaveisCriacao({
   posicaoJogadorRef,
   enabled,
 }: ColetaveisCriacaoProps) {
-  if (!enabled) return null
-
   return (
     <>
       {coletaveis.map((coletavel, indice) => (

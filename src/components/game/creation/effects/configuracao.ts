@@ -90,9 +90,9 @@ export function gerarPontosAmbienteVazio(
 
   for (let i = 0; i < contagem; i++) {
     pontos.push({
-      x: (rand() - 0.5) * 28,
+      x: (rand() - 0.5) * 46,
       y: 0.3 + rand() * 5.2,
-      z: (rand() - 0.5) * 28,
+      z: (rand() - 0.5) * 42,
       velocidade: 0.03 + rand() * 0.03,
       fase: rand() * Math.PI * 2,
       tamanho: 0.09 + rand() * 0.05,
@@ -107,14 +107,14 @@ export function gerarPontosAmbienteVazio(
  */
 export function gerarMarcadoresCaminhoLuz(): Array<[number, number, number]> {
   return [
-    [0, 0.03, 2.5],
-    [-1.2, 0.03, 4.2],
-    [-2.8, 0.03, 5.5],
-    [-4.6, 0.03, 6.2],
-    [-6.5, 0.03, 6.0],
-    [-8.0, 0.03, 5.0],
-    [-7.2, 0.03, 3.2],
-    [-5.5, 0.03, 1.8],
+    [0.8, 0.03, 18.6],
+    [2.2, 0.03, 17.8],
+    [3.8, 0.03, 16.9],
+    [5.4, 0.03, 15.9],
+    [6.9, 0.03, 15.0],
+    [8.2, 0.03, 14.2],
+    [9.2, 0.03, 13.6],
+    [10.0, 0.03, 13.0],
   ]
 }
 
@@ -128,10 +128,10 @@ export function gerarParticulasCrescimento(
   const rand = criarPrng(seed)
   const pontos: PontoCrescimento[] = []
   const origens: Array<[number, number, number]> = [
-    [-3, 0.05, 3],
-    [-7, 0.05, 5],
-    [-1, 0.05, -3],
-    [4, 0.05, 2],
+    [-13, 0.2, 9],
+    [-10, 0.1, 11],
+    [-15, 0.15, 6],
+    [10, 0.05, 9],
   ]
 
   for (let i = 0; i < contagem; i++) {

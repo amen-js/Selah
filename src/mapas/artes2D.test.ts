@@ -14,10 +14,6 @@ const arquivosEsperados = new Set([
   '/art/creation/light/light-particles.svg',
   '/art/creation/light/light-path-unlocked.svg',
   '/art/creation/light/light-portal.svg',
-  '/art/animals/kenney/duck.png',
-  '/art/animals/kenney/elephant.png',
-  '/art/animals/kenney/giraffe.png',
-  '/art/animals/kenney/rabbit.png',
 ])
 
 describe('arte 2.5D dos mapas', () => {
@@ -44,7 +40,7 @@ describe('arte 2.5D dos mapas', () => {
   it('usa arte somente como decoração sem substituir colecionáveis', () => {
     expect(mapaHub.artes2D).toHaveLength(1)
     expect(mapaHub.coletaveis).toHaveLength(0)
-    expect(mapaCriacao.artes2D).toHaveLength(9)
+    expect(mapaCriacao.artes2D).toHaveLength(5)
     expect(mapaCriacao.coletaveis).toHaveLength(5)
   })
 })

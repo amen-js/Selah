@@ -16,6 +16,14 @@ export interface ColisorCuboidMapa {
 
 export type ColisorPersonalizadoMapa = ColisorCuboidMapa
 
+export interface Cenario3DMapa {
+  arquivo: string
+  posicao?: Ponto3D
+  rotacao?: Ponto3D
+  escala?: Escala3D
+  colisor?: Extract<ColliderMapa, 'trimesh'> | false
+}
+
 export interface Arte2DMapa {
   id: string
   arquivo: string
@@ -57,4 +65,7 @@ export interface MapaRegiao {
   props: readonly PropMapa[]
   coletaveis: readonly ColetavelMapa[]
   artes2D?: readonly Arte2DMapa[]
+  cenario3D?: Cenario3DMapa
+  chaoColisor?: boolean
+  chaoVisivel?: boolean
 }

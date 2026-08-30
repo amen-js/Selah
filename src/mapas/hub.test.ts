@@ -7,11 +7,16 @@ describe('mapa do hub', () => {
     expect(mapaHub.coletaveis).toEqual([])
   })
 
-  it('seleciona peças nomeadas nos props que usam packs GLB', () => {
-    const propsModelados = mapaHub.props.filter(({ modelo }) => modelo)
-
-    expect(propsModelados.length).toBeGreaterThan(0)
-    expect(propsModelados.every(({ modeloNo }) => Boolean(modeloNo))).toBe(true)
+  it('usa uma única cena 3D completa sem props fragmentados', () => {
+    expect(mapaHub.props).toEqual([])
+    expect(mapaHub.cenario3D).toEqual({
+      arquivo: '/models/3donimus/nature/nature.glb',
+      posicao: [0, 1, 3],
+      escala: 10,
+      colisor: 'trimesh',
+    })
+    expect(mapaHub.chaoColisor).toBe(false)
+    expect(mapaHub.chaoVisivel).toBe(false)
   })
 
   it('mantém IDs e posições válidos dentro dos limites', () => {

@@ -38,6 +38,7 @@ describe('App integration', () => {
 
   beforeEach(() => {
     useGameStore.getState().apagarProgresso()
+    useGameStore.getState().setIdioma('pt-BR')
     pointerLockElement = null
     requestPointerLock = vi.fn()
     canvasMock.element = document.createElement('canvas')
@@ -67,6 +68,21 @@ describe('App integration', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Entrar no mundo' }))
     expect(requestPointerLock).toHaveBeenCalledOnce()
+  })
+
+  it('translates the entry screen and controls immediately', () => {
+    useGameStore.getState().setIdioma('en-US')
+    render(<App />)
+
+    expect(screen.getByRole('button', { name: 'Enter the world' })).toBeInTheDocument()
+    expect(screen.getByLabelText('Game controls')).toHaveTextContent('Space Jump')
+
+    act(() => useGameStore.getState().setIdioma('es-ES'))
+
+    expect(screen.getByRole('button', { name: 'Entrar al mundo' })).toBeInTheDocument()
+    expect(screen.getByLabelText('Controles del juego')).toHaveTextContent(
+      'Ratón Cámara',
+    )
   })
 
   it('disables exploration and exits pointer lock when an overlay blocks the game', () => {

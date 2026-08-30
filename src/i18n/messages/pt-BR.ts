@@ -45,7 +45,7 @@ export const ptBR = {
   'hud.settings.label': 'Pais',
 
   'dialog.aria': 'Diálogo com {character}',
-  'dialog.disclosure': 'Conversa',
+  'dialog.disclosure': 'Personagem virtual automatizado',
   'dialog.continueAria': 'Continuar diálogo',
   'dialog.continue': 'Continuar',
   'dialog.default.message':

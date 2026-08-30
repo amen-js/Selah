@@ -47,7 +47,7 @@ export const esES = {
   'hud.settings.label': 'Familia',
 
   'dialog.aria': 'Diálogo con {character}',
-  'dialog.disclosure': 'Conversación',
+  'dialog.disclosure': 'Personaje virtual automatizado',
   'dialog.continueAria': 'Continuar diálogo',
   'dialog.continue': 'Continuar',
   'dialog.default.message':

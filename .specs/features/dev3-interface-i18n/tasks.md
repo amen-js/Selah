@@ -13,7 +13,7 @@ T1 -> T2 -> T3 -> T4 -> T5 -> T6 -> T7
 | --- | --- | --- | --- | --- | --- |
 | T1 | Typed catalogs, interpolation, fallback, parity tests | None | Unit / quick | Complete | `feat(i18n): add typed message catalogs` |
 | T2 | Store-backed hook, selector and document locale sync | T1 | RTL + unit / full | Complete | `feat(i18n): sync interface language` |
-| T3 | App entry, HUD, dialogue, default NPC copy | T2 | RTL / full | Pending | `feat(ui): translate game interface` |
+| T3 | App entry, HUD, dialogue, default NPC copy | T2 | RTL / full | Complete | `feat(ui): translate game interface` |
 | T4 | Journal, dashboard, parental settings | T3 | RTL / full | Pending | `feat(ui): translate local panels` |
 | T5 | Selah flow errors, overlay states, TTS, parental pause | T4 | Unit + RTL / full | Pending | `feat(selah): translate reflection flow` |
 | T6 | Development `/lab` structural controls and copy | T5 | Integration / full | Pending | `feat(lab): translate UI laboratory` |

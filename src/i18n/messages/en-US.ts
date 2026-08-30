@@ -47,7 +47,7 @@ export const enUS = {
   'hud.settings.label': 'Parents',
 
   'dialog.aria': 'Dialogue with {character}',
-  'dialog.disclosure': 'Conversation',
+  'dialog.disclosure': 'Automated virtual character',
   'dialog.continueAria': 'Continue dialogue',
   'dialog.continue': 'Continue',
   'dialog.default.message':

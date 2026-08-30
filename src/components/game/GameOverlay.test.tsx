@@ -8,14 +8,15 @@ import { GameOverlay } from './GameOverlay'
 describe('GameOverlay', () => {
   beforeEach(() => {
     useGameStore.getState().apagarProgresso()
+    useGameStore.getState().setIdioma('pt-BR')
   })
 
   it('renders the HUD and opens composed panels', async () => {
     const user = userEvent.setup()
     render(<GameOverlay gateway={createLabGateway('sucesso')} />)
 
-    expect(screen.getByLabelText('Informações do jogo')).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: 'Abrir métricas' }))
+    expect(screen.getByLabelText('Informações e ações da exploração')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Abrir métricas locais' }))
     expect(screen.getByRole('dialog', { name: 'Medimos Momentos Selah' })).toBeInTheDocument()
   })
 
@@ -32,11 +33,24 @@ describe('GameOverlay', () => {
     expect(screen.getByText(/personagem virtual automatizado/i)).toBeInTheDocument()
   })
 
+  it('localizes its default NPC copy without changing provided narrative strings', () => {
+    useGameStore.setState({ idioma: 'es-ES', dialogoAberto: true })
+    render(<GameOverlay gateway={createLabGateway('sucesso')} />)
+
+    expect(
+      screen.getByText(
+        'La creación guarda pequeñas señales. Explora con calma y observa lo que florece en el camino.',
+      ),
+    ).toBeInTheDocument()
+  })
+
   it('gives parental pause precedence over the HUD', () => {
     useGameStore.setState({ pausaParentalAtiva: true })
     render(<GameOverlay gateway={createLabGateway('sucesso')} />)
 
     expect(screen.getByRole('dialog', { name: /agora a pausa acontece/i })).toBeInTheDocument()
-    expect(screen.queryByLabelText('Informações do jogo')).not.toBeInTheDocument()
+    expect(
+      screen.queryByLabelText('Informações e ações da exploração'),
+    ).not.toBeInTheDocument()
   })
 })

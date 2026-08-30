@@ -14,6 +14,7 @@ describe('Journal', () => {
     render(<Journal />)
 
     expect(screen.getByText(/ainda não há passagens/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Fechar diário' })).toHaveFocus()
   })
 
   it('lists minimal local progress and closes the panel', async () => {

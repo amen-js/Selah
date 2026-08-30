@@ -57,6 +57,7 @@ export function ParentSettings() {
             <h2 id="settings-title">Configurações da experiência</h2>
           </div>
           <button
+            autoFocus
             className="secondary-button"
             type="button"
             aria-label="Fechar configurações"

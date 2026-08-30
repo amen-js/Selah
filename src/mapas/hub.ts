@@ -5,7 +5,8 @@ const MEIA_PROFUNDIDADE_MUNDO = 16
 
 /**
  * Vale Central: área curta de orientação que conecta as regiões jogáveis.
- * Todos os elementos usam fallbacks geométricos para não depender de assets.
+ * A geometria continua independente de assets; a sinalização 2.5D apenas
+ * antecipa a linguagem visual da primeira jornada disponível.
  */
 export const mapaHub: MapaRegiao = {
   spawn: [0, 2, 10],
@@ -44,6 +45,15 @@ export const mapaHub: MapaRegiao = {
     },
   ],
   coletaveis: [],
+  artes2D: [
+    {
+      id: 'arte-hub-portal-criacao',
+      arquivo: '/art/creation/light/light-portal.svg',
+      posicao: [-7, 1.65, 0],
+      escala: [2.8, 2.8],
+      opacidade: 0.92,
+    },
+  ],
 }
 
 export default mapaHub

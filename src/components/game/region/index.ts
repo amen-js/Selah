@@ -9,3 +9,4 @@ export {
   type Arte2DItemProps,
   type Arte2DRegiaoProps,
 } from './Arte2DRegiao'
+export { Cenario3DRegiao, type Cenario3DRegiaoProps } from './Cenario3DRegiao'

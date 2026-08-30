@@ -42,7 +42,7 @@ import {
   type FasePortalTransicao,
   type PortalMapa,
 } from './portals'
-import { Arte2DRegiao, ColetaveisRegiao } from './region'
+import { Arte2DRegiao, Cenario3DRegiao, ColetaveisRegiao } from './region'
 
 const DURACAO_SAIDA_PORTAL_MS = 260
 const DURACAO_TROCA_PORTAL_MS = 90
@@ -189,18 +189,23 @@ function World({
       <hemisphereLight args={['#fff1c7', '#365c48', 2.2]} />
       <directionalLight position={[8, 12, 5]} intensity={2.5} color="#fff4d6" />
 
-      <RigidBody type="fixed" colliders={false}>
-        <CuboidCollider
-          args={[meiaLargura, 0.25, meiaProfundidade]}
-          position={[0, -0.25, 0]}
-          friction={1}
-        />
-        <mesh position={[0, -0.25, 0]} receiveShadow>
-          <boxGeometry args={[meiaLargura * 2, 0.5, meiaProfundidade * 2]} />
-          <meshStandardMaterial color="#6f9369" roughness={1} />
-        </mesh>
-      </RigidBody>
+      {mapa.chaoColisor !== false && (
+        <RigidBody type="fixed" colliders={false}>
+          <CuboidCollider
+            args={[meiaLargura, 0.25, meiaProfundidade]}
+            position={[0, -0.25, 0]}
+            friction={1}
+          />
+          {mapa.chaoVisivel !== false && (
+            <mesh position={[0, -0.25, 0]} receiveShadow>
+              <boxGeometry args={[meiaLargura * 2, 0.5, meiaProfundidade * 2]} />
+              <meshStandardMaterial color="#6f9369" roughness={1} />
+            </mesh>
+          )}
+        </RigidBody>
+      )}
 
+      <Cenario3DRegiao cenario={mapa.cenario3D} />
       <PropMapaRenderer props={mapa.props} />
       <Suspense fallback={null}>
         <Arte2DRegiao artes={mapa.artes2D ?? []} />

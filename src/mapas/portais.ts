@@ -10,7 +10,7 @@ export const portaisPorRegiao: Readonly<Record<Regiao, readonly PortalMapa[]>> =
     {
       id: 'portal-hub-criacao',
       destino: 'criacao',
-      posicao: [-7, 0, 0],
+      posicao: [-7, 0.65, 0],
       raioAtivacao: 1.5,
       disponivel: true,
       prioridade: 10,
@@ -18,7 +18,7 @@ export const portaisPorRegiao: Readonly<Record<Regiao, readonly PortalMapa[]>> =
     {
       id: 'portal-hub-noe',
       destino: 'noe',
-      posicao: [0, 0, -7],
+      posicao: [0, 0.5, -7],
       raioAtivacao: 1.5,
       disponivel: true,
       prioridade: 20,
@@ -26,7 +26,7 @@ export const portaisPorRegiao: Readonly<Record<Regiao, readonly PortalMapa[]>> =
     {
       id: 'portal-hub-jose',
       destino: 'jose',
-      posicao: [7, 0, 0],
+      posicao: [7, 0.5, 0],
       raioAtivacao: 1.5,
       disponivel: false,
       prioridade: 30,

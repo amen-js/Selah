@@ -7,4 +7,3 @@ The project-supplied pack includes a CC0 license; a normalized copy is kept in
 Only four animals used in the Creation scene are included. Legacy SWF files,
 URL shortcuts, thumbnails, metadata databases, duplicate styles, and unused
 sprites remain outside the repository.
-

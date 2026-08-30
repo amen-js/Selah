@@ -17,4 +17,3 @@ the entire collection as a visible prop.
 | `rocks.glb` | `Rock_1` … `Rock_5` |
 | `grass.glb` | `Grass_Large_Extruded`, `Grass_Small` |
 | `flower-bushes.glb` | `Plant_2`, `Plant_Flowers` |
-

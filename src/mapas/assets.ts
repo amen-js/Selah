@@ -63,4 +63,3 @@ export const modelosNatureza = {
     modeloNo: 'Plant_2',
   },
 } as const satisfies Record<string, ReferenciaModelo>
-

@@ -1,6 +1,6 @@
 # Responsible Onboarding Specification
 
-**Status:** Implementing
+**Status:** Verified
 
 ## Problem Statement
 
@@ -61,10 +61,28 @@ confirm, enter the world, then delete progress and verify that setup is required
 
 | Requirement | Verification | Status |
 | --- | --- | --- |
-| ONB-01 | App integration test | Implementing |
-| ONB-02 | Component test + browser UAT | Implementing |
-| ONB-03 | Store + component tests | Implementing |
-| ONB-04 | Component test | Implementing |
-| ONB-05 | Store + App integration tests | Implementing |
-| ONB-06 | Store + App integration tests | Implementing |
-| ONB-07 | Component test + desktop/mobile UAT | Implementing |
+| ONB-01 | App integration test | Verified |
+| ONB-02 | Component test + browser UAT | Verified |
+| ONB-03 | Store + component tests | Verified |
+| ONB-04 | Component test | Verified |
+| ONB-05 | Store + App integration tests | Verified |
+| ONB-06 | Store + App integration tests | Verified |
+| ONB-07 | Component test + desktop/mobile UAT | Verified |
+
+## Validation Result
+
+- Fresh storage showed only the labelled responsible-adult dialog, with focus on
+  its heading and no background HUD controls exposed to keyboard or assistive technology.
+- Saving and metrics started disabled; AI started enabled; changing age group,
+  AI, saving, and metrics updated the shared store.
+- Portuguese changed immediately to English while the dialog was open, including
+  labels, explanations, and the confirmation action.
+- Confirming setup persisted the completion preference and revealed the normal
+  game-entry screen; deleting local progress reset setup without changing the
+  current in-memory interface language mid-action.
+- Browser UAT passed at 1440×900 and 390×844. The panel scrolled internally,
+  the confirmation action remained reachable, and there was no horizontal overflow.
+- Automated gate passed with 29 test files and 120 tests, up from 115 before the
+  feature; lint and production build passed with no skipped or deleted tests.
+- The pre-existing Three/Rapier deprecation messages and the existing large-bundle
+  build warning remain outside this feature scope.

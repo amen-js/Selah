@@ -1,4 +1,5 @@
 import { momentosNoe } from './catalogo'
+import { expandirUnidadeCompativelNoe } from './compatibilidade'
 import {
   criarEstadoProgressaoNoe,
   processarEventoProgressaoNoe,
@@ -49,18 +50,93 @@ function normalizarProgresso(
 ): readonly ProgressoAcaoNoe[] {
   if (!Array.isArray(valor)) return []
 
+  const unidadesInformadas = valor.flatMap((item) => {
+    if (!ehRegistro(item) || typeof item.acaoId !== 'string') return []
+
+    return lerStrings(item.unidadesConcluidas).flatMap((unidadeId) =>
+      expandirUnidadeCompativelNoe(
+        momentoAtual.id,
+        item.acaoId as string,
+        unidadeId,
+      ),
+    )
+  })
+  const temUnidadeInformada = (acaoId: string, unidadeId: string) =>
+    unidadesInformadas.some(
+      (unidade) => unidade.acaoId === acaoId && unidade.unidadeId === unidadeId,
+    )
+
+  // M8's return marker was the entire old beat. A v1 checkpoint without the
+  // newly introduced send marker is grandfathered as send + return.
+  if (
+    momentoAtual.id === 'retorno-pomba' &&
+    temUnidadeInformada('noe.pomba.retornou', 'retorno-com-oliveira') &&
+    !temUnidadeInformada('noe.pomba.enviada', 'envio-janela-superior')
+  ) {
+    unidadesInformadas.push({
+      acaoId: 'noe.pomba.enviada',
+      unidadeId: 'envio-janela-superior',
+    })
+  }
+
+  // A fully completed old M9 had no altar action. Grandfather only that exact
+  // completed pair; a partial legacy desembark still has to build the altar.
+  const tinhaDesembarqueLegado = valor.some(
+    (item) =>
+      ehRegistro(item) &&
+      item.acaoId === 'noe.animais.desembarcados' &&
+      lerStrings(item.unidadesConcluidas).includes('desembarque-seguro'),
+  )
+  if (
+    momentoAtual.id === 'nova-terra-arco-iris' &&
+    tinhaDesembarqueLegado &&
+    temUnidadeInformada('noe.arco-iris.contemplado', 'contemplacao-da-alianca')
+  ) {
+    unidadesInformadas.push({
+      acaoId: 'noe.altar.construido',
+      unidadeId: 'altar-de-gratidao',
+    })
+  }
+
   return momentoAtual.gatilhoConclusao.tarefas.flatMap((tarefa) => {
     const unidadesDeclaradas = new Set<string>(tarefa.unidadesNecessarias)
-    const unidades = valor.flatMap((item) => {
-      if (!ehRegistro(item) || item.acaoId !== tarefa.acaoId) return []
-      return lerStrings(item.unidadesConcluidas)
-    })
+    const unidades = unidadesInformadas.flatMap((item) =>
+      item.acaoId === tarefa.acaoId ? [item.unidadeId] : [],
+    )
     const unicasPermitidas = [...new Set(unidades)].filter((unidadeId) =>
       unidadesDeclaradas.has(unidadeId),
     )
 
     return unicasPermitidas.length > 0
       ? [{ acaoId: tarefa.acaoId, unidadesConcluidas: unicasPermitidas }]
+      : []
+  })
+}
+
+function serializarProgressoCanonico(
+  estado: EstadoProgressaoNoe,
+): readonly ProgressoAcaoCheckpointNoe[] {
+  if (estado.concluida) return []
+
+  const momentoAtual = momentosNoe.find(
+    ({ id }) => id === estado.momentoAtualId,
+  )
+  if (!momentoAtual) return []
+
+  return momentoAtual.gatilhoConclusao.tarefas.flatMap((tarefa) => {
+    const registradas = new Set(
+      estado.progressoMomentoAtual.flatMap((progresso) =>
+        progresso.acaoId === tarefa.acaoId
+          ? progresso.unidadesConcluidas
+          : [],
+      ),
+    )
+    const unidadesConcluidas = tarefa.unidadesNecessarias.filter((unidadeId) =>
+      registradas.has(unidadeId),
+    )
+
+    return unidadesConcluidas.length > 0
+      ? [{ acaoId: tarefa.acaoId, unidadesConcluidas }]
       : []
   })
 }
@@ -72,12 +148,7 @@ export function criarCheckpointProgressaoNoe(
   return {
     versao: VERSAO_CHECKPOINT_NOE,
     momentosConcluidos: [...estado.momentosConcluidos],
-    progressoMomentoAtual: estado.concluida
-      ? []
-      : estado.progressoMomentoAtual.map((progresso) => ({
-          acaoId: progresso.acaoId,
-          unidadesConcluidas: [...progresso.unidadesConcluidas],
-        })),
+    progressoMomentoAtual: serializarProgressoCanonico(estado),
   }
 }
 

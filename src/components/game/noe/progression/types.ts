@@ -10,10 +10,7 @@ export type MomentoNoeId =
   | 'nova-terra-arco-iris'
 
 export type AreaNoeId =
-  | 'canteiro-vale'
-  | 'campo-animais'
-  | 'interior-arca'
-  | 'ararate-nova-terra'
+  'canteiro-vale' | 'campo-animais' | 'interior-arca' | 'ararate-nova-terra'
 
 export type FaseCenarioNoe =
   | 'vale-calmo'
@@ -31,25 +28,54 @@ export type AcaoNoeId =
   | 'noe.madeira.coletada'
   | 'noe.rampa.reparada'
   | 'noe.betume.aplicado'
+  | 'noe.mantimento.feno-armazenado'
+  | 'noe.mantimento.graos-armazenados'
+  | 'noe.mantimento.agua-armazenada'
+  | 'noe.mantimento.frutas-armazenadas'
+  | 'noe.animais.aves-guiadas'
+  | 'noe.animais.herbivoros-guiados'
+  | 'noe.animais.mamiferos-guiados'
+  | 'noe.habitat.grandes-animais-preparado'
+  | 'noe.habitat.pequenos-mamiferos-preparado'
+  | 'noe.habitat.aves-preparado'
+  | 'noe.habitat.familia-noe-preparado'
+  | 'noe.abrigo.chamado-ouvido'
+  | 'noe.abrigo.entrada-concluida'
+  | 'noe.porta.fechada'
+  | 'noe.cuidado.filhotes-aves'
+  | 'noe.cuidado.filhotes-herbivoros'
+  | 'noe.cuidado.filhotes-mamiferos'
+  | 'noe.pomba.enviada'
+  | 'noe.pomba.retornou'
+  | 'noe.desembarque.aves'
+  | 'noe.desembarque.herbivoros'
+  | 'noe.desembarque.mamiferos'
+  | 'noe.altar.construido'
+  | 'noe.arco-iris.contemplado'
+  /** @deprecated Checkpoint/runtime aliases kept for World 2 v1 compatibility. */
   | 'noe.estoque.organizado'
   | 'noe.familias.guiadas'
   | 'noe.habitats.organizados'
   | 'noe.porta.atravessada'
   | 'noe.filhotes.cuidados'
-  | 'noe.pomba.retornou'
   | 'noe.animais.desembarcados'
-  | 'noe.arco-iris.contemplado'
 
 export interface TarefaMomentoNoe {
   acaoId: AcaoNoeId
   /** Stable unit IDs declared by the catalogue and accepted by checkpoints. */
   unidadesNecessarias: readonly string[]
+  /**
+   * Tasks in the same stage are free-order. A higher stage unlocks only after
+   * every task in lower stages is complete. Omission preserves v1's strict
+   * declaration order.
+   */
+  etapa?: number
 }
 
 /** Local tasks must finish before the optional final Selah can close a beat. */
 export interface GatilhoConclusaoMomentoNoe {
   tipo: 'tarefas-locais-e-selah-opcional'
-  /** Tasks are unlocked in declaration order; units inside one task are free-order. */
+  /** Tasks unlock by stage; units and tasks inside one stage are free-order. */
   tarefas: readonly TarefaMomentoNoe[]
   selahFinal?: string
 }

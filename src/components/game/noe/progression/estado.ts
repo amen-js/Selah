@@ -1,4 +1,5 @@
 import { momentoNoePorId, momentosNoe } from './catalogo'
+import { expandirUnidadeCompativelNoe } from './compatibilidade'
 import type {
   AcaoNoeId,
   ClimaNoe,
@@ -21,9 +22,7 @@ export function criarEstadoProgressaoNoe(): EstadoProgressaoNoe {
   }
 }
 
-export function obterMomentoAtualNoe(
-  estado: EstadoProgressaoNoe,
-): MomentoNoe {
+export function obterMomentoAtualNoe(estado: EstadoProgressaoNoe): MomentoNoe {
   return momentoNoePorId.get(estado.momentoAtualId) ?? PRIMEIRO_MOMENTO
 }
 
@@ -38,6 +37,38 @@ function obterProgressoAcao(
   return estado.progressoMomentoAtual.find(
     (progresso) => progresso.acaoId === acaoId,
   )
+}
+
+function etapaTarefaNoe(
+  tarefas: readonly TarefaMomentoNoe[],
+  indice: number,
+): number {
+  return tarefas[indice]?.etapa ?? indice + 1
+}
+
+function tarefaDisponivelNoe(
+  estado: EstadoProgressaoNoe,
+  momento: MomentoNoe,
+  tarefa: TarefaMomentoNoe,
+): boolean {
+  const indiceTarefa = momento.gatilhoConclusao.tarefas.indexOf(tarefa)
+  const etapaTarefa = etapaTarefaNoe(
+    momento.gatilhoConclusao.tarefas,
+    indiceTarefa,
+  )
+
+  return momento.gatilhoConclusao.tarefas.every((requisito, indice) => {
+    if (
+      etapaTarefaNoe(momento.gatilhoConclusao.tarefas, indice) >= etapaTarefa
+    ) {
+      return true
+    }
+
+    return (
+      quantidadeConcluidaTarefaNoe(estado, requisito.acaoId) >=
+      requisito.unidadesNecessarias.length
+    )
+  })
 }
 
 export function quantidadeConcluidaTarefaNoe(
@@ -139,6 +170,38 @@ function registrarUnidadeConcluida(
  * Advances at most one canonical beat. Unit IDs make task events idempotent,
  * and a Selah is accepted only after every local requirement has finished.
  */
+function processarUnidadeCanonicaNoe(
+  estado: EstadoProgressaoNoe,
+  momentoAtual: MomentoNoe,
+  acaoId: AcaoNoeId,
+  unidadeId: string,
+): EstadoProgressaoNoe {
+  const tarefa = momentoAtual.gatilhoConclusao.tarefas.find(
+    (requisito) => requisito.acaoId === acaoId,
+  )
+  if (!tarefa) return estado
+
+  if (!tarefaDisponivelNoe(estado, momentoAtual, tarefa)) return estado
+
+  const atualizado = registrarUnidadeConcluida(estado, tarefa, unidadeId)
+  if (atualizado === estado) return estado
+
+  if (
+    tarefasLocaisConcluidasNoe(atualizado, momentoAtual) &&
+    !momentoAtual.gatilhoConclusao.selahFinal
+  ) {
+    return avancarMomentoNoe(atualizado, momentoAtual)
+  }
+
+  return atualizado
+}
+
+/**
+ * Advances at most one canonical beat. Unit IDs make task events idempotent,
+ * and a Selah is accepted only after every local requirement has finished.
+ * Placeholder events emitted by World 2 v1 are expanded only inside their
+ * original beat, preserving old checkpoints without weakening new ordering.
+ */
 export function processarEventoProgressaoNoe(
   estado: EstadoProgressaoNoe,
   evento: EventoProgressaoNoe,
@@ -158,33 +221,23 @@ export function processarEventoProgressaoNoe(
     return avancarMomentoNoe(estado, momentoAtual)
   }
 
-  const tarefa = momentoAtual.gatilhoConclusao.tarefas.find(
-    (requisito) => requisito.acaoId === evento.acaoId,
+  const unidades = expandirUnidadeCompativelNoe(
+    momentoAtual.id,
+    evento.acaoId,
+    evento.unidadeId.trim(),
   )
-  if (!tarefa) return estado
+  let atualizado = estado
 
-  const indiceTarefa = momentoAtual.gatilhoConclusao.tarefas.indexOf(tarefa)
-  const tarefasAnterioresConcluidas = momentoAtual.gatilhoConclusao.tarefas
-    .slice(0, indiceTarefa)
-    .every(
-      (requisito) =>
-        quantidadeConcluidaTarefaNoe(estado, requisito.acaoId) >=
-        requisito.unidadesNecessarias.length,
+  for (const unidade of unidades) {
+    if (atualizado.concluida || atualizado.momentoAtualId !== momentoAtual.id) {
+      break
+    }
+    atualizado = processarUnidadeCanonicaNoe(
+      atualizado,
+      momentoAtual,
+      unidade.acaoId,
+      unidade.unidadeId,
     )
-  if (!tarefasAnterioresConcluidas) return estado
-
-  const atualizado = registrarUnidadeConcluida(
-    estado,
-    tarefa,
-    evento.unidadeId,
-  )
-  if (atualizado === estado) return estado
-
-  if (
-    tarefasLocaisConcluidasNoe(atualizado, momentoAtual) &&
-    !momentoAtual.gatilhoConclusao.selahFinal
-  ) {
-    return avancarMomentoNoe(atualizado, momentoAtual)
   }
 
   return atualizado
@@ -206,22 +259,25 @@ export function obterRequisitosPendentesNoe(
   if (estado.concluida) return []
 
   const momento = obterMomentoAtualNoe(estado)
-  const tarefasPendentes = momento.gatilhoConclusao.tarefas.flatMap((tarefa) => {
-    const quantidadeConcluida = quantidadeConcluidaTarefaNoe(
-      estado,
-      tarefa.acaoId,
-    )
-    return quantidadeConcluida < tarefa.unidadesNecessarias.length
-      ? [
-          {
-            tipo: 'tarefa-local' as const,
-            acaoId: tarefa.acaoId,
-            quantidadeConcluida,
-            quantidadeNecessaria: tarefa.unidadesNecessarias.length,
-          },
-        ]
-      : []
-  })
+  const tarefasPendentes = momento.gatilhoConclusao.tarefas.flatMap(
+    (tarefa) => {
+      const quantidadeConcluida = quantidadeConcluidaTarefaNoe(
+        estado,
+        tarefa.acaoId,
+      )
+      return quantidadeConcluida < tarefa.unidadesNecessarias.length &&
+        tarefaDisponivelNoe(estado, momento, tarefa)
+        ? [
+            {
+              tipo: 'tarefa-local' as const,
+              acaoId: tarefa.acaoId,
+              quantidadeConcluida,
+              quantidadeNecessaria: tarefa.unidadesNecessarias.length,
+            },
+          ]
+        : []
+    },
+  )
 
   if (tarefasPendentes.length > 0) return tarefasPendentes
   return momento.gatilhoConclusao.selahFinal
@@ -241,28 +297,47 @@ export function obterRequisitosPendentesNoe(
  */
 export function obterClimaNoe(estado: EstadoProgressaoNoe): ClimaNoe {
   const concluidos = new Set(estado.momentosConcluidos)
+  const portaFechadaComTodosSeguros =
+    concluidos.has('fechamento-porta') ||
+    (estado.momentoAtualId === 'fechamento-porta' &&
+      tarefasLocaisConcluidasNoe(estado))
 
   if (estado.concluida) {
     return { percentualPreparacao: 100, fase: 'nova-terra', chuvaAtiva: false }
   }
   if (concluidos.has('retorno-pomba')) {
+    return { percentualPreparacao: 100, fase: 'nova-terra', chuvaAtiva: false }
+  }
+  if (concluidos.has('refugio-tempestade')) {
     return {
       percentualPreparacao: 100,
       fase: 'luz-retornando',
       chuvaAtiva: false,
     }
   }
-  if (concluidos.has('fechamento-porta')) {
-    return { percentualPreparacao: 100, fase: 'chuva-segura', chuvaAtiva: true }
+  if (portaFechadaComTodosSeguros) {
+    return {
+      percentualPreparacao: 100,
+      fase: 'chuva-segura',
+      chuvaAtiva: true,
+    }
   }
   if (concluidos.has('acomodacao-animais')) {
-    return { percentualPreparacao: 100, fase: 'abrigo-pronto', chuvaAtiva: false }
+    return {
+      percentualPreparacao: 100,
+      fase: 'abrigo-pronto',
+      chuvaAtiva: false,
+    }
   }
   if (concluidos.has('conducao-animais')) {
     return { percentualPreparacao: 66, fase: 'vento-suave', chuvaAtiva: false }
   }
   if (concluidos.has('coleta-vedacao')) {
-    return { percentualPreparacao: 33, fase: 'nuvens-leves', chuvaAtiva: false }
+    return {
+      percentualPreparacao: 33,
+      fase: 'nuvens-leves',
+      chuvaAtiva: false,
+    }
   }
 
   return { percentualPreparacao: 0, fase: 'calmo', chuvaAtiva: false }

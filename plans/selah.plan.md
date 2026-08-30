@@ -7,7 +7,7 @@ todos:
     status: pending
   - id: setup
     content: "Dev 1: scaffold Vite + React 19 + TS com todas as deps e repo no GitHub"
-    status: pending
+    status: completed
   - id: assets
     content: "Designer: baixar kits Kenney e Quaternius (CC0) para public/models/ e commitar; Dev 2: configurar cliente YouVersion em src/services/ + chave no proxy Hono"
     status: pending

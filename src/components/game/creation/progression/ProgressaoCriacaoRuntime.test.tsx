@@ -165,6 +165,31 @@ describe('ProgressaoCriacaoRuntime', () => {
     window.removeEventListener('keydown', onPortalAcionado)
   })
 
+  it('não avança a zona com Enter originado em controle do HUD', () => {
+    useGameStore.setState({
+      momentosCriacaoConcluidos: ['vazio', 'luz'],
+      selahsConcluidos: ['genesis-1-3'],
+    })
+    posicaoJogadorRef.current = { x: -14, y: 2.5, z: 5 }
+    render(
+      <ProgressaoCriacaoRuntime
+        posicaoJogadorRef={posicaoJogadorRef}
+        enabled
+      />,
+    )
+    const seletorIdioma = document.createElement('select')
+    document.body.append(seletorIdioma)
+
+    act(executarUltimoFrame)
+    fireEvent.keyDown(seletorIdioma, { key: 'Enter' })
+
+    expect(useGameStore.getState().momentosCriacaoConcluidos).toEqual([
+      'vazio',
+      'luz',
+    ])
+    seletorIdioma.remove()
+  })
+
   it('restaura 9/9, não reabre o objetivo final e reage ao reset', () => {
     const todos = [
       'vazio',

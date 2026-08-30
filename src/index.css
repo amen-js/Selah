@@ -274,7 +274,7 @@ button:disabled {
 }
 
 .selah-backdrop {
-  animation: selah-backdrop-reveal 650ms cubic-bezier(0.22, 1, 0.36, 1) 450ms both;
+  animation: selah-backdrop-reveal 420ms ease-out both;
 }
 
 .onboarding-backdrop {
@@ -293,6 +293,30 @@ button:disabled {
   to {
     opacity: 1;
     backdrop-filter: blur(18px);
+  }
+}
+
+@keyframes selah-card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(1.5rem) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes typewriter-cursor-blink {
+  0%,
+  45% {
+    opacity: 1;
+  }
+
+  55%,
+  100% {
+    opacity: 0;
   }
 }
 
@@ -552,6 +576,37 @@ button:disabled {
 .selah-card {
   padding: clamp(1.5rem, 5vw, 3rem);
   text-align: center;
+}
+
+.selah-card--enter {
+  animation: selah-card-enter 620ms cubic-bezier(0.22, 1, 0.36, 1) 80ms both;
+  transform-origin: center;
+}
+
+.typewriter-text {
+  display: inline-grid;
+  width: 100%;
+}
+
+.typewriter-text__measure,
+.typewriter-text__visible {
+  grid-area: 1 / 1;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.typewriter-text__measure {
+  visibility: hidden;
+}
+
+.typewriter-text__cursor {
+  display: inline-block;
+  width: 0.08em;
+  height: 0.9em;
+  margin-inline-start: 0.08em;
+  background: currentColor;
+  vertical-align: -0.04em;
+  animation: typewriter-cursor-blink 760ms steps(1, end) infinite;
 }
 
 .selah-card__verse {
@@ -846,5 +901,13 @@ button:disabled {
 
   .selah-backdrop {
     animation-delay: 0ms !important;
+  }
+
+  .typewriter-text__measure {
+    visibility: visible;
+  }
+
+  .typewriter-text__visible {
+    display: none;
   }
 }

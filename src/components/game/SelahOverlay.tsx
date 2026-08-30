@@ -1,4 +1,4 @@
-import { useEffect, useRef, useSyncExternalStore } from 'react'
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 
 import { useSelahFlow } from '../../hooks/useSelahFlow'
 import { useTranslation } from '../../i18n'
@@ -16,6 +16,71 @@ interface SelahOverlayProps {
 
 const estadoTtsVazio = (): TtsEstado => 'idle'
 const assinarTtsVazio = () => () => undefined
+const PASSAGE_START_DELAY_MS = 300
+const PASSAGE_CHARACTER_DELAY_MS = 58
+const QUIZ_START_DELAY_MS = 260
+const QUIZ_CHARACTER_DELAY_MS = 34
+const QUIZ_ANSWER_GAP_MS = 180
+const QUIZ_ANSWER_STAGGER_MS = 120
+const FEEDBACK_CHARACTER_DELAY_MS = 28
+
+interface TypewriterTextProps {
+  text: string
+  characterDelayMs: number
+  startDelayMs?: number
+  paused?: boolean
+}
+
+function TypewriterText({
+  text,
+  characterDelayMs,
+  startDelayMs = 0,
+  paused = false,
+}: TypewriterTextProps) {
+  const characters = Array.from(text)
+  const [visibleCount, setVisibleCount] = useState(0)
+  const visibleCountRef = useRef(0)
+  const completed = visibleCount >= characters.length
+
+  useEffect(() => {
+    if (paused || visibleCountRef.current >= characters.length) return
+
+    let interval: number | undefined
+    const revealNextCharacter = () => {
+      const nextCount = Math.min(visibleCountRef.current + 1, characters.length)
+      visibleCountRef.current = nextCount
+      setVisibleCount(nextCount)
+
+      if (nextCount >= characters.length && interval !== undefined) {
+        window.clearInterval(interval)
+      }
+    }
+    const delay = visibleCountRef.current === 0 ? startDelayMs : characterDelayMs
+    const timeout = window.setTimeout(() => {
+      revealNextCharacter()
+      if (visibleCountRef.current < characters.length) {
+        interval = window.setInterval(revealNextCharacter, characterDelayMs)
+      }
+    }, delay)
+
+    return () => {
+      window.clearTimeout(timeout)
+      if (interval !== undefined) window.clearInterval(interval)
+    }
+  }, [characterDelayMs, characters.length, paused, startDelayMs])
+
+  return (
+    <span className="typewriter-text">
+      <span className="typewriter-text__measure" aria-hidden="true">
+        {text}
+      </span>
+      <span className="typewriter-text__visible" aria-hidden="true">
+        {characters.slice(0, visibleCount).join('')}
+        {!completed && <span className="typewriter-text__cursor" />}
+      </span>
+    </span>
+  )
+}
 
 export function SelahOverlay({ gateway, tts, appVersion }: SelahOverlayProps) {
   const { t } = useTranslation()
@@ -81,7 +146,7 @@ export function SelahOverlay({ gateway, tts, appVersion }: SelahOverlayProps) {
   if (selahAtivo.erro) {
     return (
       <div className="modal-backdrop overlay-interactive selah-backdrop">
-        <section className="selah-card" role="dialog" aria-modal="true" aria-labelledby="selah-error">
+        <section className="selah-card selah-card--enter" role="dialog" aria-modal="true" aria-labelledby="selah-error">
           <p className="eyebrow">{t('selah.moment')}</p>
           <h1 id="selah-error" ref={tituloRef} tabIndex={-1}>
             {t('selah.error.title')}
@@ -100,7 +165,7 @@ export function SelahOverlay({ gateway, tts, appVersion }: SelahOverlayProps) {
   if (selahAtivo.fase === 'carregando') {
     return (
       <div className="modal-backdrop overlay-interactive selah-backdrop">
-        <section className="selah-card" role="dialog" aria-modal="true" aria-labelledby="selah-loading">
+        <section className="selah-card selah-card--enter" role="dialog" aria-modal="true" aria-labelledby="selah-loading">
           <p className="eyebrow">{t('selah.loading.eyebrow')}</p>
           <h1 id="selah-loading" ref={tituloRef} tabIndex={-1}>
             {t('selah.loading.title')}
@@ -136,12 +201,24 @@ export function SelahOverlay({ gateway, tts, appVersion }: SelahOverlayProps) {
 
     return (
       <div className="modal-backdrop overlay-interactive selah-backdrop">
-        <section className="selah-card" role="dialog" aria-modal="true" aria-labelledby="selah-verse">
+        <section className="selah-card selah-card--enter" role="dialog" aria-modal="true" aria-labelledby="selah-verse">
           <p className="eyebrow">
             {t('selah.verse.eyebrow', { reference: versiculo.referencia })}
           </p>
-          <h1 id="selah-verse" ref={tituloRef} tabIndex={-1} className="selah-card__verse">
-            {versiculo.texto}
+          <h1
+            id="selah-verse"
+            ref={tituloRef}
+            tabIndex={-1}
+            className="selah-card__verse"
+            aria-label={versiculo.texto}
+          >
+            <TypewriterText
+              key={versiculo.texto}
+              text={versiculo.texto}
+              characterDelayMs={PASSAGE_CHARACTER_DELAY_MS}
+              startDelayMs={PASSAGE_START_DELAY_MS}
+              paused={ttsEstado === 'loading' || ttsEstado === 'paused'}
+            />
           </h1>
           <p className="selah-card__attribution">
             {versiculo.versao} · {versiculo.atribuicao}
@@ -196,17 +273,27 @@ export function SelahOverlay({ gateway, tts, appVersion }: SelahOverlayProps) {
 
     return (
       <div className="modal-backdrop overlay-interactive selah-backdrop">
-        <section className="selah-card" role="dialog" aria-modal="true" aria-labelledby="selah-question">
+        <section className="selah-card selah-card--enter" role="dialog" aria-modal="true" aria-labelledby="selah-question">
           <span className="status-chip">
             {quiz.origem === 'ia'
               ? t('selah.quiz.aiStatus')
               : t('selah.quiz.fallbackStatus')}
           </span>
-          <h1 id="selah-question" ref={tituloRef} tabIndex={-1}>
-            {quiz.pergunta}
+          <h1
+            id="selah-question"
+            ref={tituloRef}
+            tabIndex={-1}
+            aria-label={quiz.pergunta}
+          >
+            <TypewriterText
+              key={quiz.pergunta}
+              text={quiz.pergunta}
+              characterDelayMs={QUIZ_CHARACTER_DELAY_MS}
+              startDelayMs={QUIZ_START_DELAY_MS}
+            />
           </h1>
           <ol className="answer-list">
-            {quiz.alternativas.map((alternativa) => (
+            {quiz.alternativas.map((alternativa, index) => (
               <li key={alternativa.id}>
                 <button
                   className="answer-button"
@@ -219,7 +306,17 @@ export function SelahOverlay({ gateway, tts, appVersion }: SelahOverlayProps) {
                   onClick={() => void responder(alternativa.id)}
                 >
                   <span className="answer-button__id">{alternativa.id}</span>
-                  <span>{alternativa.texto}</span>
+                  <TypewriterText
+                    key={alternativa.texto}
+                    text={alternativa.texto}
+                    characterDelayMs={QUIZ_CHARACTER_DELAY_MS}
+                    startDelayMs={
+                      QUIZ_START_DELAY_MS +
+                      Array.from(quiz.pergunta).length * QUIZ_CHARACTER_DELAY_MS +
+                      QUIZ_ANSWER_GAP_MS +
+                      index * QUIZ_ANSWER_STAGGER_MS
+                    }
+                  />
                 </button>
               </li>
             ))}
@@ -235,15 +332,24 @@ export function SelahOverlay({ gateway, tts, appVersion }: SelahOverlayProps) {
 
     return (
       <div className="modal-backdrop overlay-interactive selah-backdrop">
-        <section className="selah-card" role="dialog" aria-modal="true" aria-labelledby="selah-feedback">
+        <section className="selah-card selah-card--enter" role="dialog" aria-modal="true" aria-labelledby="selah-feedback">
           <p className="eyebrow">{avaliacao.referencia}</p>
           <h1 id="selah-feedback" ref={tituloRef} tabIndex={-1}>
             {avaliacao.acertou
               ? t('selah.feedback.correct')
               : t('selah.feedback.incorrect')}
           </h1>
-          <p className={`feedback${avaliacao.acertou ? '' : ' feedback--incorrect'}`} role="status">
-            {avaliacao.explicacao}
+          <p
+            className={`feedback${avaliacao.acertou ? '' : ' feedback--incorrect'}`}
+            role="status"
+            aria-label={avaliacao.explicacao}
+          >
+            <TypewriterText
+              key={avaliacao.explicacao}
+              text={avaliacao.explicacao}
+              characterDelayMs={FEEDBACK_CHARACTER_DELAY_MS}
+              startDelayMs={QUIZ_START_DELAY_MS}
+            />
           </p>
           <button className="primary-button" type="button" onClick={concluir}>
             {t('selah.feedback.startPause')}

@@ -63,7 +63,7 @@ export const loadEnv = (): Env => ({
     'es-ES': parseBibleId(process.env.YOUVERSION_BIBLE_ES, 3291),
   },
   corsOrigins: parseCsv(process.env.CORS_ORIGINS, [
-    'http://localhost:5173',
+    'http://0.0.0.0:5173',
     'http://127.0.0.1:5173',
   ]),
 })

@@ -22,6 +22,7 @@ loadDotEnv()
 
 export interface Env {
   port: number
+  host: string
   openRouterApiKey: string
   openRouterModels: string[]
   openRouterTtsModel: string
@@ -46,6 +47,7 @@ const parseBibleId = (value: string | undefined, fallback: number): number => {
 
 export const loadEnv = (): Env => ({
   port: Number(process.env.PORT) || 8787,
+  host: process.env.HOST?.trim() || '0.0.0.0',
   openRouterApiKey: process.env.OPENROUTER_API_KEY ?? '',
   openRouterModels: parseCsv(process.env.OPENROUTER_MODELS, [
     'openai/gpt-4o-mini',

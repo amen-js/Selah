@@ -9,6 +9,12 @@ export type MomentoNoeId =
   | 'retorno-pomba'
   | 'nova-terra-arco-iris'
 
+export type AreaNoeId =
+  | 'canteiro-vale'
+  | 'campo-animais'
+  | 'interior-arca'
+  | 'ararate-nova-terra'
+
 export type FaseCenarioNoe =
   | 'vale-calmo'
   | 'canteiro-preparado'
@@ -34,31 +40,47 @@ export type AcaoNoeId =
   | 'noe.animais.desembarcados'
   | 'noe.arco-iris.contemplado'
 
-export type MarcoConclusaoNoe =
-  | { tipo: 'acao-concluida'; acaoId: AcaoNoeId }
-  | { tipo: 'selah-concluido'; passagemId: string }
+export interface TarefaMomentoNoe {
+  acaoId: AcaoNoeId
+  /** Stable unit IDs declared by the catalogue and accepted by checkpoints. */
+  unidadesNecessarias: readonly string[]
+}
 
-/** Every Noah beat closes only after each declared local or Selah marker. */
+/** Local tasks must finish before the optional final Selah can close a beat. */
 export interface GatilhoConclusaoMomentoNoe {
-  tipo: 'todos-os-marcos'
-  marcos: readonly MarcoConclusaoNoe[]
+  tipo: 'tarefas-locais-e-selah-opcional'
+  tarefas: readonly TarefaMomentoNoe[]
+  selahFinal?: string
 }
 
 export interface MomentoNoe {
   id: MomentoNoeId
   ordem: number
   titulo: string
+  areaId: AreaNoeId
   faseCenario: FaseCenarioNoe
   gatilhoConclusao: GatilhoConclusaoMomentoNoe
 }
 
-export type EventoProgressaoNoe = MarcoConclusaoNoe
+export type EventoProgressaoNoe =
+  | {
+      tipo: 'unidade-acao-concluida'
+      acaoId: AcaoNoeId
+      /** Stable scene/task unit ID; makes repeated runtime events idempotent. */
+      unidadeId: string
+    }
+  | { tipo: 'selah-concluido'; passagemId: string }
+
+export interface ProgressoAcaoNoe {
+  acaoId: AcaoNoeId
+  unidadesConcluidas: readonly string[]
+}
 
 export interface EstadoProgressaoNoe {
   momentoAtualId: MomentoNoeId
   momentosConcluidos: readonly MomentoNoeId[]
-  /** Markers are scoped to the current, incomplete moment. */
-  marcosMomentoAtualConcluidos: readonly MarcoConclusaoNoe[]
+  /** Unit IDs are scoped to the current, incomplete moment. */
+  progressoMomentoAtual: readonly ProgressoAcaoNoe[]
   concluida: boolean
 }
 

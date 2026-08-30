@@ -21,11 +21,11 @@ moment cannot become available or complete before the current moment.
 | 1 | `chamado-canteiro` | O chamado e o canteiro de obras | Explicit local interaction | — |
 | 2 | `coleta-vedacao` | A coleta de materiais e a impermeabilização | Required local tasks, then completed Selah | `genesis-6-14` |
 | 3 | `estoque-mantimentos` | O estoque de mantimentos | Explicit local tasks | — |
-| 4 | `chegada-animais` | A chegada e a condução dos animais | Explicit local tasks | — |
-| 5 | `acomodacao-selah` | A acomodação e os Momentos Selah | Required local tasks, then completed Selah | `genesis-6-19` |
+| 4 | `conducao-animais` | A chegada e a condução dos animais | Explicit local tasks | — |
+| 5 | `acomodacao-animais` | A acomodação e os Momentos Selah | Required local tasks, then completed Selah | `genesis-6-19` |
 | 6 | `fechamento-porta` | A mudança do clima e a entrada no abrigo | Required local sequence, then completed Selah | `genesis-7-1` |
 | 7 | `refugio-tempestade` | O refúgio durante a tempestade | Required local tasks, then completed Selah | `genesis-8-1` |
-| 8 | `pomba-oliveira` | A pomba e o ramo de oliveira | Explicit local tasks | — |
+| 8 | `retorno-pomba` | A pomba e o ramo de oliveira | Explicit local tasks | — |
 | 9 | `nova-terra-arco-iris` | A nova terra e o arco-íris | Required local sequence, then completed Selah | `genesis-9-13` |
 
 A quiz answer or history entry is not a completed Selah. Only the existing
@@ -47,6 +47,11 @@ the parental pause has been released.
    the access and complete the sealing task before its Selah can conclude the
    moment. Exact counts SHALL be catalogue data, not duplicated runtime
    constants.
+
+For the first playable slice, the catalogue fixes those recoverable,
+child-sized requirements at four plank pickups, one ramp repair and three hull
+seams. The GDD defines the activities but not their counts; these values keep
+the slice legible without turning it into repetitive collection.
 5. **NOA-05:** Noah progression SHALL be inert outside the Noah region and
    while exploration is blocked by Selah, parental pause, an open overlay or a
    portal transition.
@@ -117,11 +122,12 @@ src/components/game/noe/
     colliders.ts      # explicit, scale-independent physics descriptors
 ```
 
-The state machine accepts semantic events such as `interacao-confirmada`,
-`recurso-coletado`, `tarefa-concluida` and `selah-concluido`. R3F components
-detect proximity and publish candidates, but do not decide progression. The
-runtime bridge emits an event only after the interaction arbiter has accepted
-the active candidate.
+The state machine accepts catalogue-allowlisted task-unit events and a final
+`selah-concluido`. Stable unit IDs make retries idempotent and let the versioned
+checkpoint reject invented or excessive counts. R3F components detect
+proximity and publish candidates, but do not decide progression. The runtime
+bridge emits an event only after the interaction arbiter has accepted the
+active candidate.
 
 The initial four-area contract is:
 

@@ -3,18 +3,43 @@ import { momentosNoe } from './catalogo'
 import {
   criarEstadoProgressaoNoe,
   obterClimaNoe,
+  obterRequisitosPendentesNoe,
   processarEventoProgressaoNoe,
 } from './estado'
 import type { EstadoProgressaoNoe, EventoProgressaoNoe } from './types'
+
+function concluirTarefasMomentoAtual(
+  estado: EstadoProgressaoNoe,
+): EstadoProgressaoNoe {
+  const momento = momentosNoe.find(({ id }) => id === estado.momentoAtualId)
+  if (!momento) return estado
+
+  return momento.gatilhoConclusao.tarefas.reduce(
+    (estadoTarefa, tarefa) =>
+      tarefa.unidadesNecessarias.reduce(
+        (atual, unidadeId) =>
+          processarEventoProgressaoNoe(atual, {
+            tipo: 'unidade-acao-concluida',
+            acaoId: tarefa.acaoId,
+            unidadeId,
+          }),
+        estadoTarefa,
+      ),
+    estado,
+  )
+}
 
 function concluirMomentoAtual(estado: EstadoProgressaoNoe): EstadoProgressaoNoe {
   const momento = momentosNoe.find(({ id }) => id === estado.momentoAtualId)
   if (!momento) return estado
 
-  return momento.gatilhoConclusao.marcos.reduce(
-    (atual, marco) => processarEventoProgressaoNoe(atual, marco),
-    estado,
-  )
+  const tarefasConcluidas = concluirTarefasMomentoAtual(estado)
+  return momento.gatilhoConclusao.selahFinal
+    ? processarEventoProgressaoNoe(tarefasConcluidas, {
+        tipo: 'selah-concluido',
+        passagemId: momento.gatilhoConclusao.selahFinal,
+      })
+    : tarefasConcluidas
 }
 
 function concluirAte(
@@ -29,51 +54,79 @@ function concluirAte(
 }
 
 describe('estado da jornada de Noé', () => {
-  it('ignora marcos de momentos futuros e conclui somente o momento atual', () => {
+  it('ignora unidades desconhecidas e ações de momentos futuros', () => {
     const inicial = criarEstadoProgressaoNoe()
     const futuro: EventoProgressaoNoe = {
-      tipo: 'selah-concluido',
-      passagemId: 'genesis-9-13',
+      tipo: 'unidade-acao-concluida',
+      acaoId: 'noe.arco-iris.contemplado',
+      unidadeId: 'contemplacao-da-alianca',
     }
 
     expect(processarEventoProgressaoNoe(inicial, futuro)).toBe(inicial)
+    expect(
+      processarEventoProgressaoNoe(inicial, {
+        tipo: 'unidade-acao-concluida',
+        acaoId: 'noe.chamado.confirmado',
+        unidadeId: 'inventado',
+      }),
+    ).toBe(inicial)
 
-    const chamado = processarEventoProgressaoNoe(inicial, {
-      tipo: 'acao-concluida',
-      acaoId: 'noe.chamado.confirmado',
-    })
+    const chamado = concluirMomentoAtual(inicial)
     expect(chamado.momentoAtualId).toBe('coleta-vedacao')
     expect(chamado.momentosConcluidos).toEqual(['chamado-canteiro'])
   })
 
-  it('exige todos os marcos do composto e trata duplicatas como idempotentes', () => {
+  it('contabiliza M2 em 4/1/3 e trata a mesma unidade como idempotente', () => {
     const noSegundoMomento = concluirMomentoAtual(criarEstadoProgressaoNoe())
-    const madeira: EventoProgressaoNoe = {
-      tipo: 'acao-concluida',
+    const primeiraTabua: EventoProgressaoNoe = {
+      tipo: 'unidade-acao-concluida',
       acaoId: 'noe.madeira.coletada',
+      unidadeId: 'tabua-1',
     }
-    const comMadeira = processarEventoProgressaoNoe(noSegundoMomento, madeira)
+    const comPrimeiraTabua = processarEventoProgressaoNoe(
+      noSegundoMomento,
+      primeiraTabua,
+    )
 
-    expect(processarEventoProgressaoNoe(comMadeira, madeira)).toBe(comMadeira)
-
-    const comRampa = processarEventoProgressaoNoe(comMadeira, {
-      tipo: 'acao-concluida',
-      acaoId: 'noe.rampa.reparada',
+    expect(
+      processarEventoProgressaoNoe(comPrimeiraTabua, primeiraTabua),
+    ).toBe(comPrimeiraTabua)
+    expect(obterRequisitosPendentesNoe(comPrimeiraTabua)[0]).toMatchObject({
+      acaoId: 'noe.madeira.coletada',
+      quantidadeConcluida: 1,
+      quantidadeNecessaria: 4,
     })
-    const semSelah = processarEventoProgressaoNoe(comRampa, {
-      tipo: 'acao-concluida',
-      acaoId: 'noe.betume.aplicado',
-    })
 
-    expect(semSelah.momentoAtualId).toBe('coleta-vedacao')
-    expect(semSelah.marcosMomentoAtualConcluidos).toHaveLength(3)
+    const aguardandoSelah = concluirTarefasMomentoAtual(comPrimeiraTabua)
+    expect(aguardandoSelah.momentoAtualId).toBe('coleta-vedacao')
+    expect(obterRequisitosPendentesNoe(aguardandoSelah)).toEqual([
+      { tipo: 'selah-final', passagemId: 'genesis-6-14' },
+    ])
 
-    const terceiroMomento = processarEventoProgressaoNoe(semSelah, {
+    const terceiroMomento = processarEventoProgressaoNoe(aguardandoSelah, {
       tipo: 'selah-concluido',
       passagemId: 'genesis-6-14',
     })
     expect(terceiroMomento.momentoAtualId).toBe('estoque-mantimentos')
-    expect(terceiroMomento.marcosMomentoAtualConcluidos).toEqual([])
+    expect(terceiroMomento.progressoMomentoAtual).toEqual([])
+  })
+
+  it('ignora cada Selah final quando recebido antes das tarefas locais', () => {
+    let estado = criarEstadoProgressaoNoe()
+
+    for (const momento of momentosNoe) {
+      expect(estado.momentoAtualId).toBe(momento.id)
+      if (momento.gatilhoConclusao.selahFinal) {
+        const antecipado = processarEventoProgressaoNoe(estado, {
+          tipo: 'selah-concluido',
+          passagemId: momento.gatilhoConclusao.selahFinal,
+        })
+        expect(antecipado).toBe(estado)
+      }
+      estado = concluirMomentoAtual(estado)
+    }
+
+    expect(estado.concluida).toBe(true)
   })
 
   it('conclui a rota com o prefixo canônico e permanece estável ao final', () => {

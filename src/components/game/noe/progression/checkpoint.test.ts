@@ -14,12 +14,12 @@ describe('checkpoint da jornada de Noé', () => {
       reconstruirProgressaoNoe({
         versao: 0,
         momentosConcluidos: ['chamado-canteiro'],
-        marcosMomentoAtualConcluidos: [],
+        progressoMomentoAtual: [],
       }),
     ).toEqual(criarEstadoProgressaoNoe())
   })
 
-  it('mantém o maior prefixo e somente marcos do momento atual', () => {
+  it('mantém o maior prefixo e somente unidades declaradas do momento atual', () => {
     const reconstruido = reconstruirProgressaoNoe({
       versao: VERSAO_CHECKPOINT_NOE,
       momentosConcluidos: [
@@ -28,11 +28,15 @@ describe('checkpoint da jornada de Noé', () => {
         'fora-da-rota',
         'estoque-mantimentos',
       ],
-      marcosMomentoAtualConcluidos: [
-        'acao:noe.estoque.organizado',
-        'acao:noe.familias.guiadas',
-        'selah:genesis-6-14',
-        'acao:noe.estoque.organizado',
+      progressoMomentoAtual: [
+        {
+          acaoId: 'noe.estoque.organizado',
+          unidadesConcluidas: ['desconhecida'],
+        },
+        {
+          acaoId: 'noe.familias.guiadas',
+          unidadesConcluidas: ['familias-do-campo'],
+        },
       ],
     })
 
@@ -41,52 +45,132 @@ describe('checkpoint da jornada de Noé', () => {
       'coleta-vedacao',
     ])
     expect(reconstruido.momentoAtualId).toBe('estoque-mantimentos')
-    expect(reconstruido.marcosMomentoAtualConcluidos).toEqual([
-      { tipo: 'acao-concluida', acaoId: 'noe.estoque.organizado' },
-    ])
+    expect(reconstruido.progressoMomentoAtual).toEqual([])
   })
 
-  it('serializa somente o progresso parcial do momento ativo', () => {
+  it('serializa e restaura progresso M2 parcial com IDs idempotentes', () => {
     const depoisDoChamado = processarEventoProgressaoNoe(
       criarEstadoProgressaoNoe(),
-      { tipo: 'acao-concluida', acaoId: 'noe.chamado.confirmado' },
+      {
+        tipo: 'unidade-acao-concluida',
+        acaoId: 'noe.chamado.confirmado',
+        unidadeId: 'chamado-noe',
+      },
     )
     const parcial = processarEventoProgressaoNoe(depoisDoChamado, {
-      tipo: 'acao-concluida',
+      tipo: 'unidade-acao-concluida',
       acaoId: 'noe.madeira.coletada',
+      unidadeId: 'tabua-1',
     })
+    const checkpoint = criarCheckpointProgressaoNoe(parcial)
 
-    expect(criarCheckpointProgressaoNoe(parcial)).toEqual({
+    expect(checkpoint).toEqual({
       versao: VERSAO_CHECKPOINT_NOE,
       momentosConcluidos: ['chamado-canteiro'],
-      marcosMomentoAtualConcluidos: ['acao:noe.madeira.coletada'],
+      progressoMomentoAtual: [
+        {
+          acaoId: 'noe.madeira.coletada',
+          unidadesConcluidas: ['tabua-1'],
+        },
+      ],
     })
+    expect(reconstruirProgressaoNoe(checkpoint)).toEqual(parcial)
   })
 
-  it('restaura também o progresso parcial do primeiro momento', () => {
+  it('normaliza um M1 totalmente marcado para M2 em vez de restaurar deadlock', () => {
     const reconstruido = reconstruirProgressaoNoe({
       versao: VERSAO_CHECKPOINT_NOE,
       momentosConcluidos: [],
-      marcosMomentoAtualConcluidos: ['acao:noe.chamado.confirmado'],
-    })
-
-    expect(reconstruido).toMatchObject({
-      momentoAtualId: 'chamado-canteiro',
-      momentosConcluidos: [],
-      marcosMomentoAtualConcluidos: [
-        { tipo: 'acao-concluida', acaoId: 'noe.chamado.confirmado' },
+      progressoMomentoAtual: [
+        {
+          acaoId: 'noe.chamado.confirmado',
+          unidadesConcluidas: ['chamado-noe'],
+        },
       ],
     })
+
+    expect(reconstruido).toEqual({
+      momentoAtualId: 'coleta-vedacao',
+      momentosConcluidos: ['chamado-canteiro'],
+      progressoMomentoAtual: [],
+      concluida: false,
+    })
+  })
+
+  it('deduplica, filtra e limita progresso M2 pela allowlist do catálogo', () => {
+    const reconstruido = reconstruirProgressaoNoe({
+      versao: VERSAO_CHECKPOINT_NOE,
+      momentosConcluidos: ['chamado-canteiro'],
+      progressoMomentoAtual: [
+        {
+          acaoId: 'noe.madeira.coletada',
+          unidadesConcluidas: [
+            'tabua-1',
+            'tabua-1',
+            'inventada',
+            'tabua-2',
+            'tabua-3',
+            'tabua-4',
+            'tabua-5',
+          ],
+        },
+        {
+          acaoId: 'noe.rampa.reparada',
+          unidadesConcluidas: ['rampa-falsa', 'rampa-principal'],
+        },
+      ],
+    })
+
+    expect(reconstruido.progressoMomentoAtual).toEqual([
+      {
+        acaoId: 'noe.madeira.coletada',
+        unidadesConcluidas: ['tabua-1', 'tabua-2', 'tabua-3', 'tabua-4'],
+      },
+      {
+        acaoId: 'noe.rampa.reparada',
+        unidadesConcluidas: ['rampa-principal'],
+      },
+    ])
+  })
+
+  it('preserva M2 com tarefas completas enquanto aguarda o Selah final', () => {
+    const reconstruido = reconstruirProgressaoNoe({
+      versao: VERSAO_CHECKPOINT_NOE,
+      momentosConcluidos: ['chamado-canteiro'],
+      progressoMomentoAtual: [
+        {
+          acaoId: 'noe.madeira.coletada',
+          unidadesConcluidas: ['tabua-1', 'tabua-2', 'tabua-3', 'tabua-4'],
+        },
+        {
+          acaoId: 'noe.rampa.reparada',
+          unidadesConcluidas: ['rampa-principal'],
+        },
+        {
+          acaoId: 'noe.betume.aplicado',
+          unidadesConcluidas: ['fenda-casco-1', 'fenda-casco-2', 'fenda-casco-3'],
+        },
+      ],
+    })
+
+    expect(reconstruido.momentoAtualId).toBe('coleta-vedacao')
+    expect(reconstruido.momentosConcluidos).toEqual(['chamado-canteiro'])
+    expect(reconstruido.progressoMomentoAtual).toHaveLength(3)
   })
 
   it('reconstrói o final canônico sem progresso parcial', () => {
     const final = reconstruirProgressaoNoe({
       versao: VERSAO_CHECKPOINT_NOE,
       momentosConcluidos: momentosNoe.map(({ id }) => id),
-      marcosMomentoAtualConcluidos: ['acao:noe.arco-iris.contemplado'],
+      progressoMomentoAtual: [
+        {
+          acaoId: 'noe.arco-iris.contemplado',
+          unidadesConcluidas: ['contemplacao-da-alianca'],
+        },
+      ],
     })
 
     expect(final.concluida).toBe(true)
-    expect(final.marcosMomentoAtualConcluidos).toEqual([])
+    expect(final.progressoMomentoAtual).toEqual([])
   })
 })

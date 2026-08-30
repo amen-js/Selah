@@ -1,21 +1,25 @@
 import { momentosNoe } from './catalogo'
 import {
-  chaveMarcoNoe,
   criarEstadoProgressaoNoe,
-  obterMomentoAtualNoe,
+  processarEventoProgressaoNoe,
 } from './estado'
 import type {
   EstadoProgressaoNoe,
-  MarcoConclusaoNoe,
   MomentoNoeId,
+  ProgressoAcaoNoe,
 } from './types'
 
 export const VERSAO_CHECKPOINT_NOE = 1
 
+export interface ProgressoAcaoCheckpointNoe {
+  acaoId: string
+  unidadesConcluidas: readonly string[]
+}
+
 export interface CheckpointProgressaoNoe {
   versao: typeof VERSAO_CHECKPOINT_NOE
   momentosConcluidos: readonly string[]
-  marcosMomentoAtualConcluidos: readonly string[]
+  progressoMomentoAtual: readonly ProgressoAcaoCheckpointNoe[]
 }
 
 function ehRegistro(valor: unknown): valor is Record<string, unknown> {
@@ -37,29 +41,48 @@ function obterPrefixoCanonico(ids: readonly string[]): MomentoNoeId[] {
   return prefixo
 }
 
-function desserializarMarco(
-  chave: string,
-  permitidos: readonly MarcoConclusaoNoe[],
-): MarcoConclusaoNoe | null {
-  return permitidos.find((marco) => chaveMarcoNoe(marco) === chave) ?? null
+function normalizarProgresso(
+  valor: unknown,
+  momentoAtual: (typeof momentosNoe)[number],
+): readonly ProgressoAcaoNoe[] {
+  if (!Array.isArray(valor)) return []
+
+  return momentoAtual.gatilhoConclusao.tarefas.flatMap((tarefa) => {
+    const unidadesDeclaradas = new Set<string>(tarefa.unidadesNecessarias)
+    const unidades = valor.flatMap((item) => {
+      if (!ehRegistro(item) || item.acaoId !== tarefa.acaoId) return []
+      return lerStrings(item.unidadesConcluidas)
+    })
+    const unicasPermitidas = [...new Set(unidades)].filter((unidadeId) =>
+      unidadesDeclaradas.has(unidadeId),
+    )
+
+    return unicasPermitidas.length > 0
+      ? [{ acaoId: tarefa.acaoId, unidadesConcluidas: unicasPermitidas }]
+      : []
+  })
 }
 
-/** Serializes only the canonical prefix and partial markers of the active beat. */
+/** Serializes only the canonical prefix and task units of the active beat. */
 export function criarCheckpointProgressaoNoe(
   estado: EstadoProgressaoNoe,
 ): CheckpointProgressaoNoe {
   return {
     versao: VERSAO_CHECKPOINT_NOE,
     momentosConcluidos: [...estado.momentosConcluidos],
-    marcosMomentoAtualConcluidos: estado.concluida
+    progressoMomentoAtual: estado.concluida
       ? []
-      : estado.marcosMomentoAtualConcluidos.map(chaveMarcoNoe),
+      : estado.progressoMomentoAtual.map((progresso) => ({
+          acaoId: progresso.acaoId,
+          unidadesConcluidas: [...progresso.unidadesConcluidas],
+        })),
   }
 }
 
 /**
- * Parses untrusted persisted data. It keeps the longest contiguous known
- * prefix and only marker keys declared by that resulting current moment.
+ * Parses untrusted persisted data, preserving only a contiguous moment prefix
+ * and catalogue-declared unit IDs. Replaying those units also canonicalizes an
+ * impossible fully-complete action-only beat instead of restoring a deadlock.
  */
 export function reconstruirProgressaoNoe(
   checkpoint: unknown,
@@ -69,32 +92,39 @@ export function reconstruirProgressaoNoe(
   }
 
   const prefixo = obterPrefixoCanonico(lerStrings(checkpoint.momentosConcluidos))
-  const concluida = prefixo.length === momentosNoe.length
-  const momentoAtual = concluida
-    ? momentosNoe[momentosNoe.length - 1]
-    : momentosNoe[prefixo.length]
-  const candidatos = concluida
-    ? []
-    : lerStrings(checkpoint.marcosMomentoAtualConcluidos)
-  const vistos = new Set<string>()
-  const marcos = candidatos.flatMap((chave) => {
-    if (vistos.has(chave)) return []
-    vistos.add(chave)
-    const marco = desserializarMarco(chave, momentoAtual.gatilhoConclusao.marcos)
-    return marco ? [marco] : []
-  })
+  if (prefixo.length === momentosNoe.length) {
+    return {
+      momentoAtualId: momentosNoe[momentosNoe.length - 1].id,
+      momentosConcluidos: prefixo,
+      progressoMomentoAtual: [],
+      concluida: true,
+    }
+  }
 
-  return {
+  const momentoAtual = momentosNoe[prefixo.length]
+  const progresso = normalizarProgresso(
+    checkpoint.progressoMomentoAtual,
+    momentoAtual,
+  )
+  let reconstruido: EstadoProgressaoNoe = {
     momentoAtualId: momentoAtual.id,
     momentosConcluidos: prefixo,
-    marcosMomentoAtualConcluidos: marcos,
-    concluida,
+    progressoMomentoAtual: [],
+    concluida: false,
   }
-}
 
-/** Convenience guard for consumers that only need the active checkpoint. */
-export function obterMarcosAtuaisNoe(
-  estado: EstadoProgressaoNoe,
-): readonly MarcoConclusaoNoe[] {
-  return estado.concluida ? [] : obterMomentoAtualNoe(estado).gatilhoConclusao.marcos
+  for (const tarefa of momentoAtual.gatilhoConclusao.tarefas) {
+    const unidades = progresso.find(
+      (item) => item.acaoId === tarefa.acaoId,
+    )?.unidadesConcluidas
+    for (const unidadeId of unidades ?? []) {
+      reconstruido = processarEventoProgressaoNoe(reconstruido, {
+        tipo: 'unidade-acao-concluida',
+        acaoId: tarefa.acaoId,
+        unidadeId,
+      })
+    }
+  }
+
+  return reconstruido
 }

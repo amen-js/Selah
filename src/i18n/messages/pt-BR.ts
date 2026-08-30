@@ -29,6 +29,21 @@ export const ptBR = {
   'app.controls.pause': 'Pausar',
   'app.controls.pauseHint': 'Pressione P a qualquer momento para pausar.',
 
+  'onboarding.eyebrow': 'Antes da primeira jornada',
+  'onboarding.title': 'Configuração do responsável',
+  'onboarding.description':
+    'Escolha como esta jornada funcionará para a criança. Tudo pode ser alterado depois na área dos responsáveis.',
+  'onboarding.pause.title': 'Pausa em família',
+  'onboarding.pause.description':
+    'Depois de cada reflexão, a exploração pausa até um responsável liberar a continuação.',
+  'onboarding.privacy.title': 'Privacidade por padrão',
+  'onboarding.privacy.description':
+    'Não há conta ou identificação. Salvar progresso e compartilhar métricas começam desligados.',
+  'onboarding.footer':
+    'Ao continuar, você confirma que revisou estas escolhas para a primeira jornada.',
+  'onboarding.action.withoutSave': 'Jogar sem salvar',
+  'onboarding.action.save': 'Salvar e continuar',
+
   'hud.aria': 'Informações e ações da exploração',
   'hud.region.hub': 'Vale Central',
   'hud.region.criacao': 'A Criação',

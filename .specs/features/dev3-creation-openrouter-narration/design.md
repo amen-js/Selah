@@ -2,7 +2,7 @@
 
 **Spec**: `.specs/features/dev3-creation-openrouter-narration/spec.md`
 **Context**: `.specs/features/dev3-creation-openrouter-narration/context.md`
-**Status**: Draft for approval
+**Status**: Approved
 
 ## Architecture Overview
 

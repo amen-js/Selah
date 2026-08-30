@@ -100,7 +100,7 @@ language.
 | CGUI-02 | P1: moment order and title in HUD | Implemented |
 | CGUI-03 | P1: non-blocking localized Voice Guide objective | Implemented |
 | CGUI-04 | P1: clear snapshot outside Creation | Implemented |
-| CGUI-05 | P1: preserve overlay priority | Pending |
+| CGUI-05 | P1: preserve overlay priority | Implemented |
 | CGUI-06 | P1: no new persisted progress | Implemented |
 | CGUI-07 | P2: `/lab` moment simulation | Pending |
 | CGUI-08 | P2: translated moment titles, objectives and UI labels | Implemented |

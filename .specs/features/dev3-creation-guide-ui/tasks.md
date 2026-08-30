@@ -109,6 +109,7 @@ is present.
 
 ### T5: Compose Creation guidance in GameOverlay
 
+**Status**: Implemented
 **What**: Pass the snapshot to `Hud` and render `CreationGuide` only during
 normal exploration.
 **Where**: `src/components/game/GameOverlay.tsx`,
@@ -122,11 +123,11 @@ normal exploration.
 
 **Done when**:
 
-- [ ] HUD and Guide render together in normal Creation exploration.
-- [ ] Guide hides for dialog and local panels.
-- [ ] Guide hides while exploration is inactive behind the start screen.
-- [ ] Selah and parental pause remain exclusive blocking overlays.
-- [ ] `npm run test:run` passes at least 247 tests.
+- [x] HUD and Guide render together in normal Creation exploration.
+- [x] Guide hides for dialog and local panels.
+- [x] Guide hides while exploration is inactive behind the start screen.
+- [x] Selah and parental pause remain exclusive blocking overlays.
+- [x] `npm run test:run` passes at least 247 tests.
 
 **Commit**: `feat(ui): compose Creation guidance overlay`
 

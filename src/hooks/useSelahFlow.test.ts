@@ -50,6 +50,8 @@ describe('useSelahFlow', () => {
   it('loads verse and quiz once and reports the start with consent', async () => {
     const gateway = createGateway()
     useGameStore.getState().setIdioma('en-US')
+    useGameStore.getState().setFaixaEtaria('geral')
+    useGameStore.getState().setIaAtiva(true)
     useGameStore.getState().setCompartilharMetricas(true)
     useGameStore.getState().abrirSelah({ historiaId: 'criacao', passagemId: versiculo.passagemId })
 
@@ -62,13 +64,39 @@ describe('useSelahFlow', () => {
       'en-US',
     )
     expect(gateway.gerarQuiz).toHaveBeenCalledOnce()
-    expect(gateway.gerarQuiz).toHaveBeenCalledWith(
-      expect.objectContaining({ idioma: 'en-US' }),
-    )
+    expect(gateway.gerarQuiz).toHaveBeenCalledWith({
+      historiaId: 'criacao',
+      passagemId: versiculo.passagemId,
+      idioma: 'en-US',
+      faixaEtaria: 'geral',
+      dificuldade: 'medio',
+      iaAtiva: true,
+    })
     expect(gateway.enviarMetricas).toHaveBeenCalledWith(
       [{ tipo: 'selah_iniciado', historiaId: 'criacao', versaoApp: 'test' }],
       true,
     )
+  })
+
+  it('derives easy quiz preferences for a child with AI disabled', async () => {
+    const gateway = createGateway()
+    useGameStore.getState().setIdioma('es-ES')
+    useGameStore.getState().setFaixaEtaria('crianca')
+    useGameStore.getState().setIaAtiva(false)
+    useGameStore.getState().abrirSelah({ historiaId: 'criacao', passagemId: versiculo.passagemId })
+
+    renderHook(() => useSelahFlow({ gateway }))
+
+    await waitFor(() => expect(useGameStore.getState().selahAtivo?.fase).toBe('versiculo'))
+    expect(gateway.gerarQuiz).toHaveBeenCalledOnce()
+    expect(gateway.gerarQuiz).toHaveBeenCalledWith({
+      historiaId: 'criacao',
+      passagemId: versiculo.passagemId,
+      idioma: 'es-ES',
+      faixaEtaria: 'crianca',
+      dificuldade: 'facil',
+      iaAtiva: false,
+    })
   })
 
   it('finishes loading under React StrictMode without duplicating requests', async () => {

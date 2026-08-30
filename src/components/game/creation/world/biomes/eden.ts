@@ -117,7 +117,7 @@ export function criarComposicaoEden(): ComposicaoBiomaCriacao {
         momentoMinimo: 'adao-e-eva',
         posicao: noTerrenoBioma(-2.2, -5, 0.02),
         rotacao: 0.18,
-        escala: 0.82,
+        escala: 0.94,
         animacao: 'adao-idle',
       },
       {
@@ -126,7 +126,7 @@ export function criarComposicaoEden(): ComposicaoBiomaCriacao {
         momentoMinimo: 'adao-e-eva',
         posicao: noTerrenoBioma(2.2, -5, 0.02),
         rotacao: -0.18,
-        escala: 0.8,
+        escala: 0.92,
         animacao: 'eva-idle',
       },
       {

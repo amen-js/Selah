@@ -75,7 +75,7 @@ export function TerrenoCriacao({ momentoId }: TerrenoCriacaoProps) {
         />
       </mesh>
       {mundoFormado && (
-        <mesh position={[13, -0.08, 5]} rotation={[-Math.PI / 2, 0, 0]}>
+        <mesh position={[-16, -0.08, -7]} rotation={[-Math.PI / 2, 0, 0]}>
           <circleGeometry args={[3.8, 48]} />
           <meshStandardMaterial
             color="#58a9c2"

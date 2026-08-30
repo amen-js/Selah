@@ -156,7 +156,13 @@ function Folha({ position, rotation = 0, color }: { position: [number, number, n
   )
 }
 
-export function PersonagemEden({ personagem }: { personagem: PersonagemEdenId }) {
+export function PersonagemEden({
+  personagem,
+  reducedMotion = false,
+}: {
+  personagem: PersonagemEdenId
+  reducedMotion?: boolean
+}) {
   const paleta = paletas[personagem]
   const eva = personagem === 'eva'
   const corpoRef = useRef<Group>(null)
@@ -165,6 +171,19 @@ export function PersonagemEden({ personagem }: { personagem: PersonagemEdenId })
   const bracoDireitoRef = useRef<Group>(null)
 
   useFrame(({ clock }) => {
+    if (reducedMotion) {
+      if (corpoRef.current) {
+        corpoRef.current.position.y = 1.08
+        corpoRef.current.rotation.z = 0
+      }
+      if (cabecaRef.current) {
+        cabecaRef.current.rotation.x = 0
+        cabecaRef.current.rotation.y = eva ? -0.08 : 0.08
+      }
+      if (bracoEsquerdoRef.current) bracoEsquerdoRef.current.rotation.x = 0
+      if (bracoDireitoRef.current) bracoDireitoRef.current.rotation.x = 0
+      return
+    }
     const tempo = clock.getElapsedTime() + (eva ? 1.7 : 0)
     const respiracao = Math.sin(tempo * 1.25)
 

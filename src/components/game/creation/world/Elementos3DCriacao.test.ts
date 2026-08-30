@@ -23,7 +23,7 @@ describe('chunks 3D da Criação', () => {
     expect(obterInstanciasAssetsCriacaoVisiveis('luz')).toEqual([])
     expect(
       obterInstanciasAssetsCriacaoVisiveis('ceu-terra-aguas').every(
-        ({ assetId }) => assetId === 'montanhas',
+        ({ assetId }) => assetId === 'montanhas' || assetId === 'rios',
       ),
     ).toBe(true)
     expect(
@@ -55,8 +55,8 @@ describe('chunks 3D da Criação', () => {
     const colidiveis = instanciasAssetsCriacao.filter(({ colisor }) => colisor)
 
     expect(colidiveis.map(({ id }) => id)).toEqual([
-      'arvore-central-eden',
-      'arvore-grande-escolha',
+      'eden-arvore-da-vida',
+      'eden-arvore-da-escolha',
     ])
     for (const { colisor } of colidiveis) {
       expect(colisor?.meiaExtensao.every((valor) => valor > 0)).toBe(true)

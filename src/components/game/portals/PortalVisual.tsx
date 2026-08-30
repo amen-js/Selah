@@ -8,6 +8,7 @@ export interface PortalVisualProps {
   portal: PortalMapa
   ativo?: boolean
   indice?: number
+  reducedMotion?: boolean
 }
 
 /** Portal emissivo, sem collider: a interação é resolvida por proximidade XZ. */
@@ -15,6 +16,7 @@ export function PortalVisual({
   portal,
   ativo = false,
   indice = 0,
+  reducedMotion = false,
 }: PortalVisualProps) {
   const grupoRef = useRef<Group>(null)
   const materialRef = useRef<MeshStandardMaterial>(null)
@@ -24,15 +26,22 @@ export function PortalVisual({
   useFrame(({ clock }, delta) => {
     const grupo = grupoRef.current
     if (grupo) {
-      grupo.rotation.y += delta * (disponivel ? 0.45 : 0.22)
-      grupo.position.y =
-        portal.posicao[1] + Math.sin(clock.elapsedTime * 1.4 + indice) * 0.08
+      if (reducedMotion) {
+        grupo.rotation.y = 0
+        grupo.position.y = portal.posicao[1]
+      } else {
+        grupo.rotation.y += delta * (disponivel ? 0.45 : 0.22)
+        grupo.position.y =
+          portal.posicao[1] + Math.sin(clock.elapsedTime * 1.4 + indice) * 0.08
+      }
     }
 
     if (materialRef.current) {
       const intensidadeBase = disponivel ? 1.2 : 0.45
       materialRef.current.emissiveIntensity =
-        intensidadeBase + (ativo ? 1.4 : 0) + Math.sin(clock.elapsedTime * 2) * 0.12
+        intensidadeBase +
+        (ativo ? 1.4 : 0) +
+        (reducedMotion ? 0 : Math.sin(clock.elapsedTime * 2) * 0.12)
     }
   })
 

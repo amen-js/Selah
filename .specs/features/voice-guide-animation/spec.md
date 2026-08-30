@@ -1,7 +1,7 @@
 # Voice Guide text animation
 
 **Date:** 2026-08-30
-**Status:** In Progress
+**Status:** Done
 
 ## Goal
 
@@ -21,4 +21,10 @@ without duplicating the existing typewriter implementation.
 
 - Component tests cover progressive reveal and accessible full text.
 - Existing Selah animation tests remain green.
-- Lint, all tests, production build and browser UAT pass.
+- Full gate: lint, 82 test files and 456 tests passed; production build passed.
+- Browser UAT: entry animation, partial text, cursor and final layout verified in
+  the local Lab with no console errors.
+
+## Commit
+
+`32a1c74` — `feat(ui): animate Voice Guide narration`

@@ -17,6 +17,7 @@ and the final browser gate is not parallel-safe.
 
 ### T1: Expose the transient Creation snapshot
 
+**Status**: Complete
 **What**: Add the snapshot type and emit it from `GameCanvas`, clearing it
 outside Creation.
 **Where**: `src/components/game/creation/progression/types.ts`,
@@ -30,10 +31,10 @@ outside Creation.
 
 **Done when**:
 
-- [ ] Snapshot contains the canonical moment and state.
-- [ ] Creation emits snapshots and other regions emit `null`.
-- [ ] No Zustand or storage contract changes.
-- [ ] `npm run lint && npm run test:run && npm run build` passes with at least 237 tests.
+- [x] Snapshot contains the canonical moment and state.
+- [x] Creation emits snapshots and other regions emit `null`.
+- [x] No Zustand or storage contract changes.
+- [x] `npm run lint && npm run test:run && npm run build` passes with at least 237 tests.
 
 **Commit**: `feat(creation): expose narrative progress snapshot`
 

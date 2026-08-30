@@ -1,6 +1,7 @@
 # Selah — Game Design Document
 
-> Status: rascunho inicial para evolução conjunta com a P.O.  
+> Status: em evolução, atualizado com o detalhamento do Mundo 1 validado pela P.O.
+>
 > Este documento descreve o jogo e sua experiência. Stack, responsáveis e cronograma permanecem no plano de execução.
 
 ## Visão do jogo
@@ -52,14 +53,28 @@ O mundo ganha vida. A criança acompanha a narrativa da criação da luz, da nat
 
 ### Fantasia do jogador
 
-Estar presente no início de um mundo vazio que progressivamente se enche de luz, cor, movimento e vida.
+Estar presente no início de um mundo vazio que progressivamente se enche de luz, cor, movimento e vida. O Aventureiro não cria o mundo nem apenas assiste à história: ele atua como uma **testemunha ativa da Criação**, descobrindo e revelando simbolicamente as transformações enquanto elas acontecem.
+
+### Papel do jogador
+
+A criança explora o cenário, percebe sinais, encontra um Ponto da Criação e interage. Essa interação revela a transformação preparada naquele local — por exemplo, um vale vazio passa a receber plantas, vegetação e árvores. A sensação desejada é: **“Eu estava aqui quando isso foi revelado.”**
+
+O jogador nunca é apresentado como responsável pelo ato da Criação. Sua participação mantém a fase interativa sem substituir o Criador na narrativa.
+
+### Loop do Mundo 1
+
+```text
+EXPLORAR → DESCOBRIR → ENCONTRAR UM PONTO DA CRIAÇÃO → INTERAGIR →
+O MUNDO SE TRANSFORMA → REGISTRAR A DESCOBERTA
+```
 
 ### Gameplay-base
 
 - Explorar o ambiente à medida que ele se transforma
-- Descobrir novos elementos da criação
+- Descobrir e revelar simbolicamente novos elementos da Criação
 - Interagir com luz, natureza e animais
 - Observar mudanças visuais e sonoras entre cada momento
+- Registrar animais e outras descobertas
 - Encontrar passagens e ativar Momentos Selah
 
 ### Direção da fase
@@ -84,6 +99,8 @@ A progressão deve ser marcada por contraste: vazio e preenchimento, escuridão 
 
 Cenário: espaço escuro, silencioso e com pouca visibilidade.
 
+**Gameplay:** exploração simples, percepção do ambiente e descoberta do primeiro caminho. O contraste prepara a chegada marcante da luz.
+
 - **Inicial:** "No começo, tudo era escuro e bem silencioso... Não havia nada aqui. Dê alguns passos e vamos descobrir o primeiro caminho juntos!"
 - **Apoio (se a criança parar):** "Siga devagarinho. O mundo está só esperando a nossa chegada."
 - **Transição:** "Você ouve isso? Algo maravilhoso está prestes a acontecer..."
@@ -91,6 +108,8 @@ Cenário: espaço escuro, silencioso e com pouca visibilidade.
 #### Momento 2 — A luz
 
 Cenário: transição da escuridão para a iluminação reveladora.
+
+**Gameplay:** seguir sinais luminosos até o primeiro Momento Selah. A iluminação revela o ambiente e mostra que existe um mundo esperando para ganhar vida.
 
 - **Inicial:** "Olhe só! Pontos brilhantes surgiram. Vamos seguir os sinais luminosos e ver a luz aparecer?"
 - **Apoio:** "Toque na luz pequenina para que ela se espalhe por todo lugar!"
@@ -100,13 +119,17 @@ Cenário: transição da escuridão para a iluminação reveladora.
 
 Cenário: o mapa ganha forma com rios, montanhas e caminhos.
 
+**Gameplay:** explorar novas áreas, encontrar passagens entre terra e água, acompanhar rios e descobrir pontos altos. O mundo ganha profundidade, forma e novos caminhos.
+
 - **Inicial:** "Uau! Agora nós temos chão para pisar e águas para navegar. Vamos caminhar até o ponto mais alto para ver os rios nascerem?"
 - **Apoio:** "Acompanhe o barulhinho da água do rio para encontrar o próximo caminho."
 - **Conclusão:** "As águas se juntaram e a terra firme apareceu. O nosso mundo está ganhando forma!"
 
 #### Momento 4 — A natureza ganha vida
 
-Cenário: surgimento de plantas, vegetação, flores e árvores.
+Cenário: surgimento de plantas, vegetação, flores, frutos e árvores.
+
+**Gameplay:** encontrar Pontos da Criação e interagir para revelar simbolicamente a natureza surgindo. A criança descobre e testemunha o que acontece; ela não cria os elementos.
 
 - **Inicial:** "Veja estes Pontos da Criação no chão! Chegue pertinho e interaja para ver as cores surgirem."
 - **Apoio:** "Toque na sementinha brilhante. O que será que vai brotar dali?"
@@ -116,21 +139,27 @@ Cenário: surgimento de plantas, vegetação, flores e árvores.
 
 Cenário: passagem do dia, entardecer, noite e surgimento das estrelas.
 
+**Gameplay:** explorar durante diferentes períodos, observar o céu e ativar um Momento Selah de contemplação.
+
 - **Inicial:** "O sol iluminou o dia todo, e agora o céu está mudando de cor... Vamos olhar para cima?"
 - **Apoio:** "Espere um pouquinho e observe as luzes brilhando lá no alto."
 - **Momento Selah:** "O sol para o dia, a lua e as estrelas para a noite. Tudo no seu tempo certo."
 
 #### Momento 6 — As criaturas
 
-Cenário: descoberta dos animais nos biomas Campo, Vale das Águas e Bosque.
+Cenário: descoberta dos animais no Campo da Criação, no Vale das Águas e no Bosque da Vida.
+
+**Loop:** explorar → encontrar → observar → descobrir → registrar. Cada criatura deve ser percebida como uma descoberta, não como um simples item colecionável.
 
 - **Inicial:** "Ouça esses sons! Tem bichinhos escondidos por aqui. Vamos encontrar, observar e registrar cada um no nosso Livro da Criação?"
 - **Apoio:** "Ande devagar para não assustar o novo amigo. Que som ele faz?"
-- **Ao registrar o animal:** "Que descoberta linda! O leão, a girafa e a ovelha agora têm um lar seguro no nosso livro."
+- **Ao registrar o animal:** "Que descoberta linda! Este novo amigo agora tem um lugar especial no nosso Livro da Criação."
 
 #### Momento 7 — O Jardim do Éden
 
 Cenário: ponto alto visual, com vegetação exuberante, frutos e rios cristalinos.
+
+**Gameplay:** exploração mais livre, descoberta de áreas especiais, encontros e novos Momentos Selah.
 
 - **Inicial:** "Chegamos ao lugar mais especial de todos: o Jardim do Éden! Explore livremente este lugar cheio de luz."
 - **Apoio:** "Caminhe pelas margens do rio e descubra os cantinhos secretos do Jardim."
@@ -140,22 +169,50 @@ Cenário: ponto alto visual, com vegetação exuberante, frutos e rios cristalin
 
 Cenário: presença dos primeiros seres humanos integrados ao Jardim.
 
+**Gameplay:** acompanhar pequenos momentos no Jardim por meio de exploração, observação da vida ao redor e interações narrativas simples.
+
 - **Inicial:** "Olhe ali! Deus criou seres muito especiais para cuidar de todo esse Jardim e viver em amizade com Ele."
 - **Aproximação:** "Eles receberam a tarefa de dar nome aos animais e cuidar de cada plantinha com carinho."
 - **Conclusão:** "O ser humano faz parte dessa linda história e tem um lugar muito amado na Criação."
 
 #### Momento 9 — O fruto e a grande escolha
 
-Cenário: a Árvore do Conhecimento do Bem e do Mal. A criança **não** controla o fruto.
+Cenário: a Árvore do Conhecimento do Bem e do Mal. A criança **não controla Adão ou Eva** e não recebe uma ação como “comer o fruto”; acompanha a narrativa como testemunha ativa.
+
+**Sequência:** explorar o Jardim → encontrar a árvore → conhecer a orientação → observar a situação → acompanhar a escolha → perceber que algo mudou.
 
 - **Inicial:** "No centro do Jardim existe uma árvore especial. Deus deu uma orientação carinhosa para proteger Adão e Eva..."
 - **Narrativa:** "Deus disse que eles podiam comer de tudo, menos daquela árvore. Mas eles escolheram não obedecer..."
-- **Encerramento da fase:** "Apesar de essa escolha ter mudado as coisas, o amor do Criador continua ao nosso lado. E Ele viu tudo o que fez, e ficou muito bom!"
+- **Mensagem infantil:** "Deus deu uma orientação. Adão e Eva escolheram não obedecer."
+- **Gancho narrativo:** "O mundo perfeito havia sido criado, mas uma escolha mudou a história."
+
+### Biomas e criaturas do primeiro escopo
+
+| Bioma | Identidade visual | Criaturas e elementos | Função no gameplay |
+| --- | --- | --- | --- |
+| **Campo da Criação** | Campos verdes, colinas, árvores, flores e pequenos riachos | Leão, girafa, elefante, zebra e ovelha | Introduzir a mecânica de descoberta de criaturas |
+| **Vale das Águas** | Rio, cachoeira, lagos, margens e pedras | Peixes, pato, rã e pássaros próximos à água | Promover exploração ambiental e descoberta de caminhos |
+| **Bosque da Vida** | Árvores altas, flores, frutos, caminhos escondidos e espaços secretos | Cervo, coelho, esquilo e pássaros | Incentivar exploração e descoberta |
+| **Jardim do Éden** | Vegetação exuberante, grandes árvores, rios cristalinos, frutos, flores e luz dourada | Vida animal; Adão; Eva; Árvore da Vida; Árvore do Conhecimento do Bem e do Mal; serpente | Apresentar a humanidade dentro da Criação e encerrar a fase com a grande escolha |
+
+### Objetivos e conclusão da fase
+
+- **Objetivo narrativo:** testemunhar o início da história e perceber o contraste entre um mundo vazio e um mundo cheio de vida.
+- **Objetivo jogável:** descobrir os nove Momentos da Criação, explorar os quatro biomas e chegar ao encerramento narrativo no Jardim do Éden.
+- **Momento final:** contemplar tudo o que ganhou vida, contrastando o começo — escuridão, vazio e silêncio — com o mundo agora cheio de luz, águas, natureza, animais, sons e humanidade.
+- **Mensagem de encerramento:** “E Deus viu tudo o que havia feito, e tudo havia ficado muito bom.” — Gênesis 1:31.
+- **Gancho para a continuidade:** o mundo perfeito havia sido criado, mas uma escolha mudou a história.
+
+### Escopo consolidado do Mundo 1
+
+- **9 momentos:** O Vazio; A Luz; Céu, Terra e Águas; A Natureza; O Céu Ganha Ritmo; As Criaturas; O Jardim do Éden; Adão e Eva; O Fruto e a Grande Escolha
+- **4 biomas:** Campo da Criação; Vale das Águas; Bosque da Vida; Jardim do Éden
+- **Gameplay principal:** explorar → descobrir → revelar → interagir → contemplar
+- **Resumo da jornada:** do vazio à vida → da Criação ao Jardim → do Jardim à primeira escolha
 
 ### Questões abertas
 
 - Quais passagens bíblicas oficiais entram em cada momento?
-- Quais animais além de leão, girafa e ovelha entram no primeiro escopo do Livro da Criação?
 - A locução da Voz Guia é integral desde o vertical slice ou só nos Momentos Selah?
 
 ## Mundo 2 — Noé e a Arca: a grande missão

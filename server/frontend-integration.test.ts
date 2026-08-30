@@ -105,20 +105,20 @@ describe('Dev 2 frontend integration', () => {
       id: expect.stringMatching(/^quiz-/),
       passagemId: gatilho!.passagemId,
       pergunta: 'O que Deus disse para que houvesse luz?',
-      alternativas: [
-        { id: 'A', texto: 'Haja luz' },
-        { id: 'B', texto: 'Haja uma cidade' },
-        { id: 'C', texto: 'Haja um palácio' },
-        { id: 'D', texto: 'Haja uma torre' },
-      ],
+      alternativas: expect.any(Array),
       origem: 'ia',
     })
-    expect(quiz.alternativas).toHaveLength(4)
+    expect(quiz.alternativas.map((item) => item.id)).toEqual(['A', 'B', 'C', 'D'])
+    expect(quiz.alternativas.map((item) => item.texto).sort()).toEqual(
+      ['Haja luz', 'Haja um palácio', 'Haja uma cidade', 'Haja uma torre'].sort(),
+    )
     expect(quiz).not.toHaveProperty('respostaCorretaId')
     expect(quiz).not.toHaveProperty('explicacao')
 
+    const correta = quiz.alternativas.find((item) => item.texto === 'Haja luz')
+    expect(correta?.id).toBeDefined()
     await expect(
-      gateway.responderQuiz({ quizId: quiz.id, alternativaId: 'A' }),
+      gateway.responderQuiz({ quizId: quiz.id, alternativaId: correta!.id }),
     ).resolves.toEqual({
       acertou: true,
       explicacao: 'Deus disse haja luz e houve luz.',

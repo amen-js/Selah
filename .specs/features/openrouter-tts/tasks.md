@@ -24,7 +24,7 @@ quiz requests retain their existing ZDR payload.
 
 ### T2: Expose the protected TTS route
 
-**Status:** Pending
+**Status:** Complete
 **What:** Add `POST /api/tts`, health status, timeout, rate limit, and route tests.
 **Where:** `server/app.ts`, `server/app.test.ts`.
 **Depends on:** T1

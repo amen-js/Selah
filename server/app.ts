@@ -4,7 +4,12 @@ import { cors } from 'hono/cors'
 import { buscarPassagemAprovada, type FaixaEtaria, type Idioma } from './data/passagens.ts'
 import { loadEnv, type Env } from './env.ts'
 import { createMetricsStore, type EventoMetrica, type MetricsStore } from './services/metrics.ts'
-import { createOpenRouterClient, type OpenRouterClient } from './services/openrouter.ts'
+import {
+  createOpenRouterClient,
+  createOpenRouterTtsClient,
+  type OpenRouterClient,
+  type OpenRouterTtsClient,
+} from './services/openrouter.ts'
 import { createQuizService, QuizHttpError, type QuizService } from './services/quiz.ts'
 import { createQuizSessionStore, type QuizSessionStore } from './services/quizSession.ts'
 import { createYouVersionClient, type YouVersionClient } from './services/youversion.ts'
@@ -20,6 +25,7 @@ export interface AppDeps {
   fetchFn?: typeof fetch
   youVersion?: YouVersionClient
   openRouter?: OpenRouterClient | null
+  openRouterTts?: OpenRouterTtsClient | null
   sessoes?: QuizSessionStore
   metrics?: MetricsStore
   quiz?: QuizService
@@ -91,6 +97,17 @@ export const createApp = (deps: AppDeps = {}) => {
         ? createOpenRouterClient(env.openRouterApiKey, env.openRouterModels, fetchFn)
         : null
       : deps.openRouter
+  const openRouterTts =
+    deps.openRouterTts === undefined
+      ? env.openRouterApiKey
+        ? createOpenRouterTtsClient(
+            env.openRouterApiKey,
+            env.openRouterTtsModel,
+            env.openRouterTtsVoice,
+            fetchFn,
+          )
+        : null
+      : deps.openRouterTts
   const sessoes = deps.sessoes ?? createQuizSessionStore(now)
   const metrics = deps.metrics ?? createMetricsStore(now)
   const quiz =
@@ -100,6 +117,19 @@ export const createApp = (deps: AppDeps = {}) => {
       openRouter,
       sessoes,
     })
+  const ttsRateLimits = new Map<string, { inicio: number; total: number }>()
+
+  const consumirTts = (ip: string): boolean => {
+    const instante = now()
+    const atual = ttsRateLimits.get(ip)
+    if (!atual || instante < atual.inicio || instante - atual.inicio >= 60_000) {
+      ttsRateLimits.set(ip, { inicio: instante, total: 1 })
+      return true
+    }
+    if (atual.total >= 10) return false
+    atual.total += 1
+    return true
+  }
 
   const app = new Hono()
 
@@ -132,6 +162,11 @@ export const createApp = (deps: AppDeps = {}) => {
       ia: Boolean(env.openRouterApiKey),
       modelo: env.openRouterModels[0] ?? null,
       youversion: Boolean(env.youVersionAppKey),
+      tts: {
+        ativo: Boolean(openRouterTts),
+        modelo: env.openRouterTtsModel,
+        voz: env.openRouterTtsVoice,
+      },
     }),
   )
 
@@ -161,6 +196,73 @@ export const createApp = (deps: AppDeps = {}) => {
       atribuicao: versiculo.atribuicao,
       origem: versiculo.origem,
     })
+  })
+
+  app.post('/api/tts', async (context) => {
+    let body: unknown
+    try {
+      body = await context.req.json()
+    } catch {
+      return context.json({ erro: 'JSON inválido.' }, 400)
+    }
+
+    const data = asRecord(body)
+    const passagemId = asString(data?.passagemId)
+    const idioma = data?.idioma
+    const campos = Object.keys(data ?? {})
+    if (
+      !passagemId ||
+      !isIdioma(idioma) ||
+      campos.length !== 2 ||
+      campos.some((campo) => !['passagemId', 'idioma'].includes(campo))
+    ) {
+      return context.json({ erro: 'Pedido de áudio inválido.' }, 400)
+    }
+
+    const passagem = buscarPassagemAprovada(passagemId)
+    if (!passagem) {
+      return context.json({ erro: 'Passagem não encontrada na allowlist.' }, 404)
+    }
+    if (!openRouterTts) {
+      return context.json({ erro: 'Narração neural indisponível.' }, 503)
+    }
+
+    const ip = clientIp(context.req.header('x-forwarded-for') ?? context.req.header('x-real-ip'))
+    if (!consumirTts(ip)) {
+      return context.json({ erro: 'Limite de narrações excedido. Tente novamente em instantes.' }, 429)
+    }
+
+    const versiculo = await youVersion.buscar(passagem.usfm, passagem.passagemId, idioma)
+    if (!versiculo) {
+      return context.json({ erro: 'Texto indisponível para esta passagem.' }, 503)
+    }
+
+    const abortController = new AbortController()
+    let timeoutId: ReturnType<typeof setTimeout> | undefined
+    try {
+      const timeout = new Promise<null>((resolve) => {
+        timeoutId = setTimeout(() => {
+          abortController.abort()
+          resolve(null)
+        }, 10_000)
+      })
+      const audio = await Promise.race([
+        openRouterTts.sintetizar(versiculo.texto, abortController.signal),
+        timeout,
+      ])
+      if (!audio) {
+        return context.json({ erro: 'Narração neural indisponível.' }, 503)
+      }
+
+      return context.body(audio, 200, {
+        'Cache-Control': 'no-store',
+        'Content-Type': 'audio/mpeg',
+      })
+    } catch {
+      return context.json({ erro: 'Narração neural indisponível.' }, 503)
+    } finally {
+      if (timeoutId !== undefined) clearTimeout(timeoutId)
+    }
   })
 
   app.post('/api/quiz/gerar', async (context) => {

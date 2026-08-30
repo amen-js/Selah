@@ -52,7 +52,7 @@ and local voice selection respects the verse language.
 
 ### T4: Integrate narration state with Selah UI and ambience
 
-**Status:** Pending
+**Status:** Complete
 **What:** Drive localized controls from TTS state and duck ambient audio during playback.
 **Where:** overlay, translations, game store/audio hook, and their tests.
 **Depends on:** T3

@@ -1,7 +1,8 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import type { SelahGateway } from '../../services/selahGateway'
+import type { TtsEstado } from '../../services/tts'
 import { useGameStore } from '../../stores/gameStore'
 import type { QuizPublico, VersiculoPublico } from '../../types/selah'
 import { SelahOverlay, type TtsController } from './SelahOverlay'
@@ -39,14 +40,27 @@ const gateway: SelahGateway = {
   enviarMetricas: vi.fn().mockResolvedValue(undefined),
 }
 
+let ttsEstado: TtsEstado = 'idle'
+const ttsListeners = new Set<(estado: TtsEstado) => void>()
+const emitirTts = (estado: TtsEstado) => {
+  ttsEstado = estado
+  for (const listener of ttsListeners) listener(estado)
+}
+
 const tts: TtsController = {
   suportado: true,
-  estado: () => 'idle',
-  assinar: vi.fn(() => () => undefined),
-  falar: vi.fn(),
-  pausar: vi.fn(),
-  retomar: vi.fn(),
-  cancelar: vi.fn(),
+  estado: () => ttsEstado,
+  assinar: (listener) => {
+    ttsListeners.add(listener)
+    return () => ttsListeners.delete(listener)
+  },
+  falar: vi.fn(async () => {
+    emitirTts('loading')
+    emitirTts('playing')
+  }),
+  pausar: vi.fn(() => emitirTts('paused')),
+  retomar: vi.fn(() => emitirTts('playing')),
+  cancelar: vi.fn(() => emitirTts('idle')),
 }
 
 const prepareVerse = (origem: QuizPublico['origem'] = 'ia') => {
@@ -59,6 +73,8 @@ describe('SelahOverlay', () => {
   beforeEach(() => {
     useGameStore.getState().apagarProgresso()
     useGameStore.getState().setIdioma('pt-BR')
+    ttsEstado = 'idle'
+    ttsListeners.clear()
     vi.clearAllMocks()
   })
 
@@ -84,9 +100,56 @@ describe('SelahOverlay', () => {
     expect(screen.getByText('Haja luz.')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Ouvir passagem em voz alta' }))
     expect(tts.falar).toHaveBeenCalledWith(versiculo)
+    expect(screen.getByRole('button', { name: 'Pausar leitura em voz alta' })).toBeInTheDocument()
+    expect(useGameStore.getState().narracaoAtiva).toBe(true)
 
     await user.click(screen.getByRole('button', { name: 'Continuar para a pergunta' }))
     expect(useGameStore.getState().selahAtivo?.fase).toBe('quiz')
+  })
+
+  it('pauses and resumes the same narration without restarting it', async () => {
+    const user = userEvent.setup()
+    prepareVerse()
+    render(<SelahOverlay gateway={gateway} tts={tts} />)
+
+    await user.click(screen.getByRole('button', { name: 'Ouvir passagem em voz alta' }))
+    await user.click(screen.getByRole('button', { name: 'Pausar leitura em voz alta' }))
+
+    expect(tts.pausar).toHaveBeenCalledOnce()
+    expect(tts.falar).toHaveBeenCalledOnce()
+    expect(useGameStore.getState().narracaoAtiva).toBe(false)
+
+    await user.click(screen.getByRole('button', { name: 'Continuar leitura em voz alta' }))
+    expect(tts.retomar).toHaveBeenCalledOnce()
+    expect(tts.falar).toHaveBeenCalledOnce()
+  })
+
+  it('replaces automatic narration when the localized verse changes', async () => {
+    useGameStore.getState().setTtsAtivo(true)
+    prepareVerse()
+    render(<SelahOverlay gateway={gateway} tts={tts} />)
+
+    await waitFor(() => expect(tts.falar).toHaveBeenCalledWith(versiculo))
+    const englishVerse: VersiculoPublico = {
+      ...versiculo,
+      texto: 'Let there be light.',
+      idioma: 'en-US',
+    }
+    act(() => useGameStore.getState().carregarVersiculo(englishVerse))
+
+    await waitFor(() => expect(tts.falar).toHaveBeenLastCalledWith(englishVerse))
+    expect(tts.cancelar).toHaveBeenCalled()
+  })
+
+  it('discloses neural narration and its device fallback', () => {
+    prepareVerse()
+    render(<SelahOverlay gateway={gateway} tts={tts} />)
+
+    expect(
+      screen.getByText(
+        'Voz gerada por IA; se estiver indisponível, será usada a voz do dispositivo.',
+      ),
+    ).toBeInTheDocument()
   })
 
   it('renders exactly four alternatives and displays evaluated feedback', async () => {

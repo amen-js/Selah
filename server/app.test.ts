@@ -131,6 +131,158 @@ describe('Selah API proxy', () => {
     expect(sintetizar).toHaveBeenCalledTimes(10)
   })
 
+  it('returns approved Creation guide audio with no-store headers', async () => {
+    const audio = new Uint8Array([73, 68, 51, 5]).buffer
+    const sintetizar = vi.fn<OpenRouterTtsClient['sintetizar']>().mockResolvedValue(audio)
+    const app = createApp({ env, openRouterTts: { sintetizar } })
+
+    const response = await app.request('/api/tts/narracao', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        narracaoId: 'criacao.vazio.inicial',
+        idioma: 'pt-BR',
+      }),
+    })
+
+    expect(response.status).toBe(200)
+    expect(response.headers.get('content-type')).toContain('audio/mpeg')
+    expect(response.headers.get('cache-control')).toBe('no-store')
+    expect(new Uint8Array(await response.arrayBuffer())).toEqual(new Uint8Array(audio))
+    expect(sintetizar).toHaveBeenCalledOnce()
+    expect(sintetizar.mock.calls[0]?.[0]).toBe(
+      'No começo, tudo era escuro e bem silencioso... Não havia nada aqui. Dê alguns passos e vamos descobrir o primeiro caminho juntos!',
+    )
+    expect(sintetizar.mock.calls[0]?.[1]).toBeInstanceOf(AbortSignal)
+  })
+
+  it('rejects invalid Creation guide requests before synthesis', async () => {
+    const sintetizar = vi.fn<OpenRouterTtsClient['sintetizar']>()
+    const app = createApp({ env, openRouterTts: { sintetizar } })
+    const request = (body: unknown) =>
+      app.request('/api/tts/narracao', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+
+    const extraField = await request({
+      narracaoId: 'criacao.vazio.inicial',
+      idioma: 'pt-BR',
+      texto: 'Conteúdo arbitrário',
+    })
+    const invalidLanguage = await request({
+      narracaoId: 'criacao.vazio.inicial',
+      idioma: 'fr-FR',
+    })
+    const invalidType = await request({ narracaoId: 1, idioma: 'pt-BR' })
+    const unknown = await request({
+      narracaoId: 'criacao.inexistente.inicial',
+      idioma: 'pt-BR',
+    })
+    const padded = await request({
+      narracaoId: ' criacao.vazio.inicial ',
+      idioma: 'pt-BR',
+    })
+
+    expect(extraField.status).toBe(400)
+    expect(invalidLanguage.status).toBe(400)
+    expect(invalidType.status).toBe(400)
+    expect(unknown.status).toBe(404)
+    expect(padded.status).toBe(404)
+    expect(sintetizar).not.toHaveBeenCalled()
+  })
+
+  it('returns 503 when Creation guide speech is unavailable or fails', async () => {
+    const request = (app: ReturnType<typeof createApp>) =>
+      app.request('/api/tts/narracao', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          narracaoId: 'criacao.vazio.inicial',
+          idioma: 'pt-BR',
+        }),
+      })
+
+    expect((await request(createApp({ env, openRouterTts: null }))).status).toBe(503)
+
+    const sintetizar = vi
+      .fn<OpenRouterTtsClient['sintetizar']>()
+      .mockResolvedValueOnce(null)
+      .mockRejectedValueOnce(new Error('adapter-failure'))
+      .mockResolvedValueOnce(new ArrayBuffer(0))
+    const failingApp = createApp({ env, openRouterTts: { sintetizar } })
+
+    expect((await request(failingApp)).status).toBe(503)
+    expect((await request(failingApp)).status).toBe(503)
+    expect((await request(failingApp)).status).toBe(503)
+    expect(sintetizar).toHaveBeenCalledTimes(3)
+  })
+
+  it('times out Creation guide synthesis after ten seconds', async () => {
+    vi.useFakeTimers()
+    try {
+      let observedSignal: AbortSignal | undefined
+      const sintetizar: OpenRouterTtsClient['sintetizar'] = (_texto, signal) => {
+        observedSignal = signal
+        return new Promise((resolve) =>
+          signal?.addEventListener('abort', () => resolve(null), { once: true }),
+        )
+      }
+      const app = createApp({ env, openRouterTts: { sintetizar } })
+      const pending = app.request('/api/tts/narracao', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          narracaoId: 'criacao.vazio.inicial',
+          idioma: 'pt-BR',
+        }),
+      })
+
+      await vi.advanceTimersByTimeAsync(10_000)
+
+      expect((await pending).status).toBe(503)
+      expect(observedSignal?.aborted).toBe(true)
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('shares the ten-request TTS budget between scripture and Creation guide speech', async () => {
+    const sintetizar = vi
+      .fn<OpenRouterTtsClient['sintetizar']>()
+      .mockResolvedValue(new Uint8Array([1]).buffer)
+    const app = createApp({ env, openRouterTts: { sintetizar } })
+    const headers = {
+      'content-type': 'application/json',
+      'x-forwarded-for': '203.0.113.16',
+    }
+    const requestScripture = () =>
+      app.request('/api/tts', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ passagemId: 'genesis-1-3', idioma: 'pt-BR' }),
+      })
+    const requestGuide = () =>
+      app.request('/api/tts/narracao', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          narracaoId: 'criacao.vazio.inicial',
+          idioma: 'pt-BR',
+        }),
+      })
+
+    for (let index = 0; index < 5; index += 1) {
+      expect((await requestScripture()).status).toBe(200)
+      expect((await requestGuide()).status).toBe(200)
+    }
+
+    expect((await requestGuide()).status).toBe(429)
+    expect((await requestScripture()).status).toBe(429)
+    expect(sintetizar).toHaveBeenCalledTimes(10)
+  })
+
   it('rejects passages outside the allowlist', async () => {
     const app = createApp({ env })
     const response = await app.request('/api/versiculo?passagemId=jonah-1-1&idioma=pt-BR')

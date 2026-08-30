@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 
+import { buscarNarracaoCriacao } from '../src/content/creationNarrations.ts'
 import { buscarPassagemAprovada, type FaixaEtaria, type Idioma } from './data/passagens.ts'
 import { loadEnv, type Env } from './env.ts'
 import { createMetricsStore, type EventoMetrica, type MetricsStore } from './services/metrics.ts'
@@ -251,6 +252,68 @@ export const createApp = (deps: AppDeps = {}) => {
         timeout,
       ])
       if (!audio) {
+        return context.json({ erro: 'Narração neural indisponível.' }, 503)
+      }
+
+      return context.body(audio, 200, {
+        'Cache-Control': 'no-store',
+        'Content-Type': 'audio/mpeg',
+      })
+    } catch {
+      return context.json({ erro: 'Narração neural indisponível.' }, 503)
+    } finally {
+      if (timeoutId !== undefined) clearTimeout(timeoutId)
+    }
+  })
+
+  app.post('/api/tts/narracao', async (context) => {
+    let body: unknown
+    try {
+      body = await context.req.json()
+    } catch {
+      return context.json({ erro: 'JSON inválido.' }, 400)
+    }
+
+    const data = asRecord(body)
+    const narracaoId = data?.narracaoId
+    const idioma = data?.idioma
+    const campos = Object.keys(data ?? {})
+    if (
+      typeof narracaoId !== 'string' ||
+      !isIdioma(idioma) ||
+      campos.length !== 2 ||
+      campos.some((campo) => !['narracaoId', 'idioma'].includes(campo))
+    ) {
+      return context.json({ erro: 'Pedido de áudio inválido.' }, 400)
+    }
+
+    const narracao = buscarNarracaoCriacao(narracaoId, idioma)
+    if (!narracao) {
+      return context.json({ erro: 'Narração não encontrada na allowlist.' }, 404)
+    }
+    if (!openRouterTts) {
+      return context.json({ erro: 'Narração neural indisponível.' }, 503)
+    }
+
+    const ip = clientIp(context.req.header('x-forwarded-for') ?? context.req.header('x-real-ip'))
+    if (!consumirTts(ip)) {
+      return context.json({ erro: 'Limite de narrações excedido. Tente novamente em instantes.' }, 429)
+    }
+
+    const abortController = new AbortController()
+    let timeoutId: ReturnType<typeof setTimeout> | undefined
+    try {
+      const timeout = new Promise<null>((resolve) => {
+        timeoutId = setTimeout(() => {
+          abortController.abort()
+          resolve(null)
+        }, 10_000)
+      })
+      const audio = await Promise.race([
+        openRouterTts.sintetizar(narracao.texto, abortController.signal),
+        timeout,
+      ])
+      if (!audio || audio.byteLength === 0) {
         return context.json({ erro: 'Narração neural indisponível.' }, 503)
       }
 

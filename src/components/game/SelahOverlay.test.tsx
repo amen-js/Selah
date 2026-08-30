@@ -141,15 +141,13 @@ describe('SelahOverlay', () => {
     expect(tts.cancelar).toHaveBeenCalled()
   })
 
-  it('discloses neural narration and its device fallback', () => {
+  it('does not show a narration disclosure on the passage screen', () => {
     prepareVerse()
     render(<SelahOverlay gateway={gateway} tts={tts} />)
 
     expect(
-      screen.getByText(
-        'Voz gerada por IA; se estiver indisponível, será usada a voz do dispositivo.',
-      ),
-    ).toBeInTheDocument()
+      screen.queryByText(/Voz gerada por IA/),
+    ).not.toBeInTheDocument()
   })
 
   it('renders exactly four alternatives and displays evaluated feedback', async () => {

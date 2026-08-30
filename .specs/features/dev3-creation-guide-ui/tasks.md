@@ -189,7 +189,8 @@ mounting Canvas.
 
 **Done when**:
 
-- [x] `npm run lint && npm run test:run && npm run build` passes with 258 tests.
+- [x] `npm run lint && npm run test:run && npm run build` passes with 274 tests
+      after integrating `origin/main`.
 - [x] Desktop 1440x900 and mobile 390x844 show no overlap or clipped controls.
 - [x] Pointer lock and overlay priority remain correct.
 - [x] All eight requirements are marked Verified.

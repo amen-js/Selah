@@ -61,6 +61,15 @@ export const esES = {
   'hud.settings.open': 'Abrir configuración parental',
   'hud.settings.label': 'Familia',
 
+  'portal.prompt.aria': 'Portal a {region}',
+  'portal.prompt.eyebrow': 'Portal',
+  'portal.prompt.enter': 'Presiona E o Enter para entrar',
+  'portal.prompt.soon': 'Próximamente',
+  'portal.transition.aria': 'Transición de región',
+  'portal.transition.exiting': 'Preparando tu paso…',
+  'portal.transition.switching': 'Entrando en {region}…',
+  'portal.transition.entering': 'Bienvenido a {region}',
+
   'dialog.aria': 'Diálogo con {character}',
   'dialog.disclosure': 'Personaje virtual automatizado',
   'dialog.continueAria': 'Continuar diálogo',

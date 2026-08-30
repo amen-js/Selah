@@ -49,7 +49,7 @@ todos:
     status: completed
   - id: regiao-noe
     content: Dev 1 monta o hub com portais e, se a jornada principal estiver estável, inicia a região de Noé; Designer preenche mapas/noe.ts
-    status: pending
+    status: completed
   - id: regiao-jose
     content: "Expansão pós-demo: Dev 1 reutiliza a estrutura de regiões para José; Designer preenche mapas/jose.ts após aprovação do recorte pela P.O."
     status: pending

@@ -12,9 +12,14 @@ export {
   distanciaXZ,
   estaNoRaioXZ,
   portalDisponivel,
+  selecionarPortalDetectado,
   resolverPortalProximo,
   selecionarPortalProximo,
 } from './proximidade'
+export { PortalVisual } from './PortalVisual'
+export type { PortalVisualProps } from './PortalVisual'
+export { PortaisRegiao } from './PortaisRegiao'
+export type { PortaisRegiaoProps } from './PortaisRegiao'
 export {
   ehTeclaConfirmacaoPortal,
   podeAcionarPortalPorTecla,

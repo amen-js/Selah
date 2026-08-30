@@ -50,20 +50,17 @@ function deveSubstituir(
   return candidato.id.localeCompare(escolhido.id) < 0
 }
 
-/**
- * Encontra o portal disponível mais próximo dentro do raio de ativação.
- * Empates usam prioridade e, por fim, ID, mantendo o resultado determinístico.
- */
-export function selecionarPortalProximo(
+function selecionarPortalMaisProximo(
   jogador: PosicaoXZ,
   portais: readonly PortalMapa[],
+  considerar: (portal: PortalMapa) => boolean,
 ): PortalMapa | null {
   let escolhido: PortalMapa | null = null
   let distanciaEscolhida = Number.POSITIVE_INFINITY
 
   for (const portal of portais) {
     if (
-      !portalDisponivel(portal) ||
+      !considerar(portal) ||
       !estaNoRaioXZ(jogador, portal.posicao, portal.raioAtivacao)
     ) {
       continue
@@ -80,6 +77,25 @@ export function selecionarPortalProximo(
   }
 
   return escolhido
+}
+
+/**
+ * Encontra o portal disponível mais próximo dentro do raio de ativação.
+ * Empates usam prioridade e, por fim, ID, mantendo o resultado determinístico.
+ */
+export function selecionarPortalProximo(
+  jogador: PosicaoXZ,
+  portais: readonly PortalMapa[],
+): PortalMapa | null {
+  return selecionarPortalMaisProximo(jogador, portais, portalDisponivel)
+}
+
+/** Encontra o portal mais próximo, inclusive quando está indisponível. */
+export function selecionarPortalDetectado(
+  jogador: PosicaoXZ,
+  portais: readonly PortalMapa[],
+): PortalMapa | null {
+  return selecionarPortalMaisProximo(jogador, portais, () => true)
 }
 
 /** Alias verbal para uso nos componentes de cena. */

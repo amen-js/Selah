@@ -3,6 +3,7 @@ import {
   distanciaXZ,
   estaNoRaioXZ,
   portalDisponivel,
+  selecionarPortalDetectado,
   resolverPortalProximo,
 } from './proximidade'
 import type { PortalMapa } from './types'
@@ -69,5 +70,12 @@ describe('helpers de proximidade de portais', () => {
     expect(portalDisponivel(indisponivel)).toBe(false)
     expect(resolverPortalProximo({ x: 0, z: 0 }, [indisponivel])).toBeNull()
     expect(resolverPortalProximo({ x: 100, z: 100 }, [portalLeste])).toBeNull()
+  })
+
+  it('detecta o portal indisponível sem torná-lo acionável', () => {
+    const indisponivel = { ...portalLeste, disponivel: false }
+
+    expect(selecionarPortalDetectado({ x: 4, z: 0 }, [indisponivel])).toBe(indisponivel)
+    expect(resolverPortalProximo({ x: 4, z: 0 }, [indisponivel])).toBeNull()
   })
 })

@@ -251,7 +251,12 @@ describe('abrigo e tempestade de Noé', () => {
         'filhotes-mamiferos',
       ],
     })
-    expect(projetarAtmosferaNoe(m8).chuvaExteriorAtiva).toBe(false)
+    expect(projetarAtmosferaNoe(m8)).toMatchObject({
+      densidadeNuvens: 0.22,
+      intensidadeVento: 0.12,
+      corCeu: '#9bcfdd',
+      chuvaExteriorAtiva: false,
+    })
 
     const m9 = estadoNoMomento('nova-terra-arco-iris', [
       ...ateM5,
@@ -260,5 +265,11 @@ describe('abrigo e tempestade de Noé', () => {
       'retorno-pomba',
     ])
     expect(obterEstadoVisualAbrigoNoe(m9).porta).toBe('aberta')
+    expect(projetarAtmosferaNoe(m9)).toMatchObject({
+      densidadeNuvens: 0,
+      intensidadeVento: 0,
+      corCeu: '#91d8ec',
+      chuvaExteriorAtiva: false,
+    })
   })
 })

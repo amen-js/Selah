@@ -11,8 +11,11 @@ import type {
 import {
   arcoIrisVisivelNoe,
   descreverTarefasNovaTerraNoe,
+  MEIA_EXTENSAO_COLISOR_ALTAR_NOE,
   obterEstadoVisualNovaTerraNoe,
+  penhascosArarateNoe,
   resolverCandidatoNovaTerraNoe,
+  tarefasNovaTerraNoe,
 } from './novaTerra'
 
 const MOMENTOS_ANTES_DA_NOVA_TERRA = [
@@ -60,6 +63,32 @@ function concluirDesembarques(estado: EstadoProgressaoNoe) {
 }
 
 describe('nova terra e aliança de Noé', () => {
+  it('mantém os penhascos fora do casco e o gatilho fora do futuro altar', () => {
+    for (const penhasco of penhascosArarateNoe) {
+      const cos = Math.abs(Math.cos(penhasco.rotacaoY))
+      const sin = Math.abs(Math.sin(penhasco.rotacaoY))
+      const meiaLarguraRotacionada =
+        cos * penhasco.escala[0] + sin * penhasco.escala[2]
+      const xMin = penhasco.posicao[0] - meiaLarguraRotacionada
+      const xMax = penhasco.posicao[0] + meiaLarguraRotacionada
+
+      expect(xMax <= -6.4 || xMin >= 6.4).toBe(true)
+    }
+
+    const altar = tarefasNovaTerraNoe.find(
+      ({ acaoId }) => acaoId === 'noe.altar.construido',
+    )
+    expect(altar).toBeDefined()
+    if (!altar) return
+    const distanciaAoCentro = Math.hypot(
+      altar.posicao[0] - altar.posicaoDestino[0],
+      altar.posicao[2] - altar.posicaoDestino[2],
+    )
+    expect(distanciaAoCentro).toBeGreaterThan(
+      altar.raio + MEIA_EXTENSAO_COLISOR_ALTAR_NOE[2] + 0.3,
+    )
+  })
+
   it('libera os três grupos em ordem livre e mantém o altar bloqueado', () => {
     let estado = criarEstadoM9()
     expect(
@@ -94,10 +123,19 @@ describe('nova terra e aliança de Noé', () => {
 
   it('ordena desembarque, altar e contemplação sem revelar o arco-íris', () => {
     let estado = concluirDesembarques(criarEstadoM9())
+    const gatilhoAltar = tarefasNovaTerraNoe.find(
+      ({ acaoId }) => acaoId === 'noe.altar.construido',
+    )
+    expect(gatilhoAltar).toBeDefined()
+    if (!gatilhoAltar) return
 
     expect(
       resolverCandidatoNovaTerraNoe(
-        { x: 0, y: 0.45, z: 30.5 },
+        {
+          x: gatilhoAltar.posicao[0],
+          y: gatilhoAltar.posicao[1],
+          z: gatilhoAltar.posicao[2],
+        },
         estado,
       ),
     ).toMatchObject({

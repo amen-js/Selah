@@ -12,7 +12,9 @@ import type { PosicaoJogador } from '../../creation/proximidade'
 import type { EstadoProgressaoNoe } from '../progression/types'
 import {
   descreverTarefasNovaTerraNoe,
+  MEIA_EXTENSAO_COLISOR_ALTAR_NOE,
   obterEstadoVisualNovaTerraNoe,
+  penhascosArarateNoe,
   resolverCandidatoNovaTerraNoe,
   type AcaoNovaTerraNoeId,
   type CandidatoNovaTerraNoePuro,
@@ -62,33 +64,32 @@ function Caixa({
 }
 
 function MontanhaArarate() {
-  const penhascos = [
-    [-10.5, 0.3, -25.5, 9.5, 5.8, 9.5, '#6f736b'],
-    [10.5, 0.15, -25.5, 9.2, 5.5, 9.2, '#777b70'],
-    [-14.5, -0.25, -13, 7.2, 4.1, 7.2, '#85877a'],
-    [14.5, -0.3, -13, 7.4, 4.2, 7.4, '#7c8075'],
-  ] as const
-
   return (
     <group name="arca-pousada-no-ararate">
       <mesh position={[0, -1.05, -16]} scale={[12.8, 1.15, 17.2]} receiveShadow>
         <icosahedronGeometry args={[1, 1]} />
         <meshStandardMaterial color="#74796e" roughness={0.96} />
       </mesh>
-      {penhascos.map(([x, y, z, sx, sy, sz, cor], indice) => (
-        <mesh
-          key={indice}
-          castShadow
-          receiveShadow
-          position={[x, y, z]}
-          scale={[sx, sy, sz]}
-          rotation={[0, indice * 0.58, 0]}
+      {penhascosArarateNoe.map(({ id, posicao, escala, rotacaoY, cor }) => (
+        <RigidBody
+          key={id}
+          name={`colisor-${id}`}
+          type="fixed"
+          colliders={false}
+          position={[...posicao]}
+          rotation={[0, rotacaoY, 0]}
         >
-          <icosahedronGeometry args={[1, 1]} />
-          <meshStandardMaterial color={cor} roughness={0.95} />
-        </mesh>
+          <CuboidCollider
+            args={[escala[0] * 0.62, escala[1] * 0.55, escala[2] * 0.62]}
+            friction={1.05}
+          />
+          <mesh castShadow receiveShadow scale={[...escala]}>
+            <icosahedronGeometry args={[1, 1]} />
+            <meshStandardMaterial color={cor} roughness={0.95} />
+          </mesh>
+        </RigidBody>
       ))}
-      <mesh position={[0, -0.42, 19]} scale={[21, 0.65, 24]} receiveShadow>
+      <mesh position={[0, -0.55, 19]} scale={[21, 0.65, 24]} receiveShadow>
         <sphereGeometry args={[1, 22, 12]} />
         <meshStandardMaterial color="#76a75c" roughness={0.98} />
       </mesh>
@@ -356,7 +357,10 @@ function AltarGratidao({ construido }: { construido: boolean }) {
       userData={{ construido }}
     >
       {construido && (
-        <CuboidCollider args={[1.05, 0.65, 0.85]} position={[0, 0.48, 0]} />
+        <CuboidCollider
+          args={[...MEIA_EXTENSAO_COLISOR_ALTAR_NOE]}
+          position={[0, 0.48, 0]}
+        />
       )}
       {pedras.map(([x, y, z, escala], indice) => (
         <mesh

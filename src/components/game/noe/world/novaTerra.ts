@@ -60,6 +60,48 @@ export interface EstadoVisualNovaTerraNoe {
 
 const PRIORIDADE_NOVA_TERRA = 390
 
+export const MEIA_EXTENSAO_COLISOR_ALTAR_NOE: Ponto3D = [1.05, 0.65, 0.85]
+
+export interface PenhascoArarateNoe {
+  id: string
+  posicao: Ponto3D
+  escala: Ponto3D
+  rotacaoY: number
+  cor: string
+}
+
+/** Side cliffs frame the Ark without intersecting its navigable hull. */
+export const penhascosArarateNoe: readonly PenhascoArarateNoe[] = [
+  {
+    id: 'ararate-oeste-fundo',
+    posicao: [-23, 0.3, -25.5],
+    escala: [9.5, 5.8, 9.5],
+    rotacaoY: 0,
+    cor: '#6f736b',
+  },
+  {
+    id: 'ararate-leste-fundo',
+    posicao: [23, 0.15, -25.5],
+    escala: [9.2, 5.5, 9.2],
+    rotacaoY: 0.58,
+    cor: '#777b70',
+  },
+  {
+    id: 'ararate-oeste-frente',
+    posicao: [-20, -0.25, -13],
+    escala: [7.2, 4.1, 7.2],
+    rotacaoY: 1.16,
+    cor: '#85877a',
+  },
+  {
+    id: 'ararate-leste-frente',
+    posicao: [20, -0.3, -13],
+    escala: [7.4, 4.2, 7.4],
+    rotacaoY: 1.74,
+    cor: '#7c8075',
+  },
+] as const
+
 /** Stage 1 is deliberately free-order; stages 2 and 3 are strict gates. */
 export const tarefasNovaTerraNoe: readonly DescritorTarefaNovaTerraNoe[] = [
   {
@@ -102,9 +144,9 @@ export const tarefasNovaTerraNoe: readonly DescritorTarefaNovaTerraNoe[] = [
     id: 'nova-terra-altar-gratidao',
     acaoId: 'noe.altar.construido',
     unidadeId: 'altar-de-gratidao',
-    posicao: [0, 0.45, 30.5],
+    posicao: [0, 0.45, 27.2],
     posicaoDestino: [0, 0.45, 30.5],
-    raio: 2.25,
+    raio: 1.6,
     prioridade: PRIORIDADE_NOVA_TERRA,
     etapa: 2,
     ordem: 4,

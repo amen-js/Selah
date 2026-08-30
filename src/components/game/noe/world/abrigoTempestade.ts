@@ -65,8 +65,8 @@ export interface EstadoVisualAbrigoNoe {
 
 export interface ProjecaoAtmosferaNoe {
   percentualPreparacao: PercentualPreparacaoNoe
-  densidadeNuvens: 0 | 0.33 | 0.66 | 1
-  intensidadeVento: 0 | 0.25 | 0.55 | 0.72
+  densidadeNuvens: 0 | 0.22 | 0.33 | 0.66 | 1
+  intensidadeVento: 0 | 0.12 | 0.25 | 0.55 | 0.72
   chuvaExteriorAtiva: boolean
   corCeu: string
   corNuvem: string
@@ -311,7 +311,22 @@ export function projetarAtmosferaNoe(
   estado: EstadoProgressaoNoe,
 ): ProjecaoAtmosferaNoe {
   const clima = obterClimaNoe(estado)
-  const parametros = PARAMETROS_ATMOSFERA[clima.percentualPreparacao]
+  const parametros =
+    clima.fase === 'luz-retornando'
+      ? {
+          densidadeNuvens: 0.22 as const,
+          intensidadeVento: 0.12 as const,
+          corCeu: '#9bcfdd',
+          corNuvem: '#e7e8df',
+        }
+      : clima.fase === 'nova-terra'
+        ? {
+            densidadeNuvens: 0 as const,
+            intensidadeVento: 0 as const,
+            corCeu: '#91d8ec',
+            corNuvem: '#f7f3df',
+          }
+        : PARAMETROS_ATMOSFERA[clima.percentualPreparacao]
   const portaSegura = obterEstadoVisualAbrigoNoe(estado).porta === 'fechada'
 
   return {

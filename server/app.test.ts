@@ -19,6 +19,11 @@ describe('Selah API proxy', () => {
     ...loadEnv(),
     openRouterApiKey: '',
     youVersionAppKey: '',
+    youVersionBibleIds: {
+      'pt-BR': 3254,
+      'en-US': 3034,
+      'es-ES': 3291,
+    },
   }
 
   it('returns an approved verse from the public-domain snapshot', async () => {
@@ -109,6 +114,51 @@ describe('Selah API proxy', () => {
     expect(body).not.toHaveProperty('respostaCorretaId')
   })
 
+  it('grounds the LLM quiz in live YouVersion text', async () => {
+    const fetchFn = vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          content: 'Deus disse: “Haja luz e houve luz”.',
+          reference: 'Gênesis 1:3',
+        }),
+        { status: 200, headers: { 'content-type': 'application/json' } },
+      ),
+    )
+    const gerarQuiz = vi.fn(async (input: { texto: string; referencia: string }) => {
+      expect(input.referencia).toBe('Gênesis 1:3')
+      expect(input.texto).toContain('Haja luz')
+      return {
+        pergunta: 'O que Deus disse para que houvesse luz?',
+        alternativas: [
+          { id: 'A' as const, texto: 'Haja luz' },
+          { id: 'B' as const, texto: 'Haja uma cidade' },
+          { id: 'C' as const, texto: 'Haja um palácio' },
+          { id: 'D' as const, texto: 'Haja uma torre' },
+        ],
+        respostaCorretaId: 'A' as const,
+        explicacao: 'Deus disse haja luz e houve luz.',
+      }
+    })
+    const app = createApp({
+      env: { ...env, youVersionAppKey: 'test-key' },
+      fetchFn,
+      openRouter: { gerarQuiz },
+    })
+    const body = await json(
+      await app.request('/api/quiz/gerar', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ ...gerarBody, iaAtiva: true }),
+      }),
+    )
+    expect(body.origem).toBe('ia')
+    expect(gerarQuiz).toHaveBeenCalledOnce()
+    expect(fetchFn).toHaveBeenCalledWith(
+      expect.stringContaining('/bibles/3254/passages/GEN.1.3'),
+      expect.anything(),
+    )
+  })
+
   it('falls back when the LLM output fails closed', async () => {
     const openRouter: OpenRouterClient = {
       gerarQuiz: async () => ({
@@ -184,6 +234,33 @@ describe('Selah API proxy', () => {
     expect(body.atribuicao).toContain('Berean Standard Bible')
     expect(fetchFn).toHaveBeenCalledWith(
       expect.stringContaining('/bibles/3034/passages/GEN.1.3'),
+      expect.objectContaining({
+        headers: expect.objectContaining({ 'X-YVP-App-Key': 'test-key' }),
+      }),
+    )
+  })
+
+  it('requests the licensed Portuguese YouVersion bible', async () => {
+    const fetchFn = vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          content: 'Deus disse: “Haja luz e houve luz”.',
+          reference: 'Gênesis 1:3',
+        }),
+        { status: 200, headers: { 'content-type': 'application/json' } },
+      ),
+    )
+    const app = createApp({
+      env: { ...env, youVersionAppKey: 'test-key' },
+      fetchFn,
+    })
+    const body = await json(
+      await app.request('/api/versiculo?passagemId=genesis-1-3&idioma=pt-BR'),
+    )
+    expect(body.origem).toBe('youversion')
+    expect(body.versao).toBe('Bíblia Livre Para Todos')
+    expect(fetchFn).toHaveBeenCalledWith(
+      expect.stringContaining('/bibles/3254/passages/GEN.1.3'),
       expect.objectContaining({
         headers: expect.objectContaining({ 'X-YVP-App-Key': 'test-key' }),
       }),

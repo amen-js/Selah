@@ -27,12 +27,7 @@ describe('validarQuiz', () => {
     const resultado = validarQuiz(
       {
         ...quizLuz(),
-        alternativas: [
-          { id: 'A', texto: 'Houve luz' },
-          { id: 'B', texto: 'Noé entrou na arca' },
-          { id: 'C', texto: 'José sonhou' },
-          { id: 'D', texto: 'Surgiu um palácio' },
-        ],
+        explicacao: 'José sonhou, e depois Deus disse haja luz.',
       },
       'E disse Deus: Haja luz. E houve luz.',
       'geral',

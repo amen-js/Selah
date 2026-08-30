@@ -35,3 +35,37 @@ export interface ConfiguracaoEfeitosCriacao {
   todasEntradas: readonly ConfiguracaoEfeitoIndividual[]
   temEfeito: (id: ProceduralVfxAssetId) => boolean
 }
+
+export interface PontoParticula {
+  x: number
+  y: number
+  z: number
+  velocidade: number
+  fase: number
+  tamanho: number
+}
+
+export interface PontoCrescimento {
+  origem: [number, number, number]
+  deslocamento: [number, number, number]
+  velocidade: number
+  fase: number
+  escala: number
+  corIndex: number
+}
+
+export interface PontoEstrela {
+  x: number
+  y: number
+  z: number
+  tamanho: number
+  fase: number
+  frequencia: number
+  brilhoBase: number
+}
+
+export interface PontoNuvem {
+  posicao: [number, number, number]
+  escala: [number, number, number]
+  velocidade: number
+}

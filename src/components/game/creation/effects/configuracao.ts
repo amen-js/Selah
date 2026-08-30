@@ -6,6 +6,10 @@ import {
 import type {
   ConfiguracaoEfeitosCriacao,
   OpcoesConfiguracaoEfeitos,
+  PontoCrescimento,
+  PontoEstrela,
+  PontoNuvem,
+  PontoParticula,
   ProceduralVfxAssetId,
 } from './types'
 
@@ -74,15 +78,6 @@ export function criarPrng(seed: number): () => number {
   }
 }
 
-export interface PontoParticula {
-  x: number
-  y: number
-  z: number
-  velocidade: number
-  fase: number
-  tamanho: number
-}
-
 /**
  * Generates deterministic points for empty ambient particles.
  */
@@ -123,15 +118,6 @@ export function gerarMarcadoresCaminhoLuz(): Array<[number, number, number]> {
   ]
 }
 
-export interface PontoCrescimento {
-  origem: [number, number, number]
-  deslocamento: [number, number, number]
-  velocidade: number
-  fase: number
-  escala: number
-  corIndex: number
-}
-
 /**
  * Generates deterministic growth particles around focal points.
  */
@@ -165,16 +151,6 @@ export function gerarParticulasCrescimento(
   return pontos
 }
 
-export interface PontoEstrela {
-  x: number
-  y: number
-  z: number
-  tamanho: number
-  fase: number
-  frequencia: number
-  brilhoBase: number
-}
-
 /**
  * Generates deterministic celestial star dome coordinates.
  */
@@ -190,7 +166,6 @@ export function gerarPontosEstrelas(
     const u = rand()
     const v = rand()
     const theta = u * 2.0 * Math.PI
-    // Upper hemisphere only (phi between 0.15 and 0.85 rad from top)
     const phi = Math.acos(0.15 + v * 0.82)
 
     const x = raio * Math.sin(phi) * Math.cos(theta)
@@ -209,12 +184,6 @@ export function gerarPontosEstrelas(
   }
 
   return estrelas
-}
-
-export interface PontoNuvem {
-  posicao: [number, number, number]
-  escala: [number, number, number]
-  velocidade: number
 }
 
 /**

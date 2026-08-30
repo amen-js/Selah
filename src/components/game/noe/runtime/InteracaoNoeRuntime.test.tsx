@@ -117,6 +117,20 @@ describe('InteracaoNoeRuntime', () => {
     expect(acionarTarefa).not.toHaveBeenCalled()
   })
 
+  it('confirma a lista mais recente logo após um rerender', () => {
+    const antigos = criarCandidatos()
+    const novos = criarCandidatos()
+    const { rerender } = render(
+      <InteracaoNoeRuntime candidatos={antigos.candidatos} enabled />,
+    )
+
+    rerender(<InteracaoNoeRuntime candidatos={novos.candidatos} enabled />)
+    fireEvent.keyDown(window, { code: 'KeyE' })
+
+    expect(novos.acionarTarefa).toHaveBeenCalledOnce()
+    expect(antigos.acionarTarefa).not.toHaveBeenCalled()
+  })
+
   it('consome a confirmação antes de listeners posteriores', () => {
     const { candidatos, acionarTarefa } = criarCandidatos()
     const listenerPosterior = vi.fn()

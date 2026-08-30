@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useLayoutEffect, useRef } from 'react'
 import { ehTeclaConfirmacaoPortal } from '../../portals/teclas'
 import {
   selecionarCandidatoInteracaoNoe,
@@ -17,7 +17,7 @@ export function InteracaoNoeRuntime({
 }: InteracaoNoeRuntimeProps) {
   const candidatosRef = useRef(candidatos)
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     candidatosRef.current = candidatos
   }, [candidatos])
 

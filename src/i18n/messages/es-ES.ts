@@ -133,6 +133,16 @@ export const esES = {
   'creation.complete.objective':
     'Todo está lleno de vida. Contempla el mundo y continúa tu viaje cuando quieras.',
 
+  'noe.interaction.aria': 'Interacción disponible: {target}',
+  'noe.interaction.eyebrow': 'Construir y explorar',
+  'noe.interaction.task': 'Tarea de Noé',
+  'noe.interaction.selah': 'Momento Selah',
+  'noe.interaction.enter': 'Presiona E o Enter para interactuar',
+  'noe.slice.aria': 'Capítulo del astillero completado',
+  'noe.slice.eyebrow': 'Etapa completada',
+  'noe.slice.title': 'El astillero está listo',
+  'noe.slice.hint': 'Explora el valle o vuelve por el portal cuando quieras.',
+
   'portal.prompt.aria': 'Portal a {region}',
   'portal.prompt.eyebrow': 'Portal',
   'portal.prompt.enter': 'Presiona E o Enter para entrar',

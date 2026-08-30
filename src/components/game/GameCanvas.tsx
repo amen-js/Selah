@@ -61,6 +61,12 @@ import {
   type FasePortalTransicao,
   type PortalMapa,
 } from './portals'
+import {
+  NoeInteractionPrompt,
+  NoeSliceStatus,
+  NoeWorldRuntime,
+  type TipoInteracaoNoe,
+} from './noe'
 import { RiggedPlayer } from './player'
 import { Arte2DRegiao, Cenario3DRegiao, ColetaveisRegiao } from './region'
 
@@ -180,6 +186,8 @@ type WorldProps = {
   ) => void
   onInatividadeCriacaoChange?: (inativo: boolean) => void
   onInteracaoCriacaoProxima: (tipo: TipoInteracaoCriacao | null) => void
+  onInteracaoNoeProxima: (tipo: TipoInteracaoNoe | null) => void
+  onBlocoNoeConcluido: (concluido: boolean) => void
 }
 
 function World({
@@ -192,6 +200,8 @@ function World({
   onProgressaoCriacaoChange,
   onInatividadeCriacaoChange,
   onInteracaoCriacaoProxima,
+  onInteracaoNoeProxima,
+  onBlocoNoeConcluido,
 }: WorldProps) {
   const reducedMotion = useReducedMotionPreference()
   const posicaoJogadorRef = useRef<PosicaoJogador | null>(null)
@@ -296,6 +306,18 @@ function World({
     <>
       {regiao === 'criacao' ? (
         <AtmosferaCriacao momentoId={momentoCriacaoId} />
+      ) : regiao === 'noe' ? (
+        <>
+          <color attach="background" args={['#b8c8a8']} />
+          <fog attach="fog" args={['#b8c8a8', 28, 82]} />
+          <hemisphereLight args={['#fff2cf', '#465a38', 2.35]} />
+          <directionalLight
+            position={[14, 18, 10]}
+            intensity={2.8}
+            color="#fff1c2"
+            castShadow
+          />
+        </>
       ) : (
         <>
           <color attach="background" args={['#b8d7ca']} />
@@ -332,17 +354,31 @@ function World({
       <Suspense fallback={null}>
         <Arte2DRegiao artes={artesDisponiveis} />
       </Suspense>
-      <ColetaveisRegiao
-        coletaveis={coletaveisDisponiveis}
-        posicaoJogadorRef={posicaoJogadorRef}
-        enabled={playing}
-        reducedMotion={reducedMotion}
-        interacaoExplicita={regiao === 'criacao'}
-        bloquearPassagensRespondidas={regiao !== 'criacao'}
-        onColetavelProximo={
-          regiao === 'criacao' ? atualizarColetavelProximo : undefined
-        }
-      />
+      {regiao === 'noe' ? (
+        <NoeWorldRuntime
+          coletaveis={mapa.coletaveis}
+          portais={portais}
+          posicaoJogadorRef={posicaoJogadorRef}
+          enabled={playing}
+          reducedMotion={reducedMotion}
+          onPortalProximo={onPortalProximo}
+          onPortalAcionado={onPortalAcionado}
+          onInteracaoProxima={onInteracaoNoeProxima}
+          onBlocoConcluido={onBlocoNoeConcluido}
+        />
+      ) : (
+        <ColetaveisRegiao
+          coletaveis={coletaveisDisponiveis}
+          posicaoJogadorRef={posicaoJogadorRef}
+          enabled={playing}
+          reducedMotion={reducedMotion}
+          interacaoExplicita={regiao === 'criacao'}
+          bloquearPassagensRespondidas={regiao !== 'criacao'}
+          onColetavelProximo={
+            regiao === 'criacao' ? atualizarColetavelProximo : undefined
+          }
+        />
+      )}
       {regiao === 'criacao' && (
         <>
           <EfeitosCriacao
@@ -368,17 +404,19 @@ function World({
           />
         </>
       )}
-      <PortaisRegiao
-        portais={portais}
-        playerRef={posicaoJogadorRef}
-        enabled={
-          playing &&
-          !(regiao === 'criacao' && interacaoCriacaoLocal !== null)
-        }
-        reducedMotion={reducedMotion}
-        onPortalProximo={onPortalProximo}
-        onPortalAcionado={onPortalAcionado}
-      />
+      {regiao !== 'noe' && (
+        <PortaisRegiao
+          portais={portais}
+          playerRef={posicaoJogadorRef}
+          enabled={
+            playing &&
+            !(regiao === 'criacao' && interacaoCriacaoLocal !== null)
+          }
+          reducedMotion={reducedMotion}
+          onPortalProximo={onPortalProximo}
+          onPortalAcionado={onPortalAcionado}
+        />
+      )}
 
       <RigidBody type="fixed" colliders={false}>
         <CuboidCollider
@@ -447,6 +485,9 @@ export function GameCanvas({
   const [portalProximo, setPortalProximo] = useState<PortalMapa | null>(null)
   const [interacaoCriacaoProxima, setInteracaoCriacaoProxima] =
     useState<TipoInteracaoCriacao | null>(null)
+  const [interacaoNoeProxima, setInteracaoNoeProxima] =
+    useState<TipoInteracaoNoe | null>(null)
+  const [blocoNoeConcluido, setBlocoNoeConcluido] = useState(false)
   const [faseTransicao, setFaseTransicao] =
     useState<FasePortalTransicao>('inativo')
   const [destinoTransicao, setDestinoTransicao] =
@@ -527,7 +568,7 @@ export function GameCanvas({
     <KeyboardControls map={keyboardMap}>
       <Canvas
         className="game-canvas"
-        camera={{ position: [6, 5, 9], fov: 70, near: 0.1, far: 80 }}
+        camera={{ position: [6, 5, 9], fov: 70, near: 0.1, far: 110 }}
         dpr={[1, 1.5]}
         gl={{ antialias: true, powerPreference: 'high-performance' }}
         onCreated={({ gl, scene }) => {
@@ -550,6 +591,8 @@ export function GameCanvas({
                 onProgressaoCriacaoChange={onProgressaoCriacaoChange}
                 onInatividadeCriacaoChange={onInatividadeCriacaoChange}
                 onInteracaoCriacaoProxima={setInteracaoCriacaoProxima}
+                onInteracaoNoeProxima={setInteracaoNoeProxima}
+                onBlocoNoeConcluido={setBlocoNoeConcluido}
               />
             ) : (
               <RegionFallback />
@@ -559,11 +602,24 @@ export function GameCanvas({
       </Canvas>
       <PortalPrompt
         portal={
-          mundoAtivo && !interacaoCriacaoProxima ? portalProximo : null
+          mundoAtivo && !interacaoCriacaoProxima && !interacaoNoeProxima
+            ? portalProximo
+            : null
         }
       />
       <CreationInteractionPrompt
         tipo={mundoAtivo ? interacaoCriacaoProxima : null}
+      />
+      <NoeInteractionPrompt
+        tipo={mundoAtivo ? interacaoNoeProxima : null}
+      />
+      <NoeSliceStatus
+        visible={
+          mundoAtivo &&
+          blocoNoeConcluido &&
+          !portalProximo &&
+          !interacaoNoeProxima
+        }
       />
       <PortalTransitionOverlay
         fase={faseTransicao}

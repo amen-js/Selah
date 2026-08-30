@@ -3,6 +3,7 @@ import type { RequisitoPendenteNoe } from '../progression/estado'
 import {
   criarCandidatoSelahFinalNoe,
   obterRequisitoSelahFinalNoe,
+  selecionarColetaveisSelahFinalNoe,
   selecionarCandidatoInteracaoNoe,
   type CandidatoInteracaoNoe,
   type CandidatoPortalNoe,
@@ -133,5 +134,40 @@ describe('candidato de Selah final', () => {
     candidato?.acionar()
     expect(acionar).toHaveBeenCalledOnce()
     expect(acionar).toHaveBeenCalledWith('genesis-6-14')
+  })
+
+  it('renderiza somente o cristal exigido, sem spoiler nem repetição', () => {
+    const coletaveis = [
+      {
+        id: 'selah-atual',
+        historiaId: 'noe',
+        passagemId: 'genesis-6-14',
+        posicao: [0, 1, 0] as const,
+      },
+      {
+        id: 'selah-futuro',
+        historiaId: 'noe',
+        passagemId: 'genesis-6-19',
+        posicao: [4, 1, 0] as const,
+      },
+    ]
+
+    expect(
+      selecionarColetaveisSelahFinalNoe(coletaveis, [selahFinal], []),
+    ).toEqual([coletaveis[0]])
+    expect(
+      selecionarColetaveisSelahFinalNoe(
+        coletaveis,
+        [selahFinal],
+        ['genesis-6-14'],
+      ),
+    ).toEqual([])
+    expect(
+      selecionarColetaveisSelahFinalNoe(
+        coletaveis,
+        [tarefaPendente],
+        [],
+      ),
+    ).toEqual([])
   })
 })

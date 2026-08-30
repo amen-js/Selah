@@ -1,3 +1,4 @@
+import type { ColetavelMapa } from '../../../../mapas/types'
 import type { RequisitoPendenteNoe } from '../progression/estado'
 import type { AcaoNoeId } from '../progression/types'
 
@@ -104,6 +105,20 @@ export function obterRequisitoSelahFinalNoe(
 
   const requisito = requisitosPendentes[0]
   return requisito.tipo === 'selah-final' ? requisito : null
+}
+
+/** Hides every future or already completed crystal from Noah's scene. */
+export function selecionarColetaveisSelahFinalNoe(
+  coletaveis: readonly ColetavelMapa[],
+  requisitosPendentes: readonly RequisitoPendenteNoe[],
+  selahsConcluidos: readonly string[],
+): readonly ColetavelMapa[] {
+  const requisito = obterRequisitoSelahFinalNoe(requisitosPendentes)
+  if (!requisito || selahsConcluidos.includes(requisito.passagemId)) return []
+
+  return coletaveis.filter(
+    ({ passagemId }) => passagemId === requisito.passagemId,
+  )
 }
 
 export interface OpcoesCandidatoSelahFinalNoe {

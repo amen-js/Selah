@@ -47,21 +47,33 @@ function ColetavelRegiao({
         posicao[1] + Math.sin(tempoAnimadoRef.current * 2 + indice * 0.9) * 0.16
     }
 
-    if (!enabled || acionadoRef.current) return
-
     const estado = useGameStore.getState()
+    const passagemRespondida = estado.historico.some(
+      ({ passagemId }) => passagemId === coletavel.passagemId,
+    )
+    const posicaoJogador = posicaoJogadorRef.current
+    const jogadorNoRaio = Boolean(
+      posicaoJogador && estaNoRaio(posicaoJogador, coletavel.posicao, raio),
+    )
+
+    if (acionadoRef.current) {
+      if (!jogadorNoRaio && !passagemRespondida) acionadoRef.current = false
+      return
+    }
+
+    if (!enabled) return
+
     if (
       !podeAcionarColetavel({
         enabled,
         jaAcionado: acionadoRef.current,
         selahAtivo: estado.selahAtivo !== null,
         pausaParentalAtiva: estado.pausaParentalAtiva,
-        passagemColetada: estado.versiculosColetados.includes(coletavel.passagemId),
+        passagemRespondida,
       })
     ) return
 
-    const posicaoJogador = posicaoJogadorRef.current
-    if (!posicaoJogador || !estaNoRaio(posicaoJogador, coletavel.posicao, raio)) return
+    if (!jogadorNoRaio) return
 
     acionadoRef.current = true
     estado.abrirSelah({

@@ -7,7 +7,7 @@ const condicoesPermitidas: CondicoesColetavel = {
   jaAcionado: false,
   selahAtivo: false,
   pausaParentalAtiva: false,
-  passagemColetada: false,
+  passagemRespondida: false,
 }
 
 describe('podeAcionarColetavel', () => {
@@ -20,7 +20,7 @@ describe('podeAcionarColetavel', () => {
     ['já acionado', { jaAcionado: true }],
     ['Selah ativo', { selahAtivo: true }],
     ['pausa parental ativa', { pausaParentalAtiva: true }],
-    ['passagem já coletada', { passagemColetada: true }],
+    ['passagem já respondida', { passagemRespondida: true }],
   ])('bloqueia quando está %s', (_, bloqueio) => {
     expect(
       podeAcionarColetavel({ ...condicoesPermitidas, ...bloqueio }),

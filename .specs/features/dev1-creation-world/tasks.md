@@ -9,7 +9,7 @@
 | T2 | Typed nine-moment catalogue and pure state machine | T1 | Unit | Complete |
 | T3 | R3F bridge for movement, zones and completed Selahs | T2 | Unit + build | Complete |
 | T4 | Smooth atmosphere, gated interactions and per-moment reveal hooks | T3 | Browser | Ready for UAT |
-| T5 | Voice Guide dialogue/narration integration | T3, localized copy/audio | Browser | Pending |
+| T5 | Voice Guide dialogue/narration integration | T3, approved localized scripts | Browser | Ready for specification — OpenRouter TTS selected |
 | T6 | Replace provisional map with optimized 3D chunks | Final assets | Browser + performance | Pending |
 | T7 | Full Creation route UAT, performance and accessibility pass | T4-T6 | Full | Pending |
 

@@ -252,6 +252,8 @@ export const ptBR = {
   'lab.scenario.fallback': 'Fallback aprovado',
   'lab.scenario.error': 'Erro de rede',
   'lab.creationMoment.label': 'Momento da Criação',
+  'lab.creationActivity.pause': 'Simular inatividade',
+  'lab.creationActivity.resume': 'Retomar atividade',
   'lab.startSelah': 'Abrir Selah',
   'lab.showDialog': 'Mostrar diálogo',
   'lab.activatePause': 'Ativar pausa parental',

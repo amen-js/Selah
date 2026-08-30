@@ -8,7 +8,7 @@ import type {
 import { traduzirJornadaCriacao } from '../components/game/creationJourneyUi'
 import { GameOverlay } from '../components/game/GameOverlay'
 import { useTranslation, type TranslationKey } from '../i18n'
-import { createTtsController } from '../services/tts'
+import { createTtsController, type TtsController } from '../services/tts'
 import { useGameStore } from '../stores/gameStore'
 import { createLabGateway, type CenarioLab, versiculoLab } from './fixtures'
 
@@ -18,13 +18,19 @@ const cenarioKeys: Record<CenarioLab, TranslationKey> = {
   erro: 'lab.scenario.error',
 }
 
-export function LabPage() {
+interface LabPageProps {
+  tts?: TtsController
+}
+
+export function LabPage({ tts: ttsInjetado }: LabPageProps = {}) {
   const { idioma, t } = useTranslation()
   const [cenario, setCenario] = useState<CenarioLab>('sucesso')
   const [momentoSelecionadoId, setMomentoSelecionadoId] =
     useState<MomentoCriacaoId>('vazio')
+  const [inatividadeCriacao, setInatividadeCriacao] = useState(false)
   const gateway = useMemo(() => createLabGateway(cenario), [cenario])
-  const tts = useMemo(() => createTtsController(), [])
+  const ttsFallback = useMemo(() => createTtsController(), [])
+  const tts = ttsInjetado ?? ttsFallback
   const setRegiao = useGameStore((state) => state.setRegiao)
   const abrirSelah = useGameStore((state) => state.abrirSelah)
   const setDialogoAberto = useGameStore((state) => state.setDialogoAberto)
@@ -53,8 +59,14 @@ export function LabPage() {
     abrirSelah({ historiaId: 'criacao', passagemId: versiculoLab.passagemId })
   }
 
+  const selecionarMomento = (momentoId: MomentoCriacaoId) => {
+    setMomentoSelecionadoId(momentoId)
+    setInatividadeCriacao(false)
+  }
+
   const reiniciar = () => {
     setMomentoSelecionadoId('vazio')
+    setInatividadeCriacao(false)
     apagarProgresso()
     useGameStore.getState().setRegiao('criacao')
   }
@@ -83,7 +95,7 @@ export function LabPage() {
             aria-label={t('lab.creationMoment.label')}
             value={momentoSelecionadoId}
             onChange={(event) =>
-              setMomentoSelecionadoId(event.target.value as MomentoCriacaoId)
+              selecionarMomento(event.target.value as MomentoCriacaoId)
             }
           >
             {momentosCriacao.map((momento) => (
@@ -113,6 +125,18 @@ export function LabPage() {
         <button
           className="secondary-button"
           type="button"
+          aria-pressed={inatividadeCriacao}
+          onClick={() => setInatividadeCriacao((inativa) => !inativa)}
+        >
+          {t(
+            inatividadeCriacao
+              ? 'lab.creationActivity.resume'
+              : 'lab.creationActivity.pause',
+          )}
+        </button>
+        <button
+          className="secondary-button"
+          type="button"
           aria-label={t('lab.resetAria')}
           onClick={reiniciar}
         >
@@ -137,6 +161,7 @@ export function LabPage() {
         appVersion="lab"
         progressaoCriacao={snapshotProgressaoCriacao}
         exploracaoAtiva
+        inatividadeCriacao={inatividadeCriacao}
         dialogo={{
           personagem: 'Lumi',
           mensagem: t('lab.dialog.message'),

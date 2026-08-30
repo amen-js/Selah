@@ -256,6 +256,8 @@ export const esES = {
   'lab.scenario.fallback': 'Fallback aprobado',
   'lab.scenario.error': 'Error de red',
   'lab.creationMoment.label': 'Momento de la Creación',
+  'lab.creationActivity.pause': 'Simular inactividad',
+  'lab.creationActivity.resume': 'Reanudar actividad',
   'lab.startSelah': 'Abrir Selah',
   'lab.showDialog': 'Mostrar diálogo',
   'lab.activatePause': 'Activar pausa parental',

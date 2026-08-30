@@ -1,8 +1,26 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
+import type { TtsController } from '../services/tts'
 import { useGameStore } from '../stores/gameStore'
 import { LabPage } from './LabPage'
+
+const criarTtsSemRede = (): TtsController => ({
+  suportado: false,
+  estado: () => 'idle',
+  assinar: () => () => undefined,
+  falar: vi.fn(),
+  narrar: vi.fn(),
+  pausar: vi.fn(),
+  retomar: vi.fn(),
+  cancelar: vi.fn(),
+})
+
+const avancarTempo = async (ms: number) => {
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(ms)
+  })
+}
 
 describe('LabPage', () => {
   beforeEach(() => {
@@ -82,63 +100,156 @@ describe('LabPage', () => {
   })
 
   it('switches Creation moments without mounting Canvas', async () => {
-    const user = userEvent.setup()
-    const { container } = render(<LabPage />)
+    vi.useFakeTimers()
+    const tts = criarTtsSemRede()
+    const { container } = render(<LabPage tts={tts} />)
 
-    expect(screen.getByText('Momento 1 de 9')).toBeInTheDocument()
+    try {
+      expect(screen.getByText('Momento 1 de 9')).toBeInTheDocument()
+      expect(screen.getByRole('status', { name: 'Voz Guia' })).toHaveTextContent(
+        'No começo, tudo era escuro e bem silencioso',
+      )
+      await avancarTempo(4_000)
+      expect(screen.getByRole('status', { name: 'Voz Guia' })).toHaveTextContent(
+        'Dê alguns passos e descubra o primeiro caminho.',
+      )
 
-    await user.selectOptions(
-      screen.getByRole('combobox', { name: 'Momento da Criação' }),
-      'luz',
-    )
+      fireEvent.change(screen.getByRole('combobox', { name: 'Momento da Criação' }), {
+        target: { value: 'luz' },
+      })
 
-    expect(screen.getByText('Momento 2 de 9')).toBeInTheDocument()
-    expect(
-      screen.getByRole('status', { name: 'Voz Guia' }),
-    ).toHaveTextContent('Siga os sinais luminosos e aproxime-se da luz.')
-    expect(container.querySelector('canvas')).not.toBeInTheDocument()
+      expect(screen.getByText('Momento 2 de 9')).toBeInTheDocument()
+      expect(screen.getByRole('status', { name: 'Voz Guia' })).toHaveTextContent(
+        'Você ouve isso? Algo maravilhoso está prestes a acontecer...',
+      )
+      await avancarTempo(3_999)
+      expect(screen.getByRole('status', { name: 'Voz Guia' })).toHaveTextContent(
+        'Você ouve isso?',
+      )
+      expect(
+        screen.getByRole('button', { name: 'Simular inatividade' }),
+      ).toBeInTheDocument()
+      await avancarTempo(1)
+      expect(screen.getByRole('status', { name: 'Voz Guia' })).toHaveTextContent(
+        'Olhe só! Pontos brilhantes surgiram.',
+      )
+      await avancarTempo(4_000)
+      expect(screen.getByRole('status', { name: 'Voz Guia' })).toHaveTextContent(
+        'Siga os sinais luminosos e aproxime-se da luz.',
+      )
+      expect(tts.narrar).not.toHaveBeenCalled()
+      expect(container.querySelector('canvas')).not.toBeInTheDocument()
+    } finally {
+      vi.useRealTimers()
+    }
   })
 
-  it('translates the selected Creation moment immediately', async () => {
-    const user = userEvent.setup()
-    render(<LabPage />)
+  it('translates the current narrative line immediately in all three locales', async () => {
+    vi.useFakeTimers()
+    render(<LabPage tts={criarTtsSemRede()} />)
 
-    await user.selectOptions(
-      screen.getByRole('combobox', { name: 'Momento da Criação' }),
-      'luz',
-    )
-    await user.selectOptions(
-      screen.getByRole('combobox', { name: 'Idioma da interface' }),
-      'en-US',
-    )
+    try {
+      fireEvent.change(screen.getByRole('combobox', { name: 'Momento da Criação' }), {
+        target: { value: 'luz' },
+      })
+      expect(screen.getByRole('status', { name: 'Voz Guia' })).toHaveTextContent(
+        'Você ouve isso?',
+      )
 
-    expect(
-      screen.getByRole('combobox', { name: 'Creation moment' }),
-    ).toHaveValue('luz')
-    expect(screen.getByText('Moment 2 of 9')).toBeInTheDocument()
-    expect(
-      screen.getByRole('status', { name: 'Voice Guide' }),
-    ).toHaveTextContent(
-      'The lightFollow the glowing signs and move closer to the light.',
-    )
+      fireEvent.change(screen.getByRole('combobox', { name: 'Idioma da interface' }), {
+        target: { value: 'en-US' },
+      })
+
+      expect(screen.getByRole('combobox', { name: 'Creation moment' })).toHaveValue('luz')
+      expect(screen.getByText('Moment 2 of 9')).toBeInTheDocument()
+      expect(screen.getByRole('status', { name: 'Voice Guide' })).toHaveTextContent(
+        'Do you hear that? Something wonderful is about to happen...',
+      )
+      expect(
+        screen.getByRole('button', { name: 'Simulate inactivity' }),
+      ).toBeInTheDocument()
+
+      fireEvent.change(screen.getByRole('combobox', { name: 'Interface language' }), {
+        target: { value: 'es-ES' },
+      })
+      expect(screen.getByRole('status', { name: 'Voz Guía' })).toHaveTextContent(
+        '¿Oyes eso? Algo maravilloso está a punto de suceder...',
+      )
+      expect(
+        screen.getByRole('button', { name: 'Simular inactividad' }),
+      ).toBeInTheDocument()
+      await avancarTempo(4_000)
+      expect(screen.getByRole('status', { name: 'Voz Guía' })).toHaveTextContent(
+        '¡Mira! Aparecieron puntos brillantes.',
+      )
+    } finally {
+      vi.useRealTimers()
+    }
   })
 
-  it('resets the Creation moment simulator to the void', async () => {
-    const user = userEvent.setup()
-    render(<LabPage />)
+  it('resets the Creation moment and activity simulator to the void', async () => {
+    vi.useFakeTimers()
+    render(<LabPage tts={criarTtsSemRede()} />)
 
-    const momentSelector = screen.getByRole('combobox', {
-      name: 'Momento da Criação',
-    })
-    await user.selectOptions(momentSelector, 'luz')
-    await user.click(
-      screen.getByRole('button', { name: 'Restaurar estado do laboratório' }),
-    )
+    try {
+      const momentSelector = screen.getByRole('combobox', {
+        name: 'Momento da Criação',
+      })
+      await avancarTempo(4_000)
+      fireEvent.change(momentSelector, { target: { value: 'luz' } })
+      await avancarTempo(8_000)
+      fireEvent.click(screen.getByRole('button', { name: 'Simular inatividade' }))
+      expect(screen.getByRole('button', { name: 'Retomar atividade' })).toBeInTheDocument()
+      fireEvent.click(
+        screen.getByRole('button', { name: 'Restaurar estado do laboratório' }),
+      )
 
-    expect(momentSelector).toHaveValue('vazio')
-    expect(screen.getByText('Momento 1 de 9')).toBeInTheDocument()
-    expect(
-      screen.getByRole('status', { name: 'Voz Guia' }),
-    ).toHaveTextContent('Dê alguns passos e descubra o primeiro caminho.')
+      expect(momentSelector).toHaveValue('vazio')
+      expect(screen.getByText('Momento 1 de 9')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Simular inatividade' })).toBeInTheDocument()
+      expect(screen.getByRole('status', { name: 'Voz Guia' })).toHaveTextContent(
+        "E Deus disse: 'Haja luz!'",
+      )
+      await avancarTempo(4_000)
+      expect(screen.getByRole('status', { name: 'Voz Guia' })).toHaveTextContent(
+        'No começo, tudo era escuro e bem silencioso',
+      )
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('resets inactivity and allows support to repeat in a new episode', async () => {
+    vi.useFakeTimers()
+    render(<LabPage tts={criarTtsSemRede()} />)
+
+    try {
+      await avancarTempo(4_000)
+      fireEvent.click(screen.getByRole('button', { name: 'Simular inatividade' }))
+      expect(screen.getByRole('status', { name: 'Voz Guia' })).toHaveTextContent(
+        'Siga devagarinho.',
+      )
+
+      await avancarTempo(4_000)
+      expect(screen.getByRole('status', { name: 'Voz Guia' })).toHaveTextContent(
+        'Dê alguns passos e descubra o primeiro caminho.',
+      )
+
+      fireEvent.click(screen.getByRole('button', { name: 'Retomar atividade' }))
+      fireEvent.click(screen.getByRole('button', { name: 'Simular inatividade' }))
+      expect(screen.getByRole('status', { name: 'Voz Guia' })).toHaveTextContent(
+        'Siga devagarinho.',
+      )
+
+      fireEvent.change(
+        screen.getByRole('combobox', { name: 'Momento da Criação' }),
+        { target: { value: 'luz' } },
+      )
+      expect(
+        screen.getByRole('button', { name: 'Simular inatividade' }),
+      ).toBeInTheDocument()
+    } finally {
+      vi.useRealTimers()
+    }
   })
 })

@@ -3,7 +3,7 @@ import {
   useKeyboardControls,
   type KeyboardControlsEntry,
 } from '@react-three/drei'
-import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import { Canvas, useFrame } from '@react-three/fiber'
 import {
   CuboidCollider,
   Physics,
@@ -11,9 +11,12 @@ import {
 } from '@react-three/rapier'
 import { Ecctrl, type EcctrlHandle } from 'ecctrl'
 import { Suspense, useEffect, useMemo, useRef, type RefObject } from 'react'
-import { Color, Vector3 } from 'three'
+import { Color } from 'three'
 import { mapaCriacao } from '../../mapas/criacao'
 import { useGameStore } from '../../stores/gameStore'
+import { SelahCameraRig } from './camera/SelahCameraRig'
+import { resolverFocoCameraSelah } from './camera/selahFocus'
+import type { FocoCameraSelah } from './camera/types'
 import {
   ColetaveisCriacao,
   PropMapaRenderer,
@@ -37,86 +40,19 @@ const keyboardMap: KeyboardControlsEntry<GameControl>[] = [
   { name: 'run', keys: ['ShiftLeft', 'ShiftRight'] },
 ]
 
-function CameraRig({ controller }: { controller: RefObject<EcctrlHandle | null> }) {
-  const { gl } = useThree()
-  const desiredTarget = useMemo(() => new Vector3(), [])
-  const smoothedTarget = useMemo(() => new Vector3(), [])
-  const desiredCameraPosition = useMemo(() => new Vector3(), [])
-  const yaw = useRef(0.7)
-  const pitch = useRef(0.32)
-  const distance = useRef(9.5)
-  const initialized = useRef(false)
-
-  useEffect(() => {
-    const canvas = gl.domElement
-    const handleMouseMove = (event: MouseEvent) => {
-      if (document.pointerLockElement !== canvas) return
-
-      yaw.current -= event.movementX * 0.0025
-      pitch.current = Math.min(
-        1.35,
-        Math.max(0.15, pitch.current + event.movementY * 0.0025),
-      )
-    }
-
-    const handleWheel = (event: WheelEvent) => {
-      if (document.pointerLockElement !== canvas) return
-
-      event.preventDefault()
-      distance.current = Math.min(
-        18,
-        Math.max(2.5, distance.current + event.deltaY * 0.01),
-      )
-    }
-
-    const preventContextMenu = (event: MouseEvent) => event.preventDefault()
-
-    canvas.addEventListener('wheel', handleWheel, { passive: false })
-    canvas.addEventListener('contextmenu', preventContextMenu)
-    document.addEventListener('mousemove', handleMouseMove)
-
-    return () => {
-      canvas.removeEventListener('wheel', handleWheel)
-      canvas.removeEventListener('contextmenu', preventContextMenu)
-      document.removeEventListener('mousemove', handleMouseMove)
-    }
-  }, [gl])
-
-  useFrame(({ camera }, delta) => {
-    const character = controller.current
-
-    if (!character) return
-
-    const position = character.currPos
-    desiredTarget.set(position.x, position.y + 0.2, position.z)
-
-    if (initialized.current) {
-      smoothedTarget.lerp(desiredTarget, 1 - Math.exp(-14 * delta))
-    } else {
-      smoothedTarget.copy(desiredTarget)
-      initialized.current = true
-    }
-
-    const horizontalDistance = Math.cos(pitch.current) * distance.current
-    desiredCameraPosition.set(
-      smoothedTarget.x + Math.sin(yaw.current) * horizontalDistance,
-      smoothedTarget.y + Math.sin(pitch.current) * distance.current,
-      smoothedTarget.z + Math.cos(yaw.current) * horizontalDistance,
-    )
-
-    camera.position.lerp(desiredCameraPosition, 1 - Math.exp(-22 * delta))
-    camera.lookAt(smoothedTarget)
-  })
-
-  return null
-}
-
 type PlayerProps = {
   playing: boolean
   posicaoJogadorRef: RefObject<PosicaoJogador | null>
+  focoCamera: FocoCameraSelah | null
+  manterFoco: boolean
 }
 
-function Player({ playing, posicaoJogadorRef }: PlayerProps) {
+function Player({
+  playing,
+  posicaoJogadorRef,
+  focoCamera,
+  manterFoco,
+}: PlayerProps) {
   const controller = useRef<EcctrlHandle>(null)
   const [, getControls] = useKeyboardControls<GameControl>()
 
@@ -189,7 +125,11 @@ function Player({ playing, posicaoJogadorRef }: PlayerProps) {
           </mesh>
         </group>
       </Ecctrl>
-      <CameraRig controller={controller} />
+      <SelahCameraRig
+        controller={controller}
+        foco={focoCamera}
+        manterFoco={manterFoco}
+      />
     </>
   )
 }
@@ -197,7 +137,13 @@ function Player({ playing, posicaoJogadorRef }: PlayerProps) {
 function World({ playing }: { playing: boolean }) {
   const posicaoJogadorRef = useRef<PosicaoJogador | null>(null)
   const setRegiao = useGameStore((state) => state.setRegiao)
+  const gatilhoSelah = useGameStore((state) => state.selahAtivo?.gatilho ?? null)
+  const pausaParentalAtiva = useGameStore((state) => state.pausaParentalAtiva)
   const { meiaLargura, meiaProfundidade } = mapaCriacao.limites
+  const focoCamera = useMemo(
+    () => resolverFocoCameraSelah(gatilhoSelah, mapaCriacao.coletaveis),
+    [gatilhoSelah],
+  )
 
   useEffect(() => {
     setRegiao('criacao')
@@ -249,7 +195,12 @@ function World({ playing }: { playing: boolean }) {
         />
       </RigidBody>
 
-      <Player playing={playing} posicaoJogadorRef={posicaoJogadorRef} />
+      <Player
+        playing={playing}
+        posicaoJogadorRef={posicaoJogadorRef}
+        focoCamera={focoCamera}
+        manterFoco={pausaParentalAtiva}
+      />
     </>
   )
 }

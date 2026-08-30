@@ -223,6 +223,10 @@ describe('canteiro navegável de Noé', () => {
         },
       ],
     )
+    const depoisDoCanteiro = selecionarInstanciasAssetsCanteiroNoe(
+      'estoque-mantimentos',
+      [],
+    )
 
     expect(new Set(m1.map(({ chunkId }) => chunkId))).toEqual(
       new Set(['canteiro-m1']),
@@ -239,5 +243,9 @@ describe('canteiro navegável de Noé', () => {
     expect(
       comTabuaColetada.some(({ unidadeId }) => unidadeId === 'tabua-1'),
     ).toBe(false)
+    expect(depoisDoCanteiro.some(({ unidadeId }) => unidadeId)).toBe(false)
+    expect(
+      depoisDoCanteiro.some(({ id }) => id === 'm2-madeira-ambiente'),
+    ).toBe(true)
   })
 })

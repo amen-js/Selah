@@ -384,6 +384,8 @@ export function selecionarInstanciasAssetsCanteiroNoe(
   if (indiceAtual < 0) return []
 
   const concluidas = unidadesConcluidas(progressoMomentoAtual)
+  const indiceColetaVedacao = indiceMomentoNoe('coleta-vedacao')
+  const coletaVedacaoConcluida = indiceAtual > indiceColetaVedacao
   const chunks = [
     ...(indiceAtual >= indiceMomentoNoe('chamado-canteiro')
       ? instanciasM1
@@ -392,7 +394,9 @@ export function selecionarInstanciasAssetsCanteiroNoe(
   ]
 
   return chunks.filter(
-    ({ unidadeId }) => !unidadeId || !concluidas.has(unidadeId),
+    ({ unidadeId }) =>
+      !unidadeId ||
+      (!coletaVedacaoConcluida && !concluidas.has(unidadeId)),
   )
 }
 

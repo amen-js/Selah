@@ -3,15 +3,10 @@ import { useEffect, useRef } from 'react'
 import { useSelahFlow } from '../../hooks/useSelahFlow'
 import { useTranslation } from '../../i18n'
 import type { SelahGateway } from '../../services/selahGateway'
+import type { TtsController } from '../../services/tts'
 import { useGameStore } from '../../stores/gameStore'
-import type { Idioma } from '../../types/selah'
 
-export interface TtsController {
-  suportado: boolean
-  falar: (texto: string, idioma: Idioma) => void
-  pausar: () => void
-  cancelar: () => void
-}
+export type { TtsController }
 
 interface SelahOverlayProps {
   gateway: SelahGateway

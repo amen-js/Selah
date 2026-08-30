@@ -17,7 +17,9 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "resolveJsonModule": true
   },
-  "include": ["vite.config.ts", "server"]
+  "include": ["vite.config.ts", "server"],
+  "exclude": ["server/**/*.test.ts"]
 }

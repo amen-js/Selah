@@ -1,13 +1,14 @@
 import { serve } from '@hono/node-server'
-import { Hono } from 'hono'
 
-const app = new Hono()
+import { createApp } from './app.ts'
+import { loadEnv } from './env.ts'
 
-app.get('/health', (context) => context.json({ status: 'ok' }))
+const env = loadEnv()
+const app = createApp({ env })
 
 serve({
   fetch: app.fetch,
-  port: 8787,
+  port: env.port,
 })
 
-console.log('Selah API proxy listening on http://localhost:8787')
+console.log(`Selah API proxy listening on http://localhost:${env.port}`)

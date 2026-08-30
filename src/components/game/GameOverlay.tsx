@@ -1,5 +1,6 @@
 import { useTranslation } from '../../i18n'
 import { selahGateway, type SelahGateway } from '../../services/selahGateway'
+import { ttsController, type TtsController } from '../../services/tts'
 import { useGameStore } from '../../stores/gameStore'
 import { DialogBox } from './DialogBox'
 import { Hud } from './Hud'
@@ -7,7 +8,7 @@ import { Journal } from './Journal'
 import { LocalDashboard } from './LocalDashboard'
 import { ParentalPause } from './ParentalPause'
 import { ParentSettings } from './ParentSettings'
-import { SelahOverlay, type TtsController } from './SelahOverlay'
+import { SelahOverlay } from './SelahOverlay'
 
 interface GameOverlayProps {
   gateway?: SelahGateway
@@ -21,7 +22,7 @@ interface GameOverlayProps {
 
 export function GameOverlay({
   gateway = selahGateway,
-  tts,
+  tts = ttsController,
   appVersion,
   dialogo,
 }: GameOverlayProps) {

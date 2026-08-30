@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react'
 
 import { GameOverlay } from '../components/game/GameOverlay'
-import type { TtsController } from '../components/game/SelahOverlay'
 import { useTranslation, type TranslationKey } from '../i18n'
+import { createTtsController } from '../services/tts'
 import { useGameStore } from '../stores/gameStore'
 import { createLabGateway, type CenarioLab, versiculoLab } from './fixtures'
 
@@ -12,35 +12,11 @@ const cenarioKeys: Record<CenarioLab, TranslationKey> = {
   erro: 'lab.scenario.error',
 }
 
-const createLabTts = (): TtsController => {
-  const suportado =
-    typeof window !== 'undefined' &&
-    'speechSynthesis' in window &&
-    'SpeechSynthesisUtterance' in window
-
-  return {
-    suportado,
-    falar: (texto, idioma) => {
-      if (!suportado) return
-      window.speechSynthesis.cancel()
-      const fala = new SpeechSynthesisUtterance(texto)
-      fala.lang = idioma
-      window.speechSynthesis.speak(fala)
-    },
-    pausar: () => {
-      if (suportado) window.speechSynthesis.pause()
-    },
-    cancelar: () => {
-      if (suportado) window.speechSynthesis.cancel()
-    },
-  }
-}
-
 export function LabPage() {
   const { t } = useTranslation()
   const [cenario, setCenario] = useState<CenarioLab>('sucesso')
   const gateway = useMemo(() => createLabGateway(cenario), [cenario])
-  const tts = useMemo(() => createLabTts(), [])
+  const tts = useMemo(() => createTtsController(), [])
   const setRegiao = useGameStore((state) => state.setRegiao)
   const abrirSelah = useGameStore((state) => state.abrirSelah)
   const setDialogoAberto = useGameStore((state) => state.setDialogoAberto)

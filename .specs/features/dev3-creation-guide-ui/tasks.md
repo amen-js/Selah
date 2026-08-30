@@ -133,6 +133,7 @@ normal exploration.
 
 ### T6: Connect GameCanvas progress to App
 
+**Status**: Complete
 **What**: Store the snapshot transiently in `App` and feed `GameOverlay`.
 **Where**: `src/App.tsx`, `src/App.test.tsx`
 **Depends on**: T5
@@ -144,10 +145,10 @@ normal exploration.
 
 **Done when**:
 
-- [ ] App forwards Canvas snapshots to the production overlay.
-- [ ] App clears guidance after a `null` snapshot.
-- [ ] No snapshot is added to local storage.
-- [ ] `npm run test:run` passes at least 249 tests.
+- [x] App forwards Canvas snapshots to the production overlay.
+- [x] App clears guidance after a `null` snapshot.
+- [x] No snapshot is added to local storage.
+- [x] `npm run test:run` passes at least 249 tests.
 
 **Commit**: `feat(app): connect Creation progress to DOM`
 

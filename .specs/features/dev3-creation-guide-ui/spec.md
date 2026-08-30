@@ -9,7 +9,7 @@ next.
 
 ## Goals
 
-- [ ] Expose the transient Creation progression to the DOM without duplicating
+- [x] Expose the transient Creation progression to the DOM without duplicating
       persistence or progression rules.
 - [ ] Show the active moment, journey progress and a short localized Voice Guide objective while
       exploration remains interactive.

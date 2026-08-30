@@ -11,10 +11,10 @@ import { momentosCriacao } from '../components/game/creation/progression'
  * Web budgets for the current Creation slice.
  *
  * The single-file and per-moment limits leave room below a typical mobile
- * browser's first-request comfort zone, while the library limit is just above
- * the 2.49 MB measured unique payload in the integration report. These are
- * intentionally explicit so a future asset addition fails the focused audit
- * before it silently becomes an eager download.
+ * browser's first-request comfort zone, while the library limit leaves room
+ * above the current ~269 KB of unique files for later licensed additions.
+ * These are intentionally explicit so a future asset addition fails the
+ * focused audit before it silently becomes an eager download.
  */
 export const LIMITES_ORCAMENTO_ASSETS_CRIACAO = {
   arquivoWebMaxBytes: 1_500_000,

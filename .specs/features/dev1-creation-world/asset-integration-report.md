@@ -2,7 +2,8 @@
 
 Data da auditoria: 2026-08-30
 Escopo: inventário, proveniência, preparação física e manifesto dos assets da
-Criação, incluindo os chunks ambientais, a ovelha e o par humano.
+Criação, incluindo os chunks ambientais, a ovelha, os personagens procedurais
+e os visuais procedurais autorais.
 
 ## Resultado executivo
 
@@ -10,19 +11,35 @@ O pacote novo usa uma seleção pequena e independente do Kenney Nature Kit 2.1.
 Os GLBs foram extraídos sem conversão ou alteração, são Y-up, estão em escala de
 metros, usam materiais/cores embutidos e não carregam texturas externas. O
 manifesto tipado em src/mapas/criacaoAssets.ts aponta somente para arquivos
-presentes em public/models/creation/shared/kenney/.
+físicos aprovados realmente usados na Criação (Kenney, a ovelha Quaternius e
+descritores procedurais autorais).
 
-A segunda seleção usa somente pacotes oficiais CC0 de Quaternius: a ovelha do
-Farm Animal Pack conserva dois clips, e os dois Universal Base Characters
-conservam seus rigs. Os humanos foram recomprimidos para WebP 1024px para cair
-de aproximadamente 31,5 MB para 2,22 MB combinados sem remover geometria ou
-skin.
+A seleção externa usada em runtime é somente a ovelha do Quaternius Farm Animal
+Pack, que conserva dois clips. Adão e Eva são personagens procedurais autorais:
+o manifesto aponta para descritores `.model.json` e o runtime usa
+`PersonagemEden.tsx`; nenhum GLB Quaternius é carregado para eles. Leão, girafa
+e os frutos da escolha também são visuais procedurais autorais, sem payload GLB.
 
 O arquivo fornecido Map by Poly by Google - bU3B6P0ngfi.glb foi auditado, mas
 não foi copiado nem colocado no manifesto: apesar de a página de origem declarar
 CC BY 3.0 para o modelo, a textura embutida é um mapa-múndi com identificação
 Rand McNally e não possui uma licença de redistribuição separada verificável.
 Além disso, a geometria é uma placa fina, não um terreno jogável da Criação.
+
+## Composição espacial final
+
+A composição é determinística e possui quatro biomas, na ordem da jornada:
+
+| Bioma | ID | Papel na rota |
+| --- | --- | --- |
+| Campo da Criação | `campo` | Clareira aberta para observar criaturas e enquadrar a rota. |
+| Vale das Águas | `vale-das-aguas` | Nascente, canal, margens e lago de contemplação. |
+| Bosque da Vida | `bosque-da-vida` | Dossel, trilhas de flores, clareiras e mirante. |
+| Jardim do Éden | `eden` | Jardim central, quatro braços de rio e landmarks da vida e da escolha. |
+
+As posições, escalas, marcos e instâncias são fixas nos módulos de composição
+do mundo e são cobertas pelo teste de determinismo de
+`world/biomes/composicao.test.ts`; não há distribuição aleatória de props.
 
 ## Fontes e licenças verificadas
 
@@ -76,7 +93,7 @@ uma decisão de design que realmente o use como prop, não como terreno.
 - Clips preservados: `Armature|Idle` e `Armature|Jump`.
 - SHA-256: `d295beed1d28f1eee2af209c637aebaa928a280652040d72627eb84e7f69ffb8`.
 
-### Quaternius Universal Base Characters — aprovado
+### Quaternius Universal Base Characters — fonte auditada, não usada no runtime
 
 - Página oficial: https://quaternius.com/packs/universalbasecharacters.html
 - Arquivo oficial: edição Standard/free, licença CC0 1.0 Universal.
@@ -85,8 +102,11 @@ uma decisão de design que realmente o use como prop, não como terreno.
 - `eve.glb`: 1.259.348 bytes, 15.060 triângulos, 1 skin, SHA-256
   `e59f51bd141eb2d71a712fb3acd8e1869d235833dbdfbbcf6b356d84fd58b0ef`.
 - Processamento: glTF-Transform 4.4.2, texturas limitadas a 1024px e WebP 80.
-- A edição gratuita não traz clip Idle; o runtime clona os rigs, baixa os
-  braços da T-pose e aplica movimento respiratório discreto.
+- Estes dois GLBs permanecem retidos como fonte previamente auditada, mas não
+  são apontados pelo manifesto atual. A implementação final usa os descritores
+  autorais `characters/adam.model.json` e `characters/eve.model.json`, com
+  pose e respiração procedural em `PersonagemEden.tsx`; portanto os 2,22 MB
+  dos GLBs Quaternius não entram no orçamento nem no carregamento da Criação.
 
 ## Inventário preexistente
 
@@ -117,20 +137,29 @@ para o loader futuro; rios e rios-eden compartilham o mesmo arquivo.
 | eden / jardim-eden | platform_grass.glb | ambiente | momento-ativo | Base modular pequena, não um jardim completo. |
 | eden / arvore-central | tree_detailed.glb | marco | momento-ativo | Landmark estático provisório. |
 | eden / rios-eden | ground_riverStraight.glb | ambiente | compartilhado | Reuso do tile de rios. |
-| adao-e-eva / adao | adam.glb | personagem | momento-ativo | Rig humano com pose Idle procedural. |
-| adao-e-eva / eva | eve.glb | personagem | momento-ativo | Rig humano com pose Idle procedural. |
-| fruto-escolha / arvore-conhecimento | tree_oak.glb | marco | momento-ativo | Árvore genérica CC0; fruto e landmark autoral ainda faltam. |
+| adao-e-eva / adao | adam.model.json | personagem | momento-ativo | Descritor procedural autoral; `PersonagemEden.tsx` cria o personagem e a pose Idle. |
+| adao-e-eva / eva | eve.model.json | personagem | momento-ativo | Descritor procedural autoral; `PersonagemEden.tsx` cria o personagem e a pose Idle. |
+| fruto-escolha / arvore-conhecimento | tree_oak.glb | marco | momento-ativo | Árvore genérica CC0; o fruto é visual procedural autoral, sem payload GLB. |
 
-Os assets aprovados estão em
-public/models/creation/shared/kenney/; não há um “mundo inteiro” em um GLB.
+Os assets GLB aprovados estão em
+public/models/creation/shared/kenney/ e em
+public/models/creation/shared/quaternius/; os descritores procedurais ficam em
+`public/models/creation/characters/`. Não há um “mundo inteiro” em um GLB.
+
+Os IDs `leao`, `girafa` e `fruto-nao-interativo` são visuais procedurais
+autorais e, por isso, não possuem caminho de arquivo no manifesto. Eles não
+representam downloads ausentes nem placeholders GLB; sua montagem permanece no
+runtime e é coberta pelos contratos de visibilidade/progressão.
 
 ## Métricas técnicas dos arquivos referenciados
 
-Bounding boxes abaixo são medidas no espaço local do GLB, em metros. Todos os
-arquivos têm 1 mesh, 0 skins, 0 bones, 0 animações, 0 imagens/texturas
-externas, root tmpParent e um node visual com o nome original do asset. Não
-há nós COL_* ou ANCHOR_*; os arquivos não devem ser usados diretamente como
-colliders.
+Bounding boxes abaixo são medidas no espaço local dos GLBs, em metros. Os
+arquivos Kenney têm 1 mesh, 0 skins, 0 bones, 0 animações e 0 imagens/texturas
+externas, com root tmpParent e um node visual com o nome original do asset. A
+ovelha mantém seu skin e clips documentados acima. Os descritores
+`adam.model.json` e `eve.model.json` não têm bounding box: são receitas
+procedurais pequenas e não carregam malha. Não há nós COL_* ou ANCHOR_* nos
+GLBs; os arquivos não devem ser usados diretamente como colliders.
 
 | Arquivo | Bytes | Triângulos | Materiais | Bounding box (X × Y × Z m) | SHA-256 |
 | --- | ---: | ---: | ---: | --- | --- |
@@ -147,8 +176,10 @@ colliders.
 
 Total dos 10 arquivos Kenney únicos referenciados: **115.024 bytes**. Os
 materiais Kenney usam dados embutidos no GLB; não foi necessário copiar
-texturas sidecar. Somando a ovelha e os dois humanos, os 13 chunks únicos do
-manifesto ocupam **2.491.312 bytes**.
+texturas sidecar. Somando a ovelha (`153.156 B`) e os dois descritores
+procedurais (`255 B` + `254 B`), os **13 arquivos físicos únicos em 14
+entradas** do manifesto ocupam **268.689 bytes**. Os GLBs Quaternius de Adão e
+Eva, embora retidos no diretório de referência, não fazem parte dessa soma.
 
 ### Variantes extraídas, ainda sem slot próprio
 
@@ -167,7 +198,7 @@ porque o catálogo atual tem um único ID para cada grupo:
 
 ## Gaps e responsabilidades de outros pipelines
 
-### Ainda sem asset físico no manifesto
+### Visuais procedurais sem asset físico no manifesto
 
 - ambiente-vazio, luz-guia, nucleo-luz,
   marcadores-caminho-luz: VFX/procedural ou arte específica de iluminação.
@@ -175,17 +206,14 @@ porque o catálogo atual tem um único ID para cada grupo:
   ser apresentado como lago sem validação de composição.
 - efeito-crescimento: VFX/procedural.
 - sol, lua, estrelas, nuvens: conjunto celeste/VFX.
-- leao, girafa e sons-animais: ainda sem modelo CC0 oficial verificado nesses
-  dois catálogos e sem áudio.
-- fruto-nao-interativo: prop com nó de fruto separado.
+- leao e girafa: visuais procedurais autorais, sem payload GLB ou dependência de
+  catálogo externo.
+- fruto-nao-interativo: visual procedural autoral e não interativo, sem payload
+  GLB ou controle de coleta.
 - animacao-idle-humanos: coberta em runtime pela pose procedural, não por um
   arquivo de modelo inventado.
 - Todos os IDs som-*: áudio fora deste pipeline; nenhum caminho de áudio foi
   inventado ou apontado para GLB.
-
-Nenhum substituto foi usado para leão ou girafa: os catálogos oficiais
-Kenney/Quaternius auditados não ofereceram esses dois modelos 3D sob a mesma
-proveniência CC0 verificável.
 
 ### Procedural vs. áudio
 
@@ -197,32 +225,43 @@ lacunas é mascarada por arquivos vazios.
 
 ## Lazy loading e orçamento por momento
 
-Os 13 arquivos únicos referenciados somam 2.491.312 bytes. Estimativa de
-primeira carga por momento, contando cada caminho apenas uma vez:
+Os 13 arquivos físicos únicos referenciados somam **268.689 bytes** em 14
+entradas. O orçamento é calculado por
+`src/mapas/criacaoAssetBudget.ts` e verificado em
+`src/mapas/criacaoAssetBudget.test.ts`: limite de **1.500.000 B por arquivo e
+por momento** e **3.000.000 B para a biblioteca**. Descritores `.model.json`
+contam como bytes web do descritor, mas têm payload de modelo igual a zero.
 
-| Momento | Carga nova aproximada | Arquivos |
-| --- | ---: | --- |
-| vazio | 0 B | Procedural; nenhum GLB aprovado. |
-| luz | 0 B | VFX/procedural. |
-| ceu-terra-aguas | 11.184 B | ground grass, river straight, cliff large stone. |
-| natureza | 45.216 B | tree default, bush detailed, flower purple A, grass large. |
-| ceu-ritmo | 0 B | Celestial procedural; nenhum download de GLB. |
-| criaturas | 153.156 B | Ovelha animada; leão e girafa permanecem pendentes. |
-| eden | 43.980 B novos | platform grass, detailed tree; river já carregado e compartilhado. |
-| adao-e-eva | 2.223.132 B | Adão e Eva, carregados apenas no momento 8. |
-| fruto-escolha | 14.644 B | oak tree. |
+Estimativa de carga direta por momento, contando cada caminho uma vez dentro do
+momento:
+
+| Momento | Carga web direta | Payload GLB | Arquivos/implementações |
+| --- | ---: | ---: | --- |
+| vazio | 0 B | 0 B | Procedural; nenhum arquivo. |
+| luz | 0 B | 0 B | VFX/procedural; nenhum arquivo. |
+| ceu-terra-aguas | 11.184 B | 11.184 B | ground grass, river straight, cliff large stone. |
+| natureza | 45.216 B | 45.216 B | tree default, bush detailed, flower purple A, grass large. |
+| ceu-ritmo | 0 B | 0 B | Céu e ritmo celeste procedurais; nenhum arquivo. |
+| criaturas | 153.156 B | 153.156 B | Ovelha Quaternius; leão e girafa procedurais. |
+| eden | 50.024 B | 50.024 B | platform grass, detailed tree e river compartilhado. |
+| adao-e-eva | 509 B | 0 B | `adam.model.json` e `eve.model.json`; personagens autorais procedurais. |
+| fruto-escolha | 14.644 B | 14.644 B | tree oak; fruto procedural autoral. |
 
 O loader deve resolver o manifesto por momentoAtualId, deduplicar caminhos
 compartilhados e descarregar chunks ao sair da região. Não fazer import estático
-dos GLBs no bundle inicial; usar URLs públicas e carregamento sob demanda.
+dos GLBs no bundle inicial; usar URLs públicas e carregamento sob demanda. A
+carga nova de Éden fica em 43.980 B quando o tile de rio já foi baixado no
+momento 3; a tabela mostra 50.024 B para deixar explícita a entrada
+compartilhada.
 
 ## Riscos técnicos
 
 - Os tiles de solo/rio têm 1 m e não têm espessura útil para colisão. Instanciar
   muitos como colliders aumenta custo e pode gerar frestas; usar colliders
   simples do mapa ou uma etapa posterior com proxies COL_*.
-- Os modelos Kenney são estáticos e sem bones/animations. Não são substitutos
-  para os animais ou humanos rigados.
+- Os modelos Kenney são estáticos e sem bones/animations. A ovelha é o único
+  personagem GLB usado; Adão/Eva, leão, girafa e frutos são procedurais e não
+  devem ganhar caminhos GLB inventados sem uma nova auditoria.
 - tree_detailed é o maior chunk individual (31.412 B, 402 tri), ainda pequeno
   para web; manter separado como landmark facilita descarte e evita carregar o
   Éden no início.
@@ -242,12 +281,25 @@ dos GLBs no bundle inicial; usar URLs públicas e carregamento sob demanda.
 - public/models/creation/shared/kenney/License.txt
 - 17 GLBs Kenney em public/models/creation/shared/kenney/ (10 referenciados,
   7 variantes sem slot próprio)
-- 1 GLB de ovelha e 2 GLBs humanos Quaternius em
+- 1 GLB de ovelha Quaternius em
   public/models/creation/shared/quaternius/
+- 2 GLBs Quaternius de personagens em
+  public/models/creation/shared/quaternius/universal-base-characters/ (fontes
+  auditadas e retidas, não montadas no runtime)
+- public/models/creation/characters/adam.model.json
+- public/models/creation/characters/eve.model.json
 - src/mapas/criacaoAssets.ts
 - src/mapas/criacaoAssets.test.ts
+- src/mapas/criacaoAssetBudget.ts
+- src/mapas/criacaoAssetBudget.test.ts
 
-Validação focada executada: npx vitest run src/mapas/criacaoAssets.test.ts.
-As verificações incluem duplicidade/IDs, existência e prefixo de paths, SHA-256
-real, licença/proveniência não vazia, momentos válidos, escala/eixo, convenções
-de nós, ausência de áudio apontando para GLB e lookup por ID.
+Validação focada executada em **9 arquivos e 56 testes**, cobrindo manifesto,
+orçamento, biomas, detalhes, elementos, portais, coletáveis, progressão e
+reduced-motion. As verificações incluem duplicidade/IDs, existência e prefixo
+de paths, SHA-256 real, licença/proveniência não vazia, momentos válidos,
+escala/eixo, convenções de nós, ausência de áudio apontando para GLB, lookup por
+ID, orçamento por momento/tipo, deduplicação física e descritores procedurais.
+Lint final e build de produção passaram; a inspeção visual no browser também
+passou para os quatro biomas, leão/girafa, Éden e frutos (com o fruto fora da
+copa). A UAT manual completa ainda é o gate do usuário; nenhuma suíte completa
+é alegada neste relatório.

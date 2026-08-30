@@ -48,7 +48,8 @@ export const enUS = {
   'app.journey.creation.title': 'Creation',
   'app.journey.creation.description': 'The first garden is waiting for you.',
   'app.journey.noe.title': 'Noah and the Ark',
-  'app.journey.noe.description': 'A new crossing is being prepared.',
+  'app.journey.noe.description':
+    'Help Noah prepare the Ark, protect life, and witness the covenant.',
   'app.journey.jose.title': 'Joseph the Dreamer',
   'app.journey.jose.description': 'Another story will unfold along the way.',
   'app.controls.aria': 'Game controls',

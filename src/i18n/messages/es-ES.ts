@@ -48,7 +48,8 @@ export const esES = {
   'app.journey.creation.title': 'La Creación',
   'app.journey.creation.description': 'El primer jardín te espera.',
   'app.journey.noe.title': 'Noé y el Arca',
-  'app.journey.noe.description': 'Se está preparando una nueva travesía.',
+  'app.journey.noe.description':
+    'Ayuda a Noé a preparar el Arca, proteger la vida y contemplar la alianza.',
   'app.journey.jose.title': 'José, el Soñador',
   'app.journey.jose.description': 'Otra historia nacerá en el camino.',
   'app.controls.aria': 'Controles del juego',

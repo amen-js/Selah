@@ -46,7 +46,8 @@ export const ptBR = {
   'app.journey.creation.title': 'A Criação',
   'app.journey.creation.description': 'O primeiro jardim espera por você.',
   'app.journey.noe.title': 'Noé e a Arca',
-  'app.journey.noe.description': 'Uma nova travessia está sendo preparada.',
+  'app.journey.noe.description':
+    'Ajude Noé a preparar a Arca, proteger a vida e testemunhar a aliança.',
   'app.journey.jose.title': 'José, o Sonhador',
   'app.journey.jose.description': 'Outra história nascerá no caminho.',
   'app.controls.aria': 'Controles do jogo',

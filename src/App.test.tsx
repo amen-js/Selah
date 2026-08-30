@@ -7,6 +7,14 @@ const canvasMock = vi.hoisted(() => ({
   element: null as HTMLCanvasElement | null,
 }))
 
+const selahAudioMock = vi.hoisted(() => ({
+  useSelahAudio: vi.fn(),
+}))
+
+vi.mock('./hooks/useSelahAudio', () => ({
+  useSelahAudio: selahAudioMock.useSelahAudio,
+}))
+
 vi.mock('./components/game/GameCanvas', async () => {
   const { useEffect } = await import('react')
 
@@ -37,6 +45,7 @@ describe('App integration', () => {
   let requestPointerLock: ReturnType<typeof vi.fn>
 
   beforeEach(() => {
+    selahAudioMock.useSelahAudio.mockClear()
     useGameStore.getState().apagarProgresso()
     useGameStore.getState().setIdioma('pt-BR')
     pointerLockElement = null
@@ -63,6 +72,7 @@ describe('App integration', () => {
   it('mounts the Canvas and DOM overlay together', () => {
     render(<App />)
 
+    expect(selahAudioMock.useSelahAudio).toHaveBeenCalledOnce()
     expect(screen.getByTestId('game-canvas')).toHaveAttribute('data-playing', 'false')
     expect(screen.getByTestId('game-overlay')).toBeInTheDocument()
 

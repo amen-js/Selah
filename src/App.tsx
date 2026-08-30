@@ -16,8 +16,6 @@ function App() {
 
   useSelahAudio()
 
-  useSelahAudio()
-
   useEffect(() => {
     const handlePointerLockChange = () => {
       const isPlaying = document.pointerLockElement === canvasRef.current

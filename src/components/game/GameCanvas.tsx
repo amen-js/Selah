@@ -22,7 +22,7 @@ import {
 import { Color } from 'three'
 import { portaisPorRegiao } from '../../mapas/portais'
 import { obterMapaRegiao } from '../../mapas/regioes'
-import type { MapaRegiao } from '../../mapas/types'
+import type { ColetavelMapa, MapaRegiao } from '../../mapas/types'
 import { useGameStore } from '../../stores/gameStore'
 import type { Regiao } from '../../types/selah'
 import { SelahCameraRig } from './camera/SelahCameraRig'
@@ -31,17 +31,21 @@ import type { FocoCameraSelah } from './camera/types'
 import {
   AtmosferaCriacao,
   coletavelCriacaoDisponivelNoMomento,
+  CreationInteractionPrompt,
   type EstadoProgressaoCriacao,
   EfeitosCriacao,
   Elementos3DCriacao,
   type MomentoCriacao,
-  type MomentoCriacaoId,
+  type ObjetivoZonaCriacao,
   ObjetivoNarrativoCriacao,
+  obterMomentoAtualCriacao,
   obterArtesCriacaoVisiveis,
   obterPropsCriacaoVisiveis,
   ProgressaoCriacaoRuntime,
   PropMapaRenderer,
+  reconstruirProgressaoCriacao,
   TerrenoCriacao,
+  type TipoInteracaoCriacao,
   type PosicaoJogador,
   type SnapshotProgressaoCriacao,
 } from './creation'
@@ -173,6 +177,7 @@ type WorldProps = {
   onProgressaoCriacaoChange?: (
     snapshot: SnapshotProgressaoCriacao | null,
   ) => void
+  onInteracaoCriacaoProxima: (tipo: TipoInteracaoCriacao | null) => void
 }
 
 function World({
@@ -183,12 +188,27 @@ function World({
   onPortalProximo,
   onPortalAcionado,
   onProgressaoCriacaoChange,
+  onInteracaoCriacaoProxima,
 }: WorldProps) {
   const posicaoJogadorRef = useRef<PosicaoJogador | null>(null)
   const gatilhoSelah = useGameStore((state) => state.selahAtivo?.gatilho ?? null)
   const pausaParentalAtiva = useGameStore((state) => state.pausaParentalAtiva)
-  const [momentoCriacaoId, setMomentoCriacaoId] =
-    useState<MomentoCriacaoId>('vazio')
+  const selahsConcluidos = useGameStore((state) => state.selahsConcluidos)
+  const momentosCriacaoConcluidos = useGameStore(
+    (state) => state.momentosCriacaoConcluidos,
+  )
+  const [estadoCriacao, setEstadoCriacao] = useState<EstadoProgressaoCriacao>(
+    () =>
+      reconstruirProgressaoCriacao(
+        selahsConcluidos,
+        momentosCriacaoConcluidos,
+      ),
+  )
+  const [interacaoCriacaoLocal, setInteracaoCriacaoLocal] =
+    useState<TipoInteracaoCriacao | null>(null)
+  const momentoCriacaoId = estadoCriacao.momentoAtualId
+  const coletavelProximoRef = useRef<ColetavelMapa | null>(null)
+  const objetivoProximoRef = useRef<ObjetivoZonaCriacao | null>(null)
   const { meiaLargura, meiaProfundidade } = mapa.limites
   const focoCamera = useMemo(
     () => resolverFocoCameraSelah(gatilhoSelah, mapa.coletaveis),
@@ -197,14 +217,16 @@ function World({
   const coletaveisDisponiveis = useMemo(
     () =>
       regiao === 'criacao'
-        ? mapa.coletaveis.filter((coletavel) =>
-            coletavelCriacaoDisponivelNoMomento(
-              coletavel.passagemId,
-              momentoCriacaoId,
-            ),
+        ? mapa.coletaveis.filter(
+            (coletavel) =>
+              !selahsConcluidos.includes(coletavel.passagemId) &&
+              coletavelCriacaoDisponivelNoMomento(
+                coletavel.passagemId,
+                momentoCriacaoId,
+              ),
           )
         : mapa.coletaveis,
-    [mapa.coletaveis, momentoCriacaoId, regiao],
+    [mapa.coletaveis, momentoCriacaoId, regiao, selahsConcluidos],
   )
   const propsDisponiveis = useMemo(
     () =>
@@ -224,11 +246,46 @@ function World({
     [mapa.artes2D, momentoCriacaoId, regiao],
   )
   const atualizarMomentoCriacao = useCallback(
-    (momento: MomentoCriacao, estado: EstadoProgressaoCriacao) => {
-      setMomentoCriacaoId(momento.id)
-      onProgressaoCriacaoChange?.({ momento, estado })
+    (_momento: MomentoCriacao, estado: EstadoProgressaoCriacao) => {
+      setEstadoCriacao(estado)
     },
-    [onProgressaoCriacaoChange],
+    [],
+  )
+  const publicarInteracaoCriacao = useCallback(() => {
+    const tipo = coletavelProximoRef.current
+      ? 'selah'
+      : objetivoProximoRef.current
+        ? 'ponto-criacao'
+        : null
+    setInteracaoCriacaoLocal(tipo)
+    onInteracaoCriacaoProxima(tipo)
+  }, [onInteracaoCriacaoProxima])
+  const atualizarColetavelProximo = useCallback(
+    (coletavel: ColetavelMapa | null) => {
+      coletavelProximoRef.current = coletavel
+      publicarInteracaoCriacao()
+    },
+    [publicarInteracaoCriacao],
+  )
+  const atualizarObjetivoProximo = useCallback(
+    (objetivo: ObjetivoZonaCriacao | null) => {
+      objetivoProximoRef.current = objetivo
+      publicarInteracaoCriacao()
+    },
+    [publicarInteracaoCriacao],
+  )
+
+  useEffect(() => {
+    if (regiao !== 'criacao') return
+    onProgressaoCriacaoChange?.({
+      momento: obterMomentoAtualCriacao(estadoCriacao),
+      estado: estadoCriacao,
+    })
+  }, [estadoCriacao, onProgressaoCriacaoChange, regiao])
+
+  useEffect(
+    () => () => onInteracaoCriacaoProxima(null),
+    [onInteracaoCriacaoProxima],
   )
 
   return (
@@ -275,6 +332,11 @@ function World({
         coletaveis={coletaveisDisponiveis}
         posicaoJogadorRef={posicaoJogadorRef}
         enabled={playing}
+        interacaoExplicita={regiao === 'criacao'}
+        bloquearPassagensRespondidas={regiao !== 'criacao'}
+        onColetavelProximo={
+          regiao === 'criacao' ? atualizarColetavelProximo : undefined
+        }
       />
       {regiao === 'criacao' && (
         <>
@@ -282,19 +344,24 @@ function World({
           <Elementos3DCriacao momentoId={momentoCriacaoId} />
           <ObjetivoNarrativoCriacao
             momentoId={momentoCriacaoId}
-            enabled={playing}
+            enabled={playing && !estadoCriacao.concluida}
+            jornadaConcluida={estadoCriacao.concluida}
           />
           <ProgressaoCriacaoRuntime
             posicaoJogadorRef={posicaoJogadorRef}
             enabled={playing}
             onMomentoChange={atualizarMomentoCriacao}
+            onObjetivoProximo={atualizarObjetivoProximo}
           />
         </>
       )}
       <PortaisRegiao
         portais={portais}
         playerRef={posicaoJogadorRef}
-        enabled={playing}
+        enabled={
+          playing &&
+          !(regiao === 'criacao' && interacaoCriacaoLocal !== null)
+        }
         onPortalProximo={onPortalProximo}
         onPortalAcionado={onPortalAcionado}
       />
@@ -362,6 +429,8 @@ export function GameCanvas({
   const setRegiao = useGameStore((state) => state.setRegiao)
   const mapa = obterMapaRegiao(regiao)
   const [portalProximo, setPortalProximo] = useState<PortalMapa | null>(null)
+  const [interacaoCriacaoProxima, setInteracaoCriacaoProxima] =
+    useState<TipoInteracaoCriacao | null>(null)
   const [faseTransicao, setFaseTransicao] =
     useState<FasePortalTransicao>('inativo')
   const [destinoTransicao, setDestinoTransicao] =
@@ -385,7 +454,9 @@ export function GameCanvas({
   }, [mapa, setRegiao])
 
   useEffect(() => {
-    if (regiao !== 'criacao') onProgressaoCriacaoChange?.(null)
+    if (regiao !== 'criacao') {
+      onProgressaoCriacaoChange?.(null)
+    }
   }, [onProgressaoCriacaoChange, regiao])
 
   const acionarPortal = useCallback((portal: PortalMapa) => {
@@ -461,6 +532,7 @@ export function GameCanvas({
                 onPortalProximo={setPortalProximo}
                 onPortalAcionado={acionarPortal}
                 onProgressaoCriacaoChange={onProgressaoCriacaoChange}
+                onInteracaoCriacaoProxima={setInteracaoCriacaoProxima}
               />
             ) : (
               <RegionFallback />
@@ -469,7 +541,12 @@ export function GameCanvas({
         </Suspense>
       </Canvas>
       <PortalPrompt
-        portal={mundoAtivo ? portalProximo : null}
+        portal={
+          mundoAtivo && !interacaoCriacaoProxima ? portalProximo : null
+        }
+      />
+      <CreationInteractionPrompt
+        tipo={mundoAtivo ? interacaoCriacaoProxima : null}
       />
       <PortalTransitionOverlay
         fase={faseTransicao}

@@ -59,12 +59,17 @@ export function PortaisRegiao({
 
   useEffect(() => {
     const confirmarPortal = (event: KeyboardEvent) => {
-      if (!enabled || !ehTeclaConfirmacaoPortal(event)) return
+      if (
+        event.defaultPrevented ||
+        !enabled ||
+        !ehTeclaConfirmacaoPortal(event)
+      ) return
 
       const portal = portalAcionavelRef.current
       if (!portal) return
 
       event.preventDefault()
+      event.stopImmediatePropagation()
       onPortalAcionado?.(portal)
     }
 

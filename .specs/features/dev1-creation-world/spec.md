@@ -15,17 +15,19 @@ data-driven 3D progression that can be developed before final art arrives.
    Selah passage.
 3. **CRE-03:** Runtime events SHALL only complete the current moment. A player
    SHALL NOT skip moments by reaching a later zone or passage early.
-4. **CRE-04:** A Selah trigger SHALL count only after its quiz is present in the
-   local response history. Merely touching a collectible SHALL NOT advance the
-   Creation narrative.
-5. **CRE-05:** Re-entering Creation SHALL reconstruct the furthest safe moment
-   from already completed Creation passages without adding fields to the shared
-   Zustand store.
+4. **CRE-04:** A Selah trigger SHALL count only after the Selah feedback is
+   concluded and the parental pause is released. A quiz response in local
+   history SHALL NOT advance the Creation narrative by itself.
+5. **CRE-05:** Re-entering Creation SHALL restore the exact canonical checkpoint,
+   including spatial beats and 9/9 completion. The checkpoint SHALL remain only
+   in memory while playing without save and SHALL persist only when local
+   progress saving is enabled.
 6. **CRE-06:** The engine SHALL expose the active moment and scene phase so that
    future environment chunks, effects, narration and UI can subscribe without
    changing progression rules.
-7. **CRE-07:** The first implementation SHALL remain inside Dev 1's 3D/map
-   scope. It SHALL NOT change backend, quiz, TTS, UI persistence or API contracts.
+7. **CRE-07:** The implementation SHALL remain inside the local 3D/gameplay
+   scope. It SHALL NOT change backend, quiz generation, TTS or remote API
+   contracts.
 8. **CRE-08:** Creation progression SHALL be inert outside the Creation region
    and while exploration is blocked.
 9. **CRE-09:** Final art SHALL be loaded as per-moment or per-biome chunks. The
@@ -35,21 +37,27 @@ data-driven 3D progression that can be developed before final art arrives.
     available.
 11. **CRE-11:** Cancelling an unanswered Selah SHALL allow a new attempt after
     the player leaves and re-enters its activation radius.
+12. **CRE-12:** Creation crystals and narrative zones SHALL require an explicit
+    E/Enter interaction after entering their radius; proximity alone SHALL NOT
+    advance the journey.
+13. **CRE-13:** Transient narrative cues SHALL disappear after their beat while
+    revealed environment chunks remain cumulative.
 
 ## First implementation slice
 
 - typed catalogue for all nine moments and their GDD guide copy;
 - pure, tested sequential state machine;
-- safe reconstruction from completed passage history;
+- exact reconstruction from the canonical completed-moment checkpoint, with a
+  legacy fallback from explicitly concluded Selahs;
 - R3F runtime bridge for player distance, zones and completed Selahs;
 - current-moment collectible gating and diegetic markers for narrative zones;
-- typed, cumulative asset reveal contract for independent art integration.
+- typed persistent environment reveal plus beat-scoped VFX contracts.
 
 ## Out of scope for this slice
 
 - final 3D environment and character assets;
 - localized recorded narration;
-- new DOM interface or changes to the shared store;
+- new backend or remote persistence;
 - Noah, Joseph, backend, quiz or TTS behavior;
 - touching or controlling the forbidden fruit.
 

@@ -22,6 +22,19 @@ const momentoMinimoPorElemento = new Map<string, MomentoCriacaoId>([
   ['arte-criacao-particulas-luz', 'luz'],
 ])
 
+/**
+ * Light illustrations are narrative cues, not persistent world geometry. The
+ * map keeps them available for the light beat only; unlike physical props,
+ * they must be unmounted when the next beat starts.
+ */
+const artesLuzTemporarias = new Set([
+  'arte-criacao-caminho-luz',
+  'arte-criacao-primeiro-brilho',
+  'arte-criacao-nucleo-luz',
+  'arte-criacao-rochas-iluminadas',
+  'arte-criacao-particulas-luz',
+])
+
 export function obterMomentoMinimoElementoCriacao(
   elementoId: string,
 ): MomentoCriacaoId | null {
@@ -34,6 +47,11 @@ export function elementoCriacaoVisivel(
 ): boolean {
   const momentoMinimo = obterMomentoMinimoElementoCriacao(elementoId)
   if (!momentoMinimo) return false
+
+  if (artesLuzTemporarias.has(elementoId)) {
+    return momentoAtualId === momentoMinimo
+  }
+
   return (
     indiceMomentoCriacao(momentoAtualId) >= indiceMomentoCriacao(momentoMinimo)
   )

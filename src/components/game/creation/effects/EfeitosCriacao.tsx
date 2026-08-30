@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
-import { obterRevelacaoCriacao } from '../progression'
 import { AmbienteVazio } from './AmbienteVazio'
+import { obterConfiguracaoEfeitosCriacao } from './configuracao'
 import { EfeitoCrescimento } from './EfeitoCrescimento'
 import { Estrelas } from './Estrelas'
 import { Lua } from './Lua'
@@ -13,7 +13,9 @@ import type { EfeitosCriacaoProps } from './types'
 
 /**
  * Root procedural VFX component for the nine Creation moments in Selah.
- * Renders cumulative procedural visual assets based on the active moment's revelation.
+ * Narrative cues are beat-local; only the celestial set persists after its
+ * establishing beat (`ceu-ritmo`). Physical scene chunks keep their own
+ * cumulative policy in the world layer.
  */
 export function EfeitosCriacao({
   momentoId,
@@ -22,8 +24,7 @@ export function EfeitosCriacao({
 }: EfeitosCriacaoProps) {
   const assetsVisiveis = useMemo(() => {
     if (!enabled) return new Set<string>()
-    const revelacao = obterRevelacaoCriacao(momentoId)
-    return new Set(revelacao.assetsVisiveis)
+    return new Set(obterConfiguracaoEfeitosCriacao(momentoId).efeitosAtivos)
   }, [momentoId, enabled])
 
   if (!enabled || assetsVisiveis.size === 0) {

@@ -1,4 +1,5 @@
 export * from './catalogo'
+export * from './CreationInteractionPrompt'
 export * from './AtmosferaCriacao'
 export * from './distancia'
 export * from './estado'

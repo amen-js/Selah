@@ -7,7 +7,7 @@ import {
 
 describe('interações liberadas pela progressão da Criação', () => {
   it('mantém os Selahs futuros escondidos até o momento correspondente', () => {
-    expect(coletavelCriacaoDisponivelNoMomento('genesis-1-1', 'vazio')).toBe(true)
+    expect(coletavelCriacaoDisponivelNoMomento('genesis-1-1', 'vazio')).toBe(false)
     expect(coletavelCriacaoDisponivelNoMomento('genesis-1-3', 'vazio')).toBe(false)
     expect(coletavelCriacaoDisponivelNoMomento('genesis-1-3', 'luz')).toBe(true)
     expect(coletavelCriacaoDisponivelNoMomento('genesis-1-11', 'ceu-terra-aguas')).toBe(false)
@@ -18,8 +18,8 @@ describe('interações liberadas pela progressão da Criação', () => {
     expect(coletavelCriacaoDisponivelNoMomento('genesis-1-27', 'adao-e-eva')).toBe(true)
   })
 
-  it('não interfere em passagens que não pertencem à jornada da Criação', () => {
-    expect(coletavelCriacaoDisponivelNoMomento('exodus-3-14', 'vazio')).toBe(true)
+  it('falha fechado para passagens sem beat configurado na Criação', () => {
+    expect(coletavelCriacaoDisponivelNoMomento('exodus-3-14', 'vazio')).toBe(false)
   })
 
   it('expõe objetivo somente para os quatro momentos de descoberta espacial', () => {
@@ -34,22 +34,32 @@ describe('interações liberadas pela progressão da Criação', () => {
     expect(obterObjetivoZonaCriacao('fruto-escolha')?.id).toBe(
       'arvore-do-conhecimento',
     )
+    expect(obterObjetivoZonaCriacao('fruto-escolha', true)).toBeNull()
   })
 
-  it('mantém o Selah da humanidade fora do gatilho anterior do Éden', () => {
-    const objetivoEden = obterObjetivoZonaCriacao('eden')
-    const humanidade = mapaCriacao.coletaveis.find(
-      ({ passagemId }) => passagemId === 'genesis-1-27',
-    )
+  it.each([
+    ['ceu-terra-aguas', 'genesis-1-11'],
+    ['ceu-ritmo', 'genesis-1-24'],
+    ['eden', 'genesis-1-27'],
+  ] as const)(
+    'separa o objetivo de %s do Selah liberado em seguida',
+    (momentoId, passagemId) => {
+      const objetivo = obterObjetivoZonaCriacao(momentoId)
+      const coletavel = mapaCriacao.coletaveis.find(
+        (item) => item.passagemId === passagemId,
+      )
 
-    expect(objetivoEden).not.toBeNull()
-    expect(humanidade).toBeDefined()
+      expect(objetivo).not.toBeNull()
+      expect(coletavel).toBeDefined()
 
-    const distancia = Math.hypot(
-      humanidade!.posicao[0] - objetivoEden!.posicao[0],
-      humanidade!.posicao[1] - objetivoEden!.posicao[1],
-      humanidade!.posicao[2] - objetivoEden!.posicao[2],
-    )
-    expect(distancia).toBeGreaterThan(objetivoEden!.raio)
-  })
+      const distancia = Math.hypot(
+        coletavel!.posicao[0] - objetivo!.posicao[0],
+        coletavel!.posicao[1] - objetivo!.posicao[1],
+        coletavel!.posicao[2] - objetivo!.posicao[2],
+      )
+      expect(distancia).toBeGreaterThan(
+        objetivo!.raio + (coletavel!.raioAtivacao ?? 2.5),
+      )
+    },
+  )
 })

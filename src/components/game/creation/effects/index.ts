@@ -1,6 +1,7 @@
 export { EfeitosCriacao } from './EfeitosCriacao'
 export {
   obterConfiguracaoEfeitosCriacao,
+  obterEfeitosProceduraisVisiveis,
   ehEfeitoProcedural,
   IDS_EFEITOS_PROCEDURAIS,
   gerarPontosAmbienteVazio,

@@ -24,13 +24,40 @@ describe('revelação dos elementos do mundo da Criação', () => {
     expect(elementoCriacaoVisivel('prop-campo-sul', 'natureza')).toBe(true)
   })
 
-  it('retorna listas acumulativas sem mutar os dados do mapa', () => {
+  it('mostra as artes 2D de luz somente durante o beat luz', () => {
+    const artesOriginais = [...(mapaCriacao.artes2D ?? [])]
+    const expectativas = [
+      ['vazio', 0],
+      ['luz', artesOriginais.length],
+      ['ceu-terra-aguas', 0],
+      ['natureza', 0],
+      ['ceu-ritmo', 0],
+      ['criaturas', 0],
+      ['eden', 0],
+      ['adao-e-eva', 0],
+      ['fruto-escolha', 0],
+    ] as const
+
+    for (const [momentoId, quantidade] of expectativas) {
+      expect(obterArtesCriacaoVisiveis(artesOriginais, momentoId)).toHaveLength(
+        quantidade,
+      )
+    }
+
+    for (const arte of artesOriginais) {
+      expect(elementoCriacaoVisivel(arte.id, 'luz')).toBe(true)
+      expect(elementoCriacaoVisivel(arte.id, 'natureza')).toBe(false)
+    }
+  })
+
+  it('retorna props cumulativos sem mutar os dados do mapa', () => {
     const propsOriginais = [...mapaCriacao.props]
     const artesOriginais = [...(mapaCriacao.artes2D ?? [])]
 
     expect(obterPropsCriacaoVisiveis(mapaCriacao.props, 'vazio')).toEqual([])
     expect(obterArtesCriacaoVisiveis(artesOriginais, 'vazio')).toEqual([])
     expect(obterArtesCriacaoVisiveis(artesOriginais, 'luz')).toHaveLength(5)
+    expect(obterArtesCriacaoVisiveis(artesOriginais, 'fruto-escolha')).toEqual([])
     expect(obterPropsCriacaoVisiveis(mapaCriacao.props, 'fruto-escolha')).toHaveLength(
       mapaCriacao.props.length,
     )

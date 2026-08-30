@@ -85,37 +85,29 @@ describe('configuracao de efeitos procedurais da criacao', () => {
     }
   })
 
-  it('respeita a cumulatividade dos efeitos procedurais conforme o avanco', () => {
-    // Momento 1 (vazio): ambiente-vazio e luz-guia
-    const configVazio = obterConfiguracaoEfeitosCriacao('vazio')
-    expect(configVazio.efeitosAtivos).toEqual(['ambiente-vazio', 'luz-guia'])
-    expect(configVazio.temEfeito('ambiente-vazio')).toBe(true)
-    expect(configVazio.temEfeito('luz-guia')).toBe(true)
-    expect(configVazio.temEfeito('nucleo-luz')).toBe(false)
+  it('monta cues temporarios por beat e persiste somente o ceu a partir de ceu-ritmo', () => {
+    const expectativas: readonly [
+      MomentoCriacaoId,
+      readonly ProceduralVfxAssetId[],
+    ][] = [
+      ['vazio', ['ambiente-vazio', 'luz-guia']],
+      ['luz', ['luz-guia', 'nucleo-luz', 'marcadores-caminho-luz']],
+      ['ceu-terra-aguas', []],
+      ['natureza', ['efeito-crescimento']],
+      ['ceu-ritmo', ['sol', 'lua', 'estrelas', 'nuvens']],
+      ['criaturas', ['sol', 'lua', 'estrelas', 'nuvens']],
+      ['eden', ['sol', 'lua', 'estrelas', 'nuvens']],
+      ['adao-e-eva', ['sol', 'lua', 'estrelas', 'nuvens']],
+      ['fruto-escolha', ['sol', 'lua', 'estrelas', 'nuvens']],
+    ]
 
-    // Momento 2 (luz): acumula nucleo-luz e marcadores-caminho-luz
-    const configLuz = obterConfiguracaoEfeitosCriacao('luz')
-    expect(configLuz.temEfeito('ambiente-vazio')).toBe(true)
-    expect(configLuz.temEfeito('luz-guia')).toBe(true)
-    expect(configLuz.temEfeito('nucleo-luz')).toBe(true)
-    expect(configLuz.temEfeito('marcadores-caminho-luz')).toBe(true)
+    for (const [momentoId, esperados] of expectativas) {
+      const config = obterConfiguracaoEfeitosCriacao(momentoId)
+      expect(config.efeitosAtivos).toEqual(esperados)
 
-    // Momento 4 (natureza): acumula efeito-crescimento
-    const configNatureza = obterConfiguracaoEfeitosCriacao('natureza')
-    expect(configNatureza.temEfeito('efeito-crescimento')).toBe(true)
-
-    // Momento 5 (ceu-ritmo): acumula sol, lua, estrelas e nuvens
-    const configCeu = obterConfiguracaoEfeitosCriacao('ceu-ritmo')
-    expect(configCeu.temEfeito('sol')).toBe(true)
-    expect(configCeu.temEfeito('lua')).toBe(true)
-    expect(configCeu.temEfeito('estrelas')).toBe(true)
-    expect(configCeu.temEfeito('nuvens')).toBe(true)
-
-    // Momento 9 (fruto-escolha): todos os 9 efeitos procedurais visiveis acumulados
-    const configEscolha = obterConfiguracaoEfeitosCriacao('fruto-escolha')
-    expect(configEscolha.efeitosAtivos.length).toBe(9)
-    for (const id of IDS_EFEITOS_PROCEDURAIS) {
-      expect(configEscolha.temEfeito(id)).toBe(true)
+      for (const id of IDS_EFEITOS_PROCEDURAIS) {
+        expect(config.temEfeito(id)).toBe(esperados.includes(id))
+      }
     }
   })
 

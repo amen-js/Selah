@@ -1,7 +1,7 @@
 # Quick Task 001: Remove verse focus outline
 
 **Date:** 2026-08-30
-**Status:** In Progress
+**Status:** Done
 
 ## Description
 
@@ -16,11 +16,11 @@ text.
 
 ## Verification
 
-- [ ] The verse heading still receives focus when the verse phase opens.
-- [ ] The yellow focus rectangle is not visible around the Bible text.
-- [ ] Interactive controls keep their normal focus indication.
-- [ ] Lint, tests, and production build pass.
+- [x] The verse heading still receives focus when the verse phase opens.
+- [x] The yellow focus rectangle is not visible around the Bible text.
+- [x] Interactive controls keep their normal focus indication.
+- [x] Lint, tests, and production build pass.
 
 ## Commit
 
-Pending.
+`599096f` — `fix(ui): hide verse focus outline`

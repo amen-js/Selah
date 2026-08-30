@@ -3,14 +3,15 @@ import { mapaCriacao } from '../src/mapas/criacao.ts'
 import { createSelahGateway } from '../src/services/selahGateway.ts'
 import { createApp } from './app.ts'
 import { loadEnv } from './env.ts'
+import type { OpenRouterClient } from './services/openrouter.ts'
 
-const createAppFetch = (): typeof fetch => {
+const createAppFetch = (openRouter: OpenRouterClient | null = null): typeof fetch => {
   const env = {
     ...loadEnv(),
     openRouterApiKey: '',
     youVersionAppKey: '',
   }
-  const app = createApp({ env, openRouter: null })
+  const app = createApp({ env, openRouter })
 
   return (input, init) => {
     const request = input instanceof Request ? input : new Request(input, init)
@@ -53,5 +54,75 @@ describe('Dev 2 frontend integration', () => {
         referencia: versiculo.referencia,
       })
     }
+  })
+
+  it('completes an AI quiz from a real Creation collectible through the public gateway', async () => {
+    const gatilho = mapaCriacao.coletaveis.find(
+      ({ passagemId }) => passagemId === 'genesis-1-3',
+    )
+    expect(gatilho).toBeDefined()
+
+    const gerarQuiz = vi.fn<OpenRouterClient['gerarQuiz']>().mockResolvedValue({
+      pergunta: 'O que Deus disse para que houvesse luz?',
+      alternativas: [
+        { id: 'A', texto: 'Haja luz' },
+        { id: 'B', texto: 'Haja uma cidade' },
+        { id: 'C', texto: 'Haja um palácio' },
+        { id: 'D', texto: 'Haja uma torre' },
+      ],
+      respostaCorretaId: 'A',
+      explicacao: 'Deus disse haja luz e houve luz.',
+    })
+    const gateway = createSelahGateway({
+      baseUrl: 'http://selah.test',
+      fetchFn: createAppFetch({ gerarQuiz }),
+    })
+    const versiculo = await gateway.buscarVersiculo(gatilho!, 'pt-BR')
+    expect(versiculo).toMatchObject({
+      passagemId: gatilho!.passagemId,
+      referencia: 'Gênesis 1:3',
+      texto: 'E disse Deus: Haja luz. E houve luz.',
+    })
+
+    const quiz = await gateway.gerarQuiz({
+      historiaId: gatilho!.historiaId,
+      passagemId: gatilho!.passagemId,
+      idioma: 'pt-BR',
+      faixaEtaria: 'crianca',
+      dificuldade: 'facil',
+      iaAtiva: true,
+    })
+
+    expect(gerarQuiz).toHaveBeenCalledOnce()
+    expect(gerarQuiz).toHaveBeenCalledWith({
+      referencia: 'Gênesis 1:3',
+      texto: 'E disse Deus: Haja luz. E houve luz.',
+      idioma: 'pt-BR',
+      faixaEtaria: 'crianca',
+      dificuldade: 'facil',
+    })
+    expect(quiz).toEqual({
+      id: expect.stringMatching(/^quiz-/),
+      passagemId: gatilho!.passagemId,
+      pergunta: 'O que Deus disse para que houvesse luz?',
+      alternativas: [
+        { id: 'A', texto: 'Haja luz' },
+        { id: 'B', texto: 'Haja uma cidade' },
+        { id: 'C', texto: 'Haja um palácio' },
+        { id: 'D', texto: 'Haja uma torre' },
+      ],
+      origem: 'ia',
+    })
+    expect(quiz.alternativas).toHaveLength(4)
+    expect(quiz).not.toHaveProperty('respostaCorretaId')
+    expect(quiz).not.toHaveProperty('explicacao')
+
+    await expect(
+      gateway.responderQuiz({ quizId: quiz.id, alternativaId: 'A' }),
+    ).resolves.toEqual({
+      acertou: true,
+      explicacao: 'Deus disse haja luz e houve luz.',
+      referencia: versiculo.referencia,
+    })
   })
 })

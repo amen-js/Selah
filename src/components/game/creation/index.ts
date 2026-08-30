@@ -15,3 +15,5 @@ export {
 } from './propTransforms'
 export { distancia3D, estaNoRaio } from './proximidade'
 export type { PosicaoJogador } from './proximidade'
+export { podeAcionarColetavel } from './podeAcionarColetavel'
+export type { CondicoesColetavel } from './podeAcionarColetavel'

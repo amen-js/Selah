@@ -13,7 +13,7 @@ todos:
     status: pending
   - id: slice-3d
     content: "Dev 1: vertical slice 3D — Canvas, RigidBody, Ecctrl com um cubo andando"
-    status: pending
+    status: completed
   - id: slice-ia
     content: "Dev 2: servidor Hono com /api/quiz/gerar via SDK openai apontado ao OpenRouter, retornando JSON estruturado"
     status: pending
@@ -31,10 +31,10 @@ todos:
     status: pending
   - id: regiao-criacao
     content: Dev 1 carrega os .glb e faz gatilho de proximidade; Designer preenche mapas/criacao.ts com o layout
-    status: pending
+    status: completed
   - id: selah
     content: "Momento Selah: Dev 1 faz pausa do Ecctrl, useSpring na câmera e fade de áudio; Dev 3 faz a UI do versículo, quiz A/B/C/D e botão ouvir (TTS)"
-    status: pending
+    status: completed
   - id: avaliar
     content: "Dev 2: endpoint /api/quiz/responder corrige quizId + alternativaId sem receber ou persistir dados pessoais"
     status: pending
@@ -46,10 +46,10 @@ todos:
     status: pending
   - id: pausa-parental
     content: "Dev 3: após o Momento Selah, pausar a exploração até liberação local do responsável; Dev 1 mantém movimento e mundo bloqueados enquanto pausaParentalAtiva"
-    status: pending
+    status: completed
   - id: regiao-noe
     content: Dev 1 monta o hub com portais e, se a jornada principal estiver estável, inicia a região de Noé; Designer preenche mapas/noe.ts
-    status: pending
+    status: completed
   - id: regiao-jose
     content: "Expansão pós-demo: Dev 1 reutiliza a estrutura de regiões para José; Designer preenche mapas/jose.ts após aprovação do recorte pela P.O."
     status: pending

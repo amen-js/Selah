@@ -88,9 +88,12 @@ Keep it light — the goal is visibility, not ceremony.
 - **Directory Layout:**
   - `src/components/` — React UI and 3D scene components
   - `src/stores/` — Zustand global stores (game progress, audio, player language)
-  - `src/services/` — API clients (YouVersion, backend proxy communication)
-  - `public/models/` — CC0 3D models and assets (.glb)
-  - `server/` — Hono proxy server endpoints
+  - `src/services/` — clientes HTTP do proxy Hono (`selahGateway`) e TTS (`tts.ts`)
+  - `public/models/` — 3D models and assets (.glb); every non-CC0 pack must keep
+    its source, license, creator attribution and checksum in a nearby README
+  - `server/` — proxy Hono (`app.ts`, rotas em `index.ts`)
+  - `server/data/` — allowlist de passagens, snapshot de versículos e quizzes de fallback
+  - `server/services/` — YouVersion, OpenRouter (ZDR), validação, sessão de quiz e métricas agregadas
 
 ## Claude Code specifically
 

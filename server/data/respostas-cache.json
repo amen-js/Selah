@@ -1,0 +1,22 @@
+{
+  "descricao": "Índice do catálogo de quizzes aprovados. A fonte executável é server/data/respostas-cache.ts.",
+  "historias": ["criacao", "noe", "jose"],
+  "idiomas": ["pt-BR", "en-US", "es-ES"],
+  "passagens": [
+    "genesis-1-1",
+    "genesis-1-3",
+    "genesis-1-11",
+    "genesis-1-24",
+    "genesis-1-27",
+    "genesis-6-14",
+    "genesis-6-19",
+    "genesis-7-1",
+    "genesis-8-1",
+    "genesis-9-13",
+    "genesis-37-5",
+    "genesis-39-2",
+    "genesis-41-16",
+    "genesis-45-5",
+    "genesis-50-20"
+  ]
+}

@@ -5,6 +5,17 @@ export type Escala3D = number | Ponto3D
 
 export type FormaFallback = 'caixa' | 'cone' | 'cilindro' | 'esfera'
 export type ColliderMapa = 'cuboid' | 'hull' | 'trimesh' | false
+export type ModoArte2D = 'billboard' | 'chao'
+
+export interface Arte2DMapa {
+  id: string
+  arquivo: string
+  posicao: Ponto3D
+  escala: readonly [number, number]
+  modo?: ModoArte2D
+  rotacao?: number
+  opacidade?: number
+}
 
 export interface PropMapa {
   id: string
@@ -34,4 +45,5 @@ export interface MapaRegiao {
   }
   props: readonly PropMapa[]
   coletaveis: readonly ColetavelMapa[]
+  artes2D?: readonly Arte2DMapa[]
 }

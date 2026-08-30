@@ -42,7 +42,7 @@ import {
   type FasePortalTransicao,
   type PortalMapa,
 } from './portals'
-import { ColetaveisRegiao } from './region'
+import { Arte2DRegiao, ColetaveisRegiao } from './region'
 
 const DURACAO_SAIDA_PORTAL_MS = 260
 const DURACAO_TROCA_PORTAL_MS = 90
@@ -202,6 +202,9 @@ function World({
       </RigidBody>
 
       <PropMapaRenderer props={mapa.props} />
+      <Suspense fallback={null}>
+        <Arte2DRegiao artes={mapa.artes2D ?? []} />
+      </Suspense>
       <ColetaveisRegiao
         coletaveis={mapa.coletaveis}
         posicaoJogadorRef={posicaoJogadorRef}

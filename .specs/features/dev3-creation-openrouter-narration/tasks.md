@@ -1,7 +1,7 @@
 # Creation OpenRouter Narration Tasks
 
 **Design**: `.specs/features/dev3-creation-openrouter-narration/design.md`
-**Status**: In Progress
+**Status**: Done
 **Baseline**: 274 tests across 58 files; 0 failures and 0 skipped.
 
 ## Execution Plan
@@ -20,6 +20,8 @@ T4 -> T5 -> T6 --------/          \-----+-> T12
 
 ### T1: Add the approved Creation narration catalogue [P]
 
+**Status**: Complete
+
 **What**: Add the 27 allowlisted narration IDs, three localized scripts and a
 strict resolver shared by browser and server.
 **Where**: `src/content/creationNarrations.ts`,
@@ -33,14 +35,16 @@ strict resolver shared by browser and server.
 
 **Done when**:
 
-- [ ] Exactly 27 IDs cover initial, support and transition phases for all nine moments.
-- [ ] Every ID resolves non-empty pt-BR, en-US and es-ES copy.
-- [ ] Unknown IDs and languages resolve to `undefined`.
-- [ ] The targeted catalogue test passes without skipped tests.
+- [x] Exactly 27 IDs cover initial, support and transition phases for all nine moments.
+- [x] Every ID resolves non-empty pt-BR, en-US and es-ES copy.
+- [x] Unknown IDs and languages resolve to `undefined`.
+- [x] The targeted catalogue test passes without skipped tests.
 
 **Commit**: `feat(content): add approved Creation narration catalogue`
 
 ### T2: Expose the protected guide narration endpoint
+
+**Status**: Complete
 
 **What**: Add `POST /api/tts/narracao` with strict allowlist validation, shared
 rate budget, timeout and no-store MP3 response.
@@ -54,15 +58,17 @@ rate budget, timeout and no-store MP3 response.
 
 **Done when**:
 
-- [ ] Only `{ narracaoId, idioma }` is accepted and resolved server-side.
-- [ ] Invalid IDs, languages and extra fields fail before OpenRouter is called.
-- [ ] Scripture and guide speech share the ten-per-minute/IP budget.
-- [ ] Success, timeout, adapter failure and no-store MP3 behavior are tested.
-- [ ] The full test gate passes without skipped or deleted tests.
+- [x] Only `{ narracaoId, idioma }` is accepted and resolved server-side.
+- [x] Invalid IDs, languages and extra fields fail before OpenRouter is called.
+- [x] Scripture and guide speech share the ten-per-minute/IP budget.
+- [x] Success, timeout, adapter failure and no-store MP3 behavior are tested.
+- [x] The full test gate passes without skipped or deleted tests.
 
 **Commit**: `feat(api): add protected Creation narration endpoint`
 
 ### T3: Extend the TTS controller for approved narration
+
+**Status**: Complete
 
 **What**: Add `narrar` to the controller while reusing its single-operation
 neural playback, cancellation, cleanup and local speech fallback.
@@ -76,14 +82,16 @@ neural playback, cancellation, cleanup and local speech fallback.
 
 **Done when**:
 
-- [ ] Neural requests send only narration ID and language.
-- [ ] Local fallback speaks the exact approved localized text.
-- [ ] New narration cancels stale scripture/guide requests and releases audio.
-- [ ] Existing `falar`, pause, resume and cancellation tests remain green.
+- [x] Neural requests send only narration ID and language.
+- [x] Local fallback speaks the exact approved localized text.
+- [x] New narration cancels stale scripture/guide requests and releases audio.
+- [x] Existing `falar`, pause, resume and cancellation tests remain green.
 
 **Commit**: `feat(tts): support approved Creation narration`
 
 ### T4: Add the pure Creation inactivity detector [P]
+
+**Status**: Complete
 
 **What**: Add a pure state helper that detects 12 seconds without meaningful
 horizontal displacement and emits one transition per inactivity episode.
@@ -98,14 +106,16 @@ horizontal displacement and emits one transition per inactivity episode.
 
 **Done when**:
 
-- [ ] The 11,999/12,000 ms boundary is deterministic.
-- [ ] Meaningful movement resets the timer and inactivity episode.
-- [ ] Jitter does not count as meaningful movement.
-- [ ] Disabled exploration resets without emitting support.
+- [x] The 11,999/12,000 ms boundary is deterministic.
+- [x] Meaningful movement resets the timer and inactivity episode.
+- [x] Jitter does not count as meaningful movement.
+- [x] Disabled exploration resets without emitting support.
 
 **Commit**: `feat(creation): detect exploration inactivity`
 
 ### T5: Emit inactivity from the Creation runtime
+
+**Status**: Complete
 
 **What**: Wire the pure detector into the existing R3F frame loop and expose
 only boolean state transitions.
@@ -119,14 +129,16 @@ only boolean state transitions.
 
 **Done when**:
 
-- [ ] Runtime emits `true` once after inactivity and `false` once after resumed movement.
-- [ ] Disabled exploration and moment changes reset inactivity.
-- [ ] No per-frame React state updates are introduced.
-- [ ] Lint, all tests and production build pass.
+- [x] Runtime emits `true` once after inactivity and `false` once after resumed movement.
+- [x] Disabled exploration and moment changes reset inactivity.
+- [x] No per-frame React state updates are introduced.
+- [x] Lint, all tests and production build pass.
 
 **Commit**: `feat(creation): emit guide inactivity transitions`
 
 ### T6: Forward the Canvas inactivity contract
+
+**Status**: Complete
 
 **What**: Forward Creation inactivity from `World` through `GameCanvas` and
 clear it outside the Creation region.
@@ -140,14 +152,16 @@ clear it outside the Creation region.
 
 **Done when**:
 
-- [ ] `GameCanvas` exposes `onInatividadeCriacaoChange` as an optional callback.
-- [ ] Creation forwards runtime transitions and other regions clear the signal.
-- [ ] Existing public props remain backward compatible.
-- [ ] Lint, all tests and production build pass.
+- [x] `GameCanvas` exposes `onInatividadeCriacaoChange` as an optional callback.
+- [x] Creation forwards runtime transitions and other regions clear the signal.
+- [x] Existing public props remain backward compatible.
+- [x] Lint, all tests and production build pass.
 
 **Commit**: `feat(game): forward Creation inactivity state`
 
 ### T7: Connect transient inactivity state in App
+
+**Status**: Complete
 
 **What**: Keep the inactivity boolean transient in `App` and pass it to the
 production overlay without adding Zustand or persistence state.
@@ -161,14 +175,16 @@ production overlay without adding Zustand or persistence state.
 
 **Done when**:
 
-- [ ] App forwards Canvas inactivity changes to `GameOverlay`.
-- [ ] The signal clears when the snapshot leaves Creation.
-- [ ] No inactivity value enters local storage.
-- [ ] Full integration tests pass.
+- [x] App forwards Canvas inactivity changes to `GameOverlay`.
+- [x] The signal clears when the snapshot leaves Creation.
+- [x] No inactivity value enters local storage.
+- [x] Full integration tests pass.
 
 **Commit**: `feat(app): connect Creation guide activity state`
 
 ### T8: Add the Creation narration flow hook
+
+**Status**: Complete
 
 **What**: Implement initial, transition and once-per-episode support sequencing,
 preference gating, Strict Mode deduplication and cancellation.
@@ -183,15 +199,17 @@ preference gating, Strict Mode deduplication and cancellation.
 
 **Done when**:
 
-- [ ] Initial narration runs once per moment under React Strict Mode.
-- [ ] Moment changes sequence outgoing transition before incoming initial narration.
-- [ ] Support runs once after 12-second inactivity and resets after activity.
-- [ ] Blocking, language and moment changes cancel stale work immediately.
-- [ ] Disabled narration keeps deterministic visible text without a neural request.
+- [x] Initial narration runs once per moment under React Strict Mode.
+- [x] Moment changes sequence outgoing transition before incoming initial narration.
+- [x] Support runs once after 12-second inactivity and resets after activity.
+- [x] Blocking, language and moment changes cancel stale work immediately.
+- [x] Disabled narration keeps deterministic visible text without a neural request.
 
 **Commit**: `feat(creation): orchestrate Voice Guide narration`
 
 ### T9: Render resolved narrative lines in CreationGuide
+
+**Status**: Complete
 
 **What**: Make the passive guide render the hook-resolved line while preserving
 the localized objective fallback and non-interactive accessibility contract.
@@ -206,14 +224,16 @@ the localized objective fallback and non-interactive accessibility contract.
 
 **Done when**:
 
-- [ ] Initial, support and transition lines render without interactive controls.
-- [ ] The steady objective remains the fallback between narrated lines.
-- [ ] The guide stays hidden while exploration is inactive.
-- [ ] Component tests pass in pt-BR and en-US.
+- [x] Initial, support and transition lines render without interactive controls.
+- [x] The steady objective remains the fallback between narrated lines.
+- [x] The guide stays hidden while exploration is inactive.
+- [x] Component tests pass in pt-BR and en-US.
 
 **Commit**: `feat(ui): show Creation guide narrative lines`
 
 ### T10: Compose narration with overlay priority
+
+**Status**: Complete
 
 **What**: Own the narration hook in `GameOverlay`, pass its line to the guide
 and cancel playback behind every existing blocking overlay.
@@ -228,14 +248,16 @@ and cancel playback behind every existing blocking overlay.
 
 **Done when**:
 
-- [ ] Voice Guide narration starts only during active Creation exploration.
-- [ ] Selah, parental pause, dialogue and all local panels cancel it immediately.
-- [ ] Guide and scripture speech cannot overlap through the shared controller.
-- [ ] Pointer-lock and existing overlay rendering behavior remain unchanged.
+- [x] Voice Guide narration starts only during active Creation exploration.
+- [x] Selah, parental pause, dialogue and all local panels cancel it immediately.
+- [x] Guide and scripture speech cannot overlap through the shared controller.
+- [x] Pointer-lock and existing overlay rendering behavior remain unchanged.
 
 **Commit**: `feat(ui): compose Creation Voice Guide playback`
 
 ### T11: Simulate narration and inactivity in the UI lab
+
+**Status**: Complete
 
 **What**: Add deterministic moment/activity controls to `/lab` using the same
 production overlay and injectable TTS controller.
@@ -251,14 +273,16 @@ production overlay and injectable TTS controller.
 
 **Done when**:
 
-- [ ] Lab can toggle active/inactive exploration without Canvas.
-- [ ] Moments 1 and 2 exercise initial, support and transition lines.
-- [ ] Changing interface language replaces visible narration.
-- [ ] Full integration tests pass in all three locales.
+- [x] Lab can toggle active/inactive exploration without Canvas.
+- [x] Moments 1 and 2 exercise initial, support and transition lines.
+- [x] Changing interface language replaces visible narration.
+- [x] Full integration tests pass in all three locales.
 
 **Commit**: `feat(lab): simulate Creation Voice Guide narration`
 
 ### T12: Validate and document the complete feature
+
+**Status**: Complete
 
 **What**: Run the build gate, desktop/mobile browser UAT, verify traceability
 and record the final implementation result.
@@ -274,10 +298,10 @@ and record the final implementation result.
 
 **Done when**:
 
-- [ ] Lint, all tests and production build pass with no skipped/deleted tests.
-- [ ] Desktop and mobile UAT verify visible and audible initial/support/transition flow.
-- [ ] Neural failure demonstrates local fallback without blocking exploration.
-- [ ] Every requirement is marked Verified or has an explicit deviation/blocker.
+- [x] Lint, all tests and production build pass with no skipped/deleted tests.
+- [x] Desktop and mobile UAT verify visible and audible initial/support/transition flow.
+- [x] Neural failure demonstrates local fallback without blocking exploration.
+- [x] Every requirement is marked Verified or has an explicit deviation/blocker.
 
 **Commit**: `docs(spec): verify Creation Voice Guide narration`
 
@@ -354,3 +378,18 @@ Validation:
 | T10 | GameOverlay | Integration RTL | Integration RTL | Match |
 | T11 | LabPage | Integration RTL | Integration RTL | Match |
 | T12 | Final UI validation | Build + browser UAT | Build + browser UAT | Match |
+
+## Execution Result
+
+- **Complete**: T1-T12, including the protected guide endpoint, shared TTS
+  controller, activity detector, narration flow, production overlay and `/lab`.
+- **Automated gate**: lint, 308 tests across 61 files and production build pass;
+  no failures or skipped tests. Vite reports only the pre-existing large-chunk warning.
+- **Neural smoke test**: the local proxy returned HTTP 200, `audio/mpeg`,
+  `Cache-Control: no-store` and a valid 149,376-byte MP3 for an approved ID.
+- **Browser UAT**: initial, support, transition and locale replacement passed;
+  1440x900 and 390x844 had no horizontal overflow or clipped guide; console clean.
+- **Fallback**: controller tests verify exact localized device speech after neural
+  failure, without sending fallback text to the proxy.
+- **Compatibility fixes**: shared type-only imports use explicit `.ts` extensions
+  so the browser catalogue remains consumable by the NodeNext server build.

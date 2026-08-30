@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type RefObject } from 'react'
+import { useCallback, useEffect, useMemo, useState, type RefObject } from 'react'
 import type { ColetavelMapa } from '../../../../mapas/types'
 import type { PortalMapa } from '../../portals'
 import { PortaisRegiao } from '../../portals'
@@ -9,6 +9,8 @@ import { obterRequisitosPendentesNoe } from '../progression'
 import {
   CanteiroNoe,
   type CandidatoTarefaNoe as CandidatoTarefaCanteiroNoe,
+  MantimentosArcaNoe,
+  type CandidatoMantimentoNoe,
 } from '../world'
 import {
   obterRequisitoSelahFinalNoe,
@@ -67,6 +69,8 @@ export function NoeWorldRuntime({
   const selahsConcluidos = useGameStore((state) => state.selahsConcluidos)
   const [tarefaProxima, setTarefaProxima] =
     useState<CandidatoTarefaCanteiroNoe | null>(null)
+  const [mantimentoProximo, setMantimentoProximo] =
+    useState<CandidatoMantimentoNoe | null>(null)
   const [coletavelProximo, setColetavelProximo] =
     useState<ColetavelMapa | null>(null)
   const [portalAcionavel, setPortalAcionavel] = useState<PortalMapa | null>(null)
@@ -131,6 +135,17 @@ export function NoeWorldRuntime({
       proximos.push(candidato)
     }
 
+    if (mantimentoProximo) {
+      proximos.push({
+        tipo: 'tarefa',
+        id: mantimentoProximo.id,
+        acaoId: mantimentoProximo.acaoId,
+        unidadeId: mantimentoProximo.unidadeId,
+        distancia: 0,
+        acionar: mantimentoProximo.acionar,
+      })
+    }
+
     if (
       coletavelProximo &&
       requisitoSelah &&
@@ -164,6 +179,7 @@ export function NoeWorldRuntime({
   }, [
     coletavelProximo,
     emitir,
+    mantimentoProximo,
     onPortalAcionado,
     onDialogoSolicitado,
     onVedacaoSolicitada,
@@ -194,6 +210,13 @@ export function NoeWorldRuntime({
     onProgressaoChange?.(estado)
   }, [estado, onProgressaoChange])
 
+  const concluirUnidade = useCallback(
+    (acaoId: CandidatoTarefaNoe['acaoId'], unidadeId: string) => {
+      emitir({ tipo: 'unidade-acao-concluida', acaoId, unidadeId })
+    },
+    [emitir],
+  )
+
   return (
     <>
       <CanteiroNoe
@@ -202,6 +225,14 @@ export function NoeWorldRuntime({
         posicaoJogadorRef={posicaoJogadorRef}
         enabled={enabled}
         onCandidatoChange={setTarefaProxima}
+      />
+      <MantimentosArcaNoe
+        momentoAtualId={estado.momentoAtualId}
+        progressoMomentoAtual={estado.progressoMomentoAtual}
+        posicaoJogadorRef={posicaoJogadorRef}
+        enabled={enabled}
+        onCandidatoChange={setMantimentoProximo}
+        onConcluirUnidade={concluirUnidade}
       />
       <ColetaveisRegiao
         coletaveis={coletaveisDisponiveis}

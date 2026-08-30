@@ -3,6 +3,7 @@ import { useGameStore } from '../../../../stores/gameStore'
 import type { ColetaveisRegiaoProps } from '../../region/ColetaveisRegiao'
 import type { PortaisRegiaoProps } from '../../portals/PortaisRegiao'
 import type { CanteiroNoeProps } from '../world/types'
+import type { MantimentosArcaNoeProps } from '../world/MantimentosArcaNoe'
 import { NoeWorldRuntime } from './NoeWorldRuntime'
 
 vi.mock('../world', () => ({
@@ -43,6 +44,35 @@ vi.mock('../world', () => ({
       </button>
     </section>
   ),
+  MantimentosArcaNoe: ({
+    momentoAtualId,
+    onCandidatoChange,
+    onConcluirUnidade,
+  }: MantimentosArcaNoeProps) =>
+    momentoAtualId === 'estoque-mantimentos' ? (
+      <button
+        type="button"
+        onClick={() =>
+          onCandidatoChange?.({
+            id: 'mantimento-entrega-feno',
+            acaoId: 'noe.mantimento.feno-armazenado',
+            unidadeId: 'feno-estabulos-inferiores',
+            posicao: [0, 0, 0],
+            raio: 2,
+            prioridade: 320,
+            etapaInteracao: 'entrega',
+            mantimentoId: 'feno',
+            acionar: () =>
+              onConcluirUnidade(
+                'noe.mantimento.feno-armazenado',
+                'feno-estabulos-inferiores',
+              ),
+          })
+        }
+      >
+        entregar feno
+      </button>
+    ) : null,
 }))
 
 vi.mock('../../region', () => ({
@@ -240,5 +270,30 @@ describe('NoeWorldRuntime', () => {
     )
     expect(screen.getByTestId('coletaveis-noe')).toHaveTextContent('')
     expect(useGameStore.getState().selahAtivo).toBeNull()
+  })
+
+  it('encaminha uma entrega de M3 pelo mesmo árbitro de confirmação', async () => {
+    useGameStore.setState({
+      checkpointNoe: {
+        versao: 1,
+        momentosConcluidos: ['chamado-canteiro', 'coleta-vedacao'],
+        progressoMomentoAtual: [],
+      },
+    })
+    renderRuntime()
+
+    fireEvent.click(screen.getByRole('button', { name: 'entregar feno' }))
+    fireEvent.keyDown(window, { code: 'KeyE' })
+
+    await waitFor(() =>
+      expect(useGameStore.getState().checkpointNoe?.progressoMomentoAtual).toEqual(
+        [
+          {
+            acaoId: 'noe.mantimento.feno-armazenado',
+            unidadesConcluidas: ['feno-estabulos-inferiores'],
+          },
+        ],
+      ),
+    )
   })
 })

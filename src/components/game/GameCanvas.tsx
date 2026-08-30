@@ -30,8 +30,10 @@ import { resolverFocoCameraSelah } from './camera/selahFocus'
 import type { FocoCameraSelah } from './camera/types'
 import {
   AtmosferaCriacao,
+  coletavelCriacaoDisponivelNoMomento,
   type MomentoCriacao,
   type MomentoCriacaoId,
+  ObjetivoNarrativoCriacao,
   ProgressaoCriacaoRuntime,
   PropMapaRenderer,
   type PosicaoJogador,
@@ -181,6 +183,18 @@ function World({
     () => resolverFocoCameraSelah(gatilhoSelah, mapa.coletaveis),
     [gatilhoSelah, mapa.coletaveis],
   )
+  const coletaveisDisponiveis = useMemo(
+    () =>
+      regiao === 'criacao'
+        ? mapa.coletaveis.filter((coletavel) =>
+            coletavelCriacaoDisponivelNoMomento(
+              coletavel.passagemId,
+              momentoCriacaoId,
+            ),
+          )
+        : mapa.coletaveis,
+    [mapa.coletaveis, momentoCriacaoId, regiao],
+  )
   const atualizarMomentoCriacao = useCallback((momento: MomentoCriacao) => {
     setMomentoCriacaoId(momento.id)
   }, [])
@@ -224,16 +238,22 @@ function World({
         <Arte2DRegiao artes={mapa.artes2D ?? []} />
       </Suspense>
       <ColetaveisRegiao
-        coletaveis={mapa.coletaveis}
+        coletaveis={coletaveisDisponiveis}
         posicaoJogadorRef={posicaoJogadorRef}
         enabled={playing}
       />
       {regiao === 'criacao' && (
-        <ProgressaoCriacaoRuntime
-          posicaoJogadorRef={posicaoJogadorRef}
-          enabled={playing}
-          onMomentoChange={atualizarMomentoCriacao}
-        />
+        <>
+          <ObjetivoNarrativoCriacao
+            momentoId={momentoCriacaoId}
+            enabled={playing}
+          />
+          <ProgressaoCriacaoRuntime
+            posicaoJogadorRef={posicaoJogadorRef}
+            enabled={playing}
+            onMomentoChange={atualizarMomentoCriacao}
+          />
+        </>
       )}
       <PortaisRegiao
         portais={portais}

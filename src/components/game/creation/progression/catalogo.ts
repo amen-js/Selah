@@ -137,3 +137,6 @@ export const momentosCriacao = [
 export const momentoCriacaoPorId = new Map(
   momentosCriacao.map((momento) => [momento.id, momento]),
 )
+
+/** Stable integration key shared by the Creation runtime and asset manifests. */
+export type AssetCriacaoId = (typeof momentosCriacao)[number]['assets'][number]

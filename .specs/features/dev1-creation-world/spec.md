@@ -30,6 +30,11 @@ data-driven 3D progression that can be developed before final art arrives.
    and while exploration is blocked.
 9. **CRE-09:** Final art SHALL be loaded as per-moment or per-biome chunks. The
    complete multi-world asset library SHALL NOT mount at application startup.
+10. **CRE-10:** Creation collectibles from future moments SHALL remain hidden
+    until their declared moment, while previously released collectibles remain
+    available.
+11. **CRE-11:** Cancelling an unanswered Selah SHALL allow a new attempt after
+    the player leaves and re-enters its activation radius.
 
 ## First implementation slice
 
@@ -37,7 +42,8 @@ data-driven 3D progression that can be developed before final art arrives.
 - pure, tested sequential state machine;
 - safe reconstruction from completed passage history;
 - R3F runtime bridge for player distance, zones and completed Selahs;
-- active moment made available to the Creation scene for later reveals.
+- current-moment collectible gating and diegetic markers for narrative zones;
+- typed, cumulative asset reveal contract for independent art integration.
 
 ## Out of scope for this slice
 

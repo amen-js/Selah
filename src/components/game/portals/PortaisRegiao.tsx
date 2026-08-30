@@ -12,6 +12,10 @@ export interface PortaisRegiaoProps {
   portais: readonly PortalMapa[]
   playerRef: RefObject<PosicaoXZ | null>
   enabled: boolean
+  /**
+   * Delega E/Enter para um árbitro externo, mantendo visuais e detecção ativos.
+   */
+  confirmacaoExterna?: boolean
   /** Recebe o mais próximo mesmo quando indisponível, para feedback. */
   onPortalProximo?: (portal: PortalMapa | null) => void
   /** Recebe somente o mais próximo disponível. */
@@ -26,6 +30,7 @@ export function PortaisRegiao({
   portais,
   playerRef,
   enabled,
+  confirmacaoExterna = false,
   onPortalProximo,
   onPortalAcionavel,
   onPortalAcionado,
@@ -60,6 +65,8 @@ export function PortaisRegiao({
   })
 
   useEffect(() => {
+    if (confirmacaoExterna) return
+
     const confirmarPortal = (event: KeyboardEvent) => {
       if (
         event.defaultPrevented ||
@@ -77,7 +84,7 @@ export function PortaisRegiao({
 
     window.addEventListener('keydown', confirmarPortal)
     return () => window.removeEventListener('keydown', confirmarPortal)
-  }, [enabled, onPortalAcionado])
+  }, [confirmacaoExterna, enabled, onPortalAcionado])
 
   return (
     <>

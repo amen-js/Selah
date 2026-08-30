@@ -221,7 +221,15 @@ export const useGameStore = create<EstadoJogo>()(
         }),
       definirErroSelah: (erro) =>
         set((state) =>
-          state.selahAtivo ? { selahAtivo: { ...state.selahAtivo, erro } } : state,
+          state.selahAtivo
+            ? {
+                selahAtivo: {
+                  ...state.selahAtivo,
+                  fase: state.selahAtivo.fase === 'enviando' ? 'quiz' : state.selahAtivo.fase,
+                  erro,
+                },
+              }
+            : state,
         ),
       cancelarSelah: () => set({ selahAtivo: null }),
       concluirSelah: () =>

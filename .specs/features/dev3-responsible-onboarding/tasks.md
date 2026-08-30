@@ -7,8 +7,8 @@
 | --- | --- | --- | --- | --- | --- |
 | T1 | Persisted onboarding completion contract | None | Store unit / quick | Complete | `feat(state): add responsible onboarding state` |
 | T2 | Accessible localized onboarding screen | T1 | Component + i18n / full | Complete | `feat(ui): add responsible onboarding` |
-| T3 | First-run game-entry integration | T2 | App integration / full | In progress | `feat(app): require responsible setup before play` |
-| T4 | Build gate and desktop/mobile UAT | T3 | Build + browser | Pending | `docs(spec): verify responsible onboarding` |
+| T3 | First-run game-entry integration | T2 | App integration / full | Complete | `feat(app): require responsible setup before play` |
+| T4 | Build gate and desktop/mobile UAT | T3 | Build + browser | In progress | `docs(spec): verify responsible onboarding` |
 
 ## Execution Notes
 

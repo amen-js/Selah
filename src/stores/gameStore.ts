@@ -249,7 +249,7 @@ export const useGameStore = create<EstadoJogo>()(
         }),
       liberarPausaParental: () => set({ pausaParentalAtiva: false }),
       apagarProgresso: () => {
-        set(criarEstadoInicial())
+        set((state) => ({ ...criarEstadoInicial(), idioma: state.idioma }))
         localStorage.removeItem(GAME_STORAGE_KEY)
       },
     }),

@@ -11,8 +11,8 @@ A experiência alterna entre movimento e pausa: a criança explora, interage com
 
 ## Público inicial
 
-- Crianças em faixa etária a ser definida pela P.O.
-- Experiência acompanhada por pais ou responsáveis
+- **5 a 11 anos:** público principal, sempre acompanhado por pais ou responsáveis
+- **12 a 18 anos:** faixa complementar, também monitorada pelos pais ou responsáveis
 - Linguagem, histórias e desafios classificados antes de entrarem no jogo
 
 ## Pilares da experiência
@@ -64,14 +64,99 @@ Estar presente no início de um mundo vazio que progressivamente se enche de luz
 
 ### Direção da fase
 
-A progressão deve ser marcada por contraste: vazio e preenchimento, escuridão e luz, silêncio e vida. A ordem exata dos eventos, as passagens e a forma de participação da criança serão definidas pela P.O.
+A progressão deve ser marcada por contraste: vazio e preenchimento, escuridão e luz, silêncio e vida. A comunicação da fase não começa com um personagem físico, mas com uma **Voz Guia** (narrador sábio e acolhedor) que acompanha a criança como testemunha ativa.
+
+### Voz do narrador / Guia da Criação
+
+- **Tom:** calmo, pausado, poético e acolhedor, como quem conta uma história de embalar
+- **Exibição:** balões de fala com no máximo duas linhas, locução em áudio (dublagem integral) e destaques em cores quentes nas palavras de ação
+- **Feedback:** nunca punitivo; redireciona com convite, não com correção
+
+| Ação do jogador | O que o guia não diz | O que o guia diz (estilo Selah) |
+| --- | --- | --- |
+| Anda no sentido oposto ao objetivo | "Caminho errado! Volte para a rota." | "Acho que tem algo brilhante nos esperando do outro lado... Vamos lá ver?" |
+| Demora para interagir com o Ponto da Criação | "Pressione o botão para continuar." | "Quando você estiver pronto, toque no brilho para revelar uma surpresa!" |
+| Toca repetidamente na tela sem foco | "Aguarde a animação terminar." | "Respire fundo... Veja como o vento mexe as folhinhas devagar." |
+
+### Momentos da fase
+
+#### Momento 1 — O vazio
+
+Cenário: espaço escuro, silencioso e com pouca visibilidade.
+
+- **Inicial:** "No começo, tudo era escuro e bem silencioso... Não havia nada aqui. Dê alguns passos e vamos descobrir o primeiro caminho juntos!"
+- **Apoio (se a criança parar):** "Siga devagarinho. O mundo está só esperando a nossa chegada."
+- **Transição:** "Você ouve isso? Algo maravilhoso está prestes a acontecer..."
+
+#### Momento 2 — A luz
+
+Cenário: transição da escuridão para a iluminação reveladora.
+
+- **Inicial:** "Olhe só! Pontos brilhantes surgiram. Vamos seguir os sinais luminosos e ver a luz aparecer?"
+- **Apoio:** "Toque na luz pequenina para que ela se espalhe por todo lugar!"
+- **Momento Selah:** "E Deus disse: 'Haja luz!' E a luz apareceu. Como é bonito ver tudo iluminado!"
+
+#### Momento 3 — Céu, terra e águas
+
+Cenário: o mapa ganha forma com rios, montanhas e caminhos.
+
+- **Inicial:** "Uau! Agora nós temos chão para pisar e águas para navegar. Vamos caminhar até o ponto mais alto para ver os rios nascerem?"
+- **Apoio:** "Acompanhe o barulhinho da água do rio para encontrar o próximo caminho."
+- **Conclusão:** "As águas se juntaram e a terra firme apareceu. O nosso mundo está ganhando forma!"
+
+#### Momento 4 — A natureza ganha vida
+
+Cenário: surgimento de plantas, vegetação, flores e árvores.
+
+- **Inicial:** "Veja estes Pontos da Criação no chão! Chegue pertinho e interaja para ver as cores surgirem."
+- **Apoio:** "Toque na sementinha brilhante. O que será que vai brotar dali?"
+- **Momento Selah:** "Árvores altas, grama verde e flores coloridas! A terra ficou cheia de vida."
+
+#### Momento 5 — O céu ganha ritmo
+
+Cenário: passagem do dia, entardecer, noite e surgimento das estrelas.
+
+- **Inicial:** "O sol iluminou o dia todo, e agora o céu está mudando de cor... Vamos olhar para cima?"
+- **Apoio:** "Espere um pouquinho e observe as luzes brilhando lá no alto."
+- **Momento Selah:** "O sol para o dia, a lua e as estrelas para a noite. Tudo no seu tempo certo."
+
+#### Momento 6 — As criaturas
+
+Cenário: descoberta dos animais nos biomas Campo, Vale das Águas e Bosque.
+
+- **Inicial:** "Ouça esses sons! Tem bichinhos escondidos por aqui. Vamos encontrar, observar e registrar cada um no nosso Livro da Criação?"
+- **Apoio:** "Ande devagar para não assustar o novo amigo. Que som ele faz?"
+- **Ao registrar o animal:** "Que descoberta linda! O leão, a girafa e a ovelha agora têm um lar seguro no nosso livro."
+
+#### Momento 7 — O Jardim do Éden
+
+Cenário: ponto alto visual, com vegetação exuberante, frutos e rios cristalinos.
+
+- **Inicial:** "Chegamos ao lugar mais especial de todos: o Jardim do Éden! Explore livremente este lugar cheio de luz."
+- **Apoio:** "Caminhe pelas margens do rio e descubra os cantinhos secretos do Jardim."
+- **Momento Selah:** "Tudo aqui é paz, harmonia e alegria."
+
+#### Momento 8 — Adão e Eva
+
+Cenário: presença dos primeiros seres humanos integrados ao Jardim.
+
+- **Inicial:** "Olhe ali! Deus criou seres muito especiais para cuidar de todo esse Jardim e viver em amizade com Ele."
+- **Aproximação:** "Eles receberam a tarefa de dar nome aos animais e cuidar de cada plantinha com carinho."
+- **Conclusão:** "O ser humano faz parte dessa linda história e tem um lugar muito amado na Criação."
+
+#### Momento 9 — O fruto e a grande escolha
+
+Cenário: a Árvore do Conhecimento do Bem e do Mal. A criança **não** controla o fruto.
+
+- **Inicial:** "No centro do Jardim existe uma árvore especial. Deus deu uma orientação carinhosa para proteger Adão e Eva..."
+- **Narrativa:** "Deus disse que eles podiam comer de tudo, menos daquela árvore. Mas eles escolheram não obedecer..."
+- **Encerramento da fase:** "Apesar de essa escolha ter mudado as coisas, o amor do Criador continua ao nosso lado. E Ele viu tudo o que fez, e ficou muito bom!"
 
 ### Questões abertas
 
-- Quais momentos da criação serão jogáveis?
-- A criança apenas testemunha ou ajuda simbolicamente a revelar elementos?
-- Qual é o objetivo final da fase?
-- Quais animais e biomas entram no primeiro escopo?
+- Quais passagens bíblicas oficiais entram em cada momento?
+- Quais animais além de leão, girafa e ovelha entram no primeiro escopo do Livro da Criação?
+- A locução da Voz Guia é integral desde o vertical slice ou só nos Momentos Selah?
 
 ## Mundo 2 — Noé e a Arca: a grande missão
 
@@ -163,6 +248,8 @@ O Momento Selah é a mecânica que conecta exploração e aprendizagem:
 6. O jogo entra na Pausa Selah real
 7. O responsável libera localmente a continuação
 
+O intervalo desejado entre Momentos Selah é de **5 minutos** de exploração.
+
 O jogo nunca bloqueia o navegador ou o aparelho. Fechar a experiência permanece sempre possível, e manter a tela aberta durante a pausa não gera recompensa ou vantagem.
 
 ## Uso da inteligência artificial
@@ -197,12 +284,10 @@ O histórico não é sincronizado com o backend. O responsável pode escolher **
 
 ## Decisões pendentes para a P.O.
 
-- Faixa etária inicial
 - Passagens e tradução de cada mundo
-- Recorte exato das três histórias
-- Objetivo e encerramento de cada fase
-- Linguagem das explicações e mensagens dos NPCs
-- Duração desejada entre Momentos Selah
+- Recorte exato das histórias de Noé e José
+- Objetivo e encerramento das fases 2 e 3
+- Linguagem das explicações e mensagens dos NPCs fora da Criação
 - Regra de liberação e duração da Pausa Selah real
 - Critérios de aprovação bíblica e etária dos quizzes
 - Ordem definitiva dos mundos e conexão entre eles

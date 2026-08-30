@@ -1,6 +1,7 @@
 import { useFrame } from '@react-three/fiber'
-import { useEffect, useMemo, useRef, useState, type RefObject } from 'react'
+import { useCallback, useEffect, useRef, useState, type RefObject } from 'react'
 import { useGameStore } from '../../../../stores/gameStore'
+import { ehTeclaConfirmacaoPortal } from '../../portals/teclas'
 import type { PosicaoJogador } from '../proximidade'
 import { estaNoRaio } from '../proximidade'
 import { acumularDistanciaNarrativa } from './distancia'
@@ -10,6 +11,10 @@ import {
   processarEventoProgressaoCriacao,
   reconstruirProgressaoCriacao,
 } from './estado'
+import {
+  obterObjetivoZonaCriacao,
+  type ObjetivoZonaCriacao,
+} from './interacao'
 import type {
   EstadoProgressaoCriacao,
   EventoProgressaoCriacao,
@@ -23,6 +28,7 @@ export interface ProgressaoCriacaoRuntimeProps {
     momento: MomentoCriacao,
     estado: EstadoProgressaoCriacao,
   ) => void
+  onObjetivoProximo?: (objetivo: ObjetivoZonaCriacao | null) => void
 }
 
 /** Bridges the pure Creation state machine to R3F movement and the quiz history. */
@@ -30,48 +36,123 @@ export function ProgressaoCriacaoRuntime({
   posicaoJogadorRef,
   enabled,
   onMomentoChange,
+  onObjetivoProximo,
 }: ProgressaoCriacaoRuntimeProps) {
-  const historico = useGameStore((state) => state.historico)
-  const passagensRespondidas = useMemo(
-    () => [...new Set(historico.map(({ passagemId }) => passagemId))],
-    [historico],
+  const selahsConcluidos = useGameStore((state) => state.selahsConcluidos)
+  const momentosCriacaoConcluidos = useGameStore(
+    (state) => state.momentosCriacaoConcluidos,
   )
-  const chavePassagens = passagensRespondidas.slice().sort().join('|')
+  const setMomentosCriacaoConcluidos = useGameStore(
+    (state) => state.setMomentosCriacaoConcluidos,
+  )
   const [estado, setEstado] = useState(() =>
-    reconstruirProgressaoCriacao(passagensRespondidas),
+    reconstruirProgressaoCriacao(
+      selahsConcluidos,
+      momentosCriacaoConcluidos,
+    ),
   )
   const estadoRef = useRef(estado)
+  const selahsConcluidosRef = useRef(selahsConcluidos)
   const posicaoAnteriorRef = useRef<PosicaoJogador | null>(null)
   const distanciaPercorridaRef = useRef(0)
+  const objetivoProximoRef = useRef<ObjetivoZonaCriacao | null>(null)
+  const objetivoNotificadoIdRef = useRef<string | null>(null)
 
-  const emitir = (evento: EventoProgressaoCriacao) => {
-    const processado = processarEventoProgressaoCriacao(estadoRef.current, evento)
-    const proximo = aplicarSelahsConcluidos(processado, passagensRespondidas)
+  const atualizarEstado = useCallback((proximo: EstadoProgressaoCriacao) => {
     if (proximo === estadoRef.current) return
     estadoRef.current = proximo
     setEstado(proximo)
-  }
+  }, [])
+
+  const emitir = useCallback((evento: EventoProgressaoCriacao) => {
+    const processado = processarEventoProgressaoCriacao(estadoRef.current, evento)
+    const proximo = aplicarSelahsConcluidos(
+      processado,
+      selahsConcluidosRef.current,
+    )
+    atualizarEstado(proximo)
+  }, [atualizarEstado])
+
+  const publicarObjetivoProximo = useCallback(
+    (objetivo: ObjetivoZonaCriacao | null) => {
+      objetivoProximoRef.current = objetivo
+      const proximoId = objetivo?.id ?? null
+      if (proximoId === objetivoNotificadoIdRef.current) return
+      objetivoNotificadoIdRef.current = proximoId
+      onObjetivoProximo?.(objetivo)
+    },
+    [onObjetivoProximo],
+  )
 
   useEffect(() => {
+    selahsConcluidosRef.current = selahsConcluidos
+    if (!enabled) return
+
     const proximo = aplicarSelahsConcluidos(
       estadoRef.current,
-      passagensRespondidas,
+      selahsConcluidos,
     )
-    if (proximo === estadoRef.current) return
-    estadoRef.current = proximo
-    setEstado(proximo)
-  }, [chavePassagens, passagensRespondidas])
+    atualizarEstado(proximo)
+  }, [atualizarEstado, enabled, selahsConcluidos])
 
   useEffect(() => {
+    const reconstruido = reconstruirProgressaoCriacao(
+      selahsConcluidosRef.current,
+      momentosCriacaoConcluidos,
+    )
+    const atual = estadoRef.current
+    const equivalente =
+      reconstruido.momentoAtualId === atual.momentoAtualId &&
+      reconstruido.concluida === atual.concluida &&
+      reconstruido.momentosConcluidos.length ===
+        atual.momentosConcluidos.length &&
+      reconstruido.momentosConcluidos.every(
+        (id, indice) => id === atual.momentosConcluidos[indice],
+      )
+
+    if (!equivalente) atualizarEstado(reconstruido)
+  }, [atualizarEstado, momentosCriacaoConcluidos])
+
+  useEffect(() => {
+    setMomentosCriacaoConcluidos(estado.momentosConcluidos)
     onMomentoChange?.(obterMomentoAtualCriacao(estado), estado)
-  }, [estado, onMomentoChange])
+  }, [estado, onMomentoChange, setMomentosCriacaoConcluidos])
+
+  useEffect(() => {
+    if (!enabled) {
+      publicarObjetivoProximo(null)
+      return
+    }
+
+    const confirmarObjetivo = (event: KeyboardEvent) => {
+      if (event.defaultPrevented || !ehTeclaConfirmacaoPortal(event)) return
+      const objetivo = objetivoProximoRef.current
+      if (!objetivo) return
+
+      event.preventDefault()
+      event.stopImmediatePropagation()
+      emitir({ tipo: 'zona-narrativa', zonaId: objetivo.id })
+    }
+
+    window.addEventListener('keydown', confirmarObjetivo)
+    return () => window.removeEventListener('keydown', confirmarObjetivo)
+  }, [emitir, enabled, publicarObjetivoProximo])
+
+  useEffect(
+    () => () => onObjetivoProximo?.(null),
+    [onObjetivoProximo],
+  )
 
   useFrame(() => {
     const posicaoAtual = posicaoJogadorRef.current
-    if (!posicaoAtual) return
+    if (!posicaoAtual) {
+      publicarObjetivoProximo(null)
+      return
+    }
 
     if (!enabled) {
       posicaoAnteriorRef.current = { ...posicaoAtual }
+      publicarObjetivoProximo(null)
       return
     }
 
@@ -88,15 +169,24 @@ export function ProgressaoCriacaoRuntime({
         tipo: 'distancia-percorrida',
         distancia: distanciaPercorridaRef.current,
       })
+      publicarObjetivoProximo(null)
       return
     }
 
-    if (
-      gatilho.tipo === 'zona-narrativa' &&
-      estaNoRaio(posicaoAtual, gatilho.posicao, gatilho.raio)
-    ) {
-      emitir({ tipo: 'zona-narrativa', zonaId: gatilho.zonaId })
+    if (gatilho.tipo === 'zona-narrativa') {
+      const objetivo = obterObjetivoZonaCriacao(
+        estadoRef.current.momentoAtualId,
+        estadoRef.current.concluida,
+      )
+      publicarObjetivoProximo(
+        objetivo && estaNoRaio(posicaoAtual, gatilho.posicao, gatilho.raio)
+          ? objetivo
+          : null,
+      )
+      return
     }
+
+    publicarObjetivoProximo(null)
   })
 
   return null

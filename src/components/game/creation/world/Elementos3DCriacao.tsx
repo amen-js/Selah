@@ -1,13 +1,12 @@
 import { Clone, useGLTF } from '@react-three/drei'
 import { CuboidCollider, RigidBody } from '@react-three/rapier'
-import { Suspense, useEffect, useMemo } from 'react'
+import { Suspense, useMemo } from 'react'
 import { obterManifestoAssetCriacao } from '../../../../mapas/criacaoAssets'
 import type { Ponto3D } from '../../../../mapas/types'
 import type { EntradaManifestoAssetCriacao } from '../progression/revelacao'
 import type { MomentoCriacaoId } from '../progression/types'
 import {
   obterInstanciasAssetsCriacaoVisiveis,
-  proximoMomentoId,
   type EscalaInstancia,
   type InstanciaAssetCriacao,
 } from './elementos'
@@ -81,29 +80,12 @@ function InstanciaAsset({ instancia }: { instancia: InstanciaAssetCriacao }) {
   )
 }
 
-/** Mounts only discovered GLBs and warms the cache for the immediately next beat. */
+/** Mounts discovered GLBs on demand without blocking play with speculative loads. */
 export function Elementos3DCriacao({ momentoId }: { momentoId: MomentoCriacaoId }) {
   const visiveis = useMemo(
     () => obterInstanciasAssetsCriacaoVisiveis(momentoId),
     [momentoId],
   )
-
-  useEffect(() => {
-    const proximo = proximoMomentoId(momentoId)
-    if (!proximo) return
-    const arquivosAtuais = new Set(
-      visiveis
-        .map(({ assetId }) => obterManifestoAssetCriacao(assetId)?.arquivo)
-        .filter(Boolean),
-    )
-    const proximosArquivos = obterInstanciasAssetsCriacaoVisiveis(proximo)
-      .map(({ assetId }) => obterManifestoAssetCriacao(assetId)?.arquivo)
-      .filter((arquivo): arquivo is string => Boolean(arquivo))
-
-    for (const arquivo of new Set(proximosArquivos)) {
-      if (!arquivosAtuais.has(arquivo)) useGLTF.preload(arquivo)
-    }
-  }, [momentoId, visiveis])
 
   return (
     <group name="assets-criacao">

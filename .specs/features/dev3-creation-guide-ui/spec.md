@@ -23,7 +23,7 @@ next.
 | Full initial/support/conclusion narrative sequence | It needs editorial pagination, approved translations and an inactivity signal. |
 | Biome discovery state | The merged runtime models moments, not the four biome milestones. |
 | Final World 1 completion screen | This slice validates the beginning of the journey first. |
-| New Zustand persistence | Completed Selah history remains the canonical safe checkpoint. |
+| New UI-owned persistence | The gameplay runtime owns its canonical checkpoint; the guide remains a read-only projection. |
 
 ## User Stories
 
@@ -89,8 +89,9 @@ language.
   state SHALL be created.
 - WHEN the final moment is complete THEN the DOM SHALL accept and display the
   9-of-9 snapshot without inventing a tenth moment.
-- WHEN progress is emitted THEN no new progress fields SHALL be written to
-  `localStorage`.
+- WHEN progress is emitted to the DOM THEN the guide SHALL NOT write progress;
+  persistence remains exclusively owned by the gameplay runtime and follows
+  the responsible adult's save preference.
 
 ## Requirement Traceability
 
@@ -101,7 +102,7 @@ language.
 | CGUI-03 | P1: non-blocking localized Voice Guide objective | Verified |
 | CGUI-04 | P1: clear snapshot outside Creation | Verified |
 | CGUI-05 | P1: preserve overlay priority | Verified |
-| CGUI-06 | P1: no new persisted progress | Verified |
+| CGUI-06 | P1: guide remains a read-only projection | Verified |
 | CGUI-07 | P2: `/lab` moment simulation | Verified |
 | CGUI-08 | P2: translated moment titles, objectives and UI labels | Verified |
 

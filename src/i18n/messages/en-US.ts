@@ -124,6 +124,14 @@ export const enUS = {
   'creation.journey.fruto-escolha.title': 'The fruit and the great choice',
   'creation.journey.fruto-escolha.objective':
     'Walk to the special tree and observe the great choice.',
+  'creation.interaction.aria': 'Interaction available: {target}',
+  'creation.interaction.eyebrow': 'Interact',
+  'creation.interaction.selah': 'Selah Moment',
+  'creation.interaction.point': 'Creation Point',
+  'creation.interaction.enter': 'Press E or Enter to continue',
+  'creation.complete.title': 'Creation has been revealed',
+  'creation.complete.objective':
+    'Everything is full of life. Take in the world and continue your journey when ready.',
 
   'portal.prompt.aria': 'Portal to {region}',
   'portal.prompt.eyebrow': 'Portal',

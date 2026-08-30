@@ -1,37 +1,48 @@
 import { useFrame } from '@react-three/fiber'
-import { useRef, type RefObject } from 'react'
+import { useCallback, useEffect, useRef, type RefObject } from 'react'
 import type { Group } from 'three'
 import type { ColetavelMapa } from '../../../mapas/types'
 import { useGameStore } from '../../../stores/gameStore'
-import { podeAcionarColetavel } from '../creation/podeAcionarColetavel'
-import { estaNoRaio, type PosicaoJogador } from '../creation/proximidade'
+import type { PosicaoJogador } from '../creation/proximidade'
+import { ehTeclaConfirmacaoPortal } from '../portals/teclas'
+import {
+  obterColetaveisAindaAcionados,
+  RAIO_ATIVACAO_PADRAO,
+  selecionarColetavelAcionavel,
+} from './coletaveisInteracao'
 
-export const RAIO_ATIVACAO_PADRAO = 2.5
+export { RAIO_ATIVACAO_PADRAO }
 
 export type ColetaveisRegiaoProps = {
   coletaveis: readonly ColetavelMapa[]
   posicaoJogadorRef: RefObject<PosicaoJogador | null>
   enabled: boolean
+  /** Mantém proximidade automática por padrão; quando true exige E ou Enter. */
+  interacaoExplicita?: boolean
+  /**
+   * Compatibilidade das regiões existentes: por padrão, uma resposta no
+   * histórico já bloqueia o cristal. Creation desliga isto porque resposta e
+   * conclusão de Selah são marcos distintos no seu roteiro.
+   */
+  bloquearPassagensRespondidas?: boolean
+  /** Notifica somente o coletável acionável mais próximo para um prompt externo. */
+  onColetavelProximo?: (coletavel: ColetavelMapa | null) => void
 }
 
 type ColetavelRegiaoProps = {
   coletavel: ColetavelMapa
-  posicaoJogadorRef: RefObject<PosicaoJogador | null>
   enabled: boolean
   indice: number
 }
 
 function ColetavelRegiao({
   coletavel,
-  posicaoJogadorRef,
   enabled,
   indice,
 }: ColetavelRegiaoProps) {
   const grupoRef = useRef<Group>(null)
-  const acionadoRef = useRef(false)
   const tempoAnimadoRef = useRef(0)
   const cor = coletavel.cor ?? '#fff0a8'
-  const raio = coletavel.raioAtivacao ?? RAIO_ATIVACAO_PADRAO
   const posicao: [number, number, number] = [
     coletavel.posicao[0],
     coletavel.posicao[1],
@@ -46,40 +57,6 @@ function ColetavelRegiao({
       grupo.position.y =
         posicao[1] + Math.sin(tempoAnimadoRef.current * 2 + indice * 0.9) * 0.16
     }
-
-    const estado = useGameStore.getState()
-    const passagemRespondida = estado.historico.some(
-      ({ passagemId }) => passagemId === coletavel.passagemId,
-    )
-    const posicaoJogador = posicaoJogadorRef.current
-    const jogadorNoRaio = Boolean(
-      posicaoJogador && estaNoRaio(posicaoJogador, coletavel.posicao, raio),
-    )
-
-    if (acionadoRef.current) {
-      if (!jogadorNoRaio && !passagemRespondida) acionadoRef.current = false
-      return
-    }
-
-    if (!enabled) return
-
-    if (
-      !podeAcionarColetavel({
-        enabled,
-        jaAcionado: acionadoRef.current,
-        selahAtivo: estado.selahAtivo !== null,
-        pausaParentalAtiva: estado.pausaParentalAtiva,
-        passagemRespondida,
-      })
-    ) return
-
-    if (!jogadorNoRaio) return
-
-    acionadoRef.current = true
-    estado.abrirSelah({
-      historiaId: coletavel.historiaId,
-      passagemId: coletavel.passagemId,
-    })
   })
 
   return (
@@ -108,14 +85,119 @@ export function ColetaveisRegiao({
   coletaveis,
   posicaoJogadorRef,
   enabled,
+  interacaoExplicita = false,
+  bloquearPassagensRespondidas = true,
+  onColetavelProximo,
 }: ColetaveisRegiaoProps) {
+  const coletaveisAcionadosRef = useRef<Set<string>>(new Set())
+  const proximoNotificadoIdRef = useRef<string | null>(null)
+
+  const notificarColetavelProximo = useCallback(
+    (coletavel: ColetavelMapa | null) => {
+      if (!onColetavelProximo) {
+        proximoNotificadoIdRef.current = null
+        return
+      }
+
+      const proximoId = coletavel?.id ?? null
+      if (proximoId === proximoNotificadoIdRef.current) return
+      proximoNotificadoIdRef.current = proximoId
+      onColetavelProximo(coletavel)
+    },
+    [onColetavelProximo],
+  )
+
+  const obterProximoAcionavel = useCallback(() => {
+    const estado = useGameStore.getState()
+    const posicaoJogador = posicaoJogadorRef.current
+    const passagensBloqueadas = bloquearPassagensRespondidas
+      ? [
+          ...estado.selahsConcluidos,
+          ...estado.historico.map(({ passagemId }) => passagemId),
+        ]
+      : estado.selahsConcluidos
+
+    coletaveisAcionadosRef.current = obterColetaveisAindaAcionados(
+      coletaveis,
+      posicaoJogador,
+      coletaveisAcionadosRef.current,
+      passagensBloqueadas,
+    )
+
+    return selecionarColetavelAcionavel(coletaveis, posicaoJogador, {
+      enabled,
+      selahAtivo: estado.selahAtivo !== null,
+      pausaParentalAtiva: estado.pausaParentalAtiva,
+      selahsConcluidos: passagensBloqueadas,
+      coletaveisAcionados: coletaveisAcionadosRef.current,
+    })
+  }, [
+    bloquearPassagensRespondidas,
+    coletaveis,
+    enabled,
+    posicaoJogadorRef,
+  ])
+
+  const acionarColetavel = useCallback((coletavel: ColetavelMapa) => {
+    coletaveisAcionadosRef.current.add(coletavel.id)
+    useGameStore.getState().abrirSelah({
+      historiaId: coletavel.historiaId,
+      passagemId: coletavel.passagemId,
+    })
+  }, [])
+
+  useFrame(() => {
+    const proximo = obterProximoAcionavel()
+
+    if (interacaoExplicita) {
+      notificarColetavelProximo(proximo)
+      return
+    }
+
+    notificarColetavelProximo(null)
+    if (proximo) acionarColetavel(proximo)
+  })
+
+  useEffect(() => {
+    if (!interacaoExplicita) return
+
+    const confirmarColetavel = (event: KeyboardEvent) => {
+      if (
+        event.defaultPrevented ||
+        !enabled ||
+        !ehTeclaConfirmacaoPortal(event)
+      ) return
+
+      const proximo = obterProximoAcionavel()
+      if (!proximo) return
+
+      event.preventDefault()
+      event.stopImmediatePropagation()
+      acionarColetavel(proximo)
+      notificarColetavelProximo(null)
+    }
+
+    window.addEventListener('keydown', confirmarColetavel)
+    return () => window.removeEventListener('keydown', confirmarColetavel)
+  }, [
+    acionarColetavel,
+    enabled,
+    interacaoExplicita,
+    notificarColetavelProximo,
+    obterProximoAcionavel,
+  ])
+
+  useEffect(() => {
+    proximoNotificadoIdRef.current = null
+    return () => onColetavelProximo?.(null)
+  }, [onColetavelProximo])
+
   return (
     <>
       {coletaveis.map((coletavel, indice) => (
         <ColetavelRegiao
           key={coletavel.id}
           coletavel={coletavel}
-          posicaoJogadorRef={posicaoJogadorRef}
           enabled={enabled}
           indice={indice}
         />

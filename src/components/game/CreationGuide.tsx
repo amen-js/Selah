@@ -15,7 +15,12 @@ export function CreationGuide({
 
   if (!exploracaoAtiva) return null
 
-  const texto = traduzirJornadaCriacao(snapshot.momento.id, idioma)
+  const texto = snapshot.estado.concluida
+    ? {
+        titulo: t('creation.complete.title'),
+        objetivo: t('creation.complete.objective'),
+      }
+    : traduzirJornadaCriacao(snapshot.momento.id, idioma)
   const rotulo = t('creation.guide.label')
 
   return (

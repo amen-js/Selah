@@ -1,6 +1,7 @@
 export * from './Elementos3DCriacao'
 export * from './elementos'
 export * from './ModeloPersonagemCriacao'
+export * from './PersonagemEden'
 export * from './terreno'
 export * from './TerrenoCriacao'
 export * from './visibilidade'

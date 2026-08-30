@@ -77,16 +77,16 @@ export function processarEventoProgressaoCriacao(
 /** Consumes already answered Selahs only when they match the current beat. */
 export function aplicarSelahsConcluidos(
   estado: EstadoProgressaoCriacao,
-  passagensRespondidas: readonly string[],
+  passagensConcluidas: readonly string[],
 ): EstadoProgressaoCriacao {
-  const respondidas = new Set(passagensRespondidas)
+  const concluidas = new Set(passagensConcluidas)
   let atual = estado
 
   while (!atual.concluida) {
     const gatilho = obterMomentoAtualCriacao(atual).gatilhoConclusao
     if (
       gatilho.tipo !== 'selah-concluido' ||
-      !respondidas.has(gatilho.passagemId)
+      !concluidas.has(gatilho.passagemId)
     ) {
       break
     }
@@ -108,15 +108,48 @@ const MARCOS_SELAH = momentosCriacao.flatMap((momento, indice) =>
     : [],
 )
 
-/** Rebuilds only milestones proven by answered quizzes in the existing store. */
+/** Rebuilds a canonical state from the longest valid completed-moment prefix. */
+export function reconstruirProgressaoPorMomentosConcluidos(
+  idsConcluidos: readonly string[],
+): EstadoProgressaoCriacao | null {
+  if (idsConcluidos.length === 0) return null
+
+  const concluidos: MomentoCriacaoId[] = []
+  for (const momento of momentosCriacao) {
+    if (idsConcluidos[concluidos.length] !== momento.id) break
+    concluidos.push(momento.id)
+  }
+
+  if (concluidos.length === 0) return null
+
+  const concluida = concluidos.length === momentosCriacao.length
+  const momentoAtual = concluida
+    ? momentosCriacao[momentosCriacao.length - 1]
+    : momentosCriacao[concluidos.length]
+
+  return {
+    momentoAtualId: momentoAtual.id,
+    momentosConcluidos: concluidos,
+    concluida,
+  }
+}
+
+/**
+ * Restores the exact canonical checkpoint when available and otherwise falls
+ * back to Selahs that were actually concluded in legacy saved sessions.
+ */
 export function reconstruirProgressaoCriacao(
-  passagensRespondidas: readonly string[],
+  passagensConcluidas: readonly string[],
+  momentosConcluidos: readonly string[] = [],
 ): EstadoProgressaoCriacao {
-  const respondidas = new Set(passagensRespondidas)
+  const checkpoint = reconstruirProgressaoPorMomentosConcluidos(momentosConcluidos)
+  if (checkpoint) return checkpoint
+
+  const concluidas = new Set(passagensConcluidas)
   let maiorIndiceComprovado = -1
 
   for (const marco of MARCOS_SELAH) {
-    if (!respondidas.has(marco.passagemId)) break
+    if (!concluidas.has(marco.passagemId)) break
     maiorIndiceComprovado = marco.indice
   }
 

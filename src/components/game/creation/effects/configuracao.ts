@@ -1,5 +1,6 @@
 import {
-  obterRevelacaoCriacao,
+  indiceMomentoCriacao,
+  momentoCriacaoPorId,
   type MomentoCriacaoId,
   type AssetCriacaoId,
 } from '../progression'
@@ -28,6 +29,51 @@ export const IDS_EFEITOS_PROCEDURAIS: readonly ProceduralVfxAssetId[] = [
 const SET_IDS_PROCEDURAIS = new Set<string>(IDS_EFEITOS_PROCEDURAIS)
 
 /**
+ * Cues that belong to one narrative beat only. They are deliberately kept
+ * separate from `RevelacaoCriacao.assetsVisiveis`, whose cumulative contract
+ * is still useful to the physical scene chunks.
+ */
+const EFEITOS_DO_BEAT: ReadonlyMap<
+  MomentoCriacaoId,
+  readonly ProceduralVfxAssetId[]
+> = new Map([
+  ['vazio', ['ambiente-vazio', 'luz-guia']],
+  ['luz', ['luz-guia', 'nucleo-luz', 'marcadores-caminho-luz']],
+  ['ceu-terra-aguas', []],
+  ['natureza', ['efeito-crescimento']],
+])
+
+const EFEITOS_CELESTES: readonly ProceduralVfxAssetId[] = [
+  'sol',
+  'lua',
+  'estrelas',
+  'nuvens',
+]
+
+const INDICE_INICIO_CELESTE = indiceMomentoCriacao('ceu-ritmo')
+
+/**
+ * Resolves procedural cues for the active beat.
+ *
+ * Narrative cues are ephemeral by design: empty ambience, the guide, the
+ * light core/path markers, and growth particles are mounted only in their
+ * own beat. Celestial cues are the exception and remain from `ceu-ritmo`
+ * onwards, matching the persistent sky established by that beat.
+ */
+export function obterEfeitosProceduraisVisiveis(
+  momentoId: MomentoCriacaoId,
+): readonly ProceduralVfxAssetId[] {
+  const indiceAtual = indiceMomentoCriacao(momentoId)
+  const ids = new Set<ProceduralVfxAssetId>(EFEITOS_DO_BEAT.get(momentoId) ?? [])
+
+  if (indiceAtual >= INDICE_INICIO_CELESTE) {
+    for (const id of EFEITOS_CELESTES) ids.add(id)
+  }
+
+  return IDS_EFEITOS_PROCEDURAIS.filter((id) => ids.has(id))
+}
+
+/**
  * Returns true if an asset ID corresponds to a procedural visual effect.
  */
 export function ehEfeitoProcedural(
@@ -43,10 +89,9 @@ export function obterConfiguracaoEfeitosCriacao(
   momentoId: MomentoCriacaoId,
   opcoes?: OpcoesConfiguracaoEfeitos,
 ): ConfiguracaoEfeitosCriacao {
-  const revelacao = obterRevelacaoCriacao(momentoId)
   const reducedMotion = Boolean(opcoes?.reducedMotion)
 
-  const efeitosAtivos = revelacao.assetsVisiveis.filter(ehEfeitoProcedural)
+  const efeitosAtivos = obterEfeitosProceduraisVisiveis(momentoId)
   const ativosSet = new Set(efeitosAtivos)
 
   const todasEntradas = IDS_EFEITOS_PROCEDURAIS.map((id) => ({
@@ -57,7 +102,7 @@ export function obterConfiguracaoEfeitosCriacao(
 
   return {
     momentoId,
-    faseCenario: revelacao.faseCenario,
+    faseCenario: momentoCriacaoPorId.get(momentoId)?.faseCenario ?? 'escuro',
     reducedMotion,
     efeitosAtivos,
     todasEntradas,

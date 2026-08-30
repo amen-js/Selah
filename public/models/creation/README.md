@@ -1,8 +1,9 @@
 # Creation asset chunks
 
 This directory contains independently loadable CC0 chunks for the Creation
-region. Environment pieces live in `shared/kenney`; the sheep and the two
-rigged human characters live in `shared/quaternius`. The manifest at
+region. Environment pieces live in `shared/kenney`; the sheep lives in
+`shared/quaternius`; and the two project-authored Eden characters are built by
+the runtime and described in `characters`. The manifest at
 `src/mapas/criacaoAssets.ts` is the source of truth for every runtime URL.
 
 ## Provenance and license
@@ -17,10 +18,15 @@ rigged human characters live in `shared/quaternius`. The manifest at
 - The original `License.txt` from the archive is retained beside the GLBs.
 
 - Animal source: [Quaternius Farm Animal Pack](https://quaternius.com/packs/farmanimal.html)
-- Human source: [Quaternius Universal Base Characters](https://quaternius.com/packs/universalbasecharacters.html)
 - Creator: Quaternius
 - License: [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/)
 - Each original `License.txt` is retained beside the converted GLBs.
+
+- Human source: project-authored `PersonagemEden.tsx`
+- Creator: Equipe Selah
+- Design: storybook low-poly Adão e Eva, with modest Eden clothing and no RPG
+  accessories
+- The character descriptors and checksums live in `characters`.
 
 The supplied `Map by Poly by Google - bU3B6P0ngfi.glb` is intentionally not
 copied here. It is a textured world-map plaque rather than a Creation terrain
@@ -31,10 +37,9 @@ asset integration report.
 
 The Kenney GLBs are original exports from the official archive. The sheep was
 converted from the official FBX with FBX2glTF 0.9.7 and retains the `Idle` and
-`Jump` clips. The official Quaternius human glTFs were packed as GLB, resized
-to 1024px textures, and encoded as WebP with glTF-Transform 4.4.2; their
-humanoid skins are retained. Humans receive a relaxed procedural idle pose in
-the runtime because the free base pack does not contain an animation clip.
+`Jump` clips. Adão and Eva use lightweight hierarchical meshes authored for
+this project; their shoulders, elbows, heads and bodies animate independently
+in runtime for asymmetric relaxed poses.
 
 No visual GLB is used as terrain collision. The Creation terrain owns one
 dedicated low-poly Rapier trimesh, while landmark collisions use explicit

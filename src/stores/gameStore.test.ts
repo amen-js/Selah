@@ -49,6 +49,8 @@ describe('gameStore', () => {
     expect(state.compartilharMetricas).toBe(false)
     expect(state.ttsAtivo).toBe(false)
     expect(state.configuracaoInicialConcluida).toBe(false)
+    expect(state.selahsConcluidos).toEqual([])
+    expect(state.momentosCriacaoConcluidos).toEqual([])
   })
 
   it('persists responsible onboarding completion without enabling progress saving', () => {
@@ -100,6 +102,7 @@ describe('gameStore', () => {
 
     useGameStore.getState().concluirSelah()
     expect(useGameStore.getState().selahsCompletados).toBe(1)
+    expect(useGameStore.getState().selahsConcluidos).toEqual([versiculo.passagemId])
     expect(useGameStore.getState().pausaParentalAtiva).toBe(true)
     expect(useGameStore.getState().selahAtivo).toBeNull()
 
@@ -122,6 +125,111 @@ describe('gameStore', () => {
     expect(persisted).not.toContain(versiculo.texto)
     expect(persisted).not.toContain(quiz.pergunta)
     expect(persisted).not.toContain(avaliacao.explicacao)
+  })
+
+  it('does not mark a Selah as concluded when only the response is registered', () => {
+    useGameStore.getState().abrirSelah({ historiaId: 'criacao', passagemId: versiculo.passagemId })
+    useGameStore.getState().carregarQuiz(quiz)
+    useGameStore.getState().mostrarQuiz()
+    useGameStore.getState().iniciarEnvioResposta('A')
+    useGameStore.getState().registrarResultado(avaliacao)
+
+    expect(useGameStore.getState().historico).toHaveLength(1)
+    expect(useGameStore.getState().selahsConcluidos).toEqual([])
+  })
+
+  it('keeps the passage checkpoint unique while counting completed sessions', () => {
+    const store = useGameStore.getState()
+    store.abrirSelah({ historiaId: 'criacao', passagemId: versiculo.passagemId })
+    store.carregarQuiz(quiz)
+    store.mostrarQuiz()
+    store.iniciarEnvioResposta('A')
+    store.registrarResultado(avaliacao)
+    store.concluirSelah()
+    store.liberarPausaParental()
+
+    store.abrirSelah({ historiaId: 'criacao', passagemId: versiculo.passagemId })
+    store.carregarQuiz(quiz)
+    store.mostrarQuiz()
+    store.iniciarEnvioResposta('A')
+    store.registrarResultado(avaliacao)
+    store.concluirSelah()
+
+    expect(useGameStore.getState().selahsConcluidos).toEqual([versiculo.passagemId])
+    expect(useGameStore.getState().selahsCompletados).toBe(2)
+  })
+
+  it('stores Creation milestones idempotently and preserves their first-seen order', () => {
+    const store = useGameStore.getState()
+    store.setMomentosCriacaoConcluidos(['vazio', 'luz', 'vazio', 'natureza'])
+
+    expect(useGameStore.getState().momentosCriacaoConcluidos).toEqual([
+      'vazio',
+      'luz',
+      'natureza',
+    ])
+
+    const antes = useGameStore.getState()
+    store.setMomentosCriacaoConcluidos(['vazio', 'luz', 'vazio', 'natureza'])
+    expect(useGameStore.getState()).toBe(antes)
+  })
+
+  it('persists Creation milestones only when progress saving is enabled', () => {
+    const store = useGameStore.getState()
+    store.setMomentosCriacaoConcluidos(['vazio', 'luz'])
+
+    expect(localStorage.getItem(GAME_STORAGE_KEY)).not.toContain(
+      'momentosCriacaoConcluidos',
+    )
+
+    store.setSalvarProgresso(true)
+    expect(localStorage.getItem(GAME_STORAGE_KEY)).toContain(
+      '"momentosCriacaoConcluidos":["vazio","luz"]',
+    )
+  })
+
+  it('persists concluded passages only when progress saving is enabled', () => {
+    const store = useGameStore.getState()
+    store.abrirSelah({ historiaId: 'criacao', passagemId: versiculo.passagemId })
+    store.carregarQuiz(quiz)
+    store.mostrarQuiz()
+    store.iniciarEnvioResposta('A')
+    store.registrarResultado(avaliacao)
+    store.concluirSelah()
+
+    expect(localStorage.getItem(GAME_STORAGE_KEY)).not.toContain('selahsConcluidos')
+
+    store.setSalvarProgresso(true)
+    expect(localStorage.getItem(GAME_STORAGE_KEY)).toContain(
+      `"selahsConcluidos":["${versiculo.passagemId}"]`,
+    )
+  })
+
+  it('hydrates legacy snapshots without a concluded Selah list', async () => {
+    localStorage.setItem(
+      GAME_STORAGE_KEY,
+      JSON.stringify({
+        state: {
+          idioma: 'pt-BR',
+          faixaEtaria: 'geral',
+          ttsAtivo: false,
+          iaAtiva: true,
+          salvarProgresso: true,
+          compartilharMetricas: false,
+          configuracaoInicialConcluida: true,
+          pausaParentalAtiva: false,
+          regiao: 'criacao',
+          versiculosColetados: [versiculo.passagemId],
+          historico: [],
+        },
+        version: 1,
+      }),
+    )
+
+    await useGameStore.persist.rehydrate()
+
+    expect(useGameStore.getState().selahsConcluidos).toEqual([])
+    expect(useGameStore.getState().versiculosColetados).toEqual([versiculo.passagemId])
   })
 
   it('excludes gameplay history while playing without save', () => {
@@ -147,6 +255,8 @@ describe('gameStore', () => {
     useGameStore.getState().apagarProgresso()
     expect(localStorage.getItem(GAME_STORAGE_KEY)).toBeNull()
     expect(useGameStore.getState().selahsIniciados).toBe(0)
+    expect(useGameStore.getState().selahsConcluidos).toEqual([])
+    expect(useGameStore.getState().momentosCriacaoConcluidos).toEqual([])
     expect(useGameStore.getState().configuracaoInicialConcluida).toBe(false)
   })
 

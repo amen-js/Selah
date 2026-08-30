@@ -19,6 +19,10 @@ export const GAME_STORAGE_KEY = 'selah-game-state'
 
 const IDIOMAS_SUPORTADOS: Idioma[] = ['pt-BR', 'en-US', 'es-ES']
 
+const normalizarIdsUnicos = (ids: readonly string[]): string[] => [
+  ...new Set(ids),
+]
+
 const detectarIdioma = (): Idioma => {
   if (typeof navigator === 'undefined') return 'pt-BR'
 
@@ -49,6 +53,10 @@ interface EstadoBase {
   compartilharMetricas: boolean
   configuracaoInicialConcluida: boolean
   versiculosColetados: string[]
+  /** Passagens cujo Selah foi efetivamente concluído, não apenas respondido. */
+  selahsConcluidos: string[]
+  /** Checkpoint da sequência de momentos da Criação, sem conhecer sua lógica. */
+  momentosCriacaoConcluidos: string[]
   selahsIniciados: number
   selahsCompletados: number
   historico: ResultadoQuizLocal[]
@@ -69,6 +77,8 @@ interface EstadoPersistido {
   pausaParentalAtiva: boolean
   regiao?: Regiao
   versiculosColetados?: string[]
+  selahsConcluidos?: string[]
+  momentosCriacaoConcluidos?: string[]
   selahsIniciados?: number
   selahsCompletados?: number
   historico?: ResultadoQuizLocal[]
@@ -84,6 +94,7 @@ export interface EstadoJogo extends EstadoBase {
   setSalvarProgresso: (salvarProgresso: boolean) => void
   setCompartilharMetricas: (compartilharMetricas: boolean) => void
   concluirConfiguracaoInicial: () => void
+  setMomentosCriacaoConcluidos: (momentos: readonly string[]) => void
   setDialogoAberto: (dialogoAberto: boolean) => void
   setPainelAberto: (painelAberto: PainelAberto) => void
   abrirSelah: (gatilho: GatilhoSelah) => void
@@ -110,6 +121,8 @@ const criarEstadoInicial = (): EstadoBase => ({
   compartilharMetricas: false,
   configuracaoInicialConcluida: false,
   versiculosColetados: [],
+  selahsConcluidos: [],
+  momentosCriacaoConcluidos: [],
   selahsIniciados: 0,
   selahsCompletados: 0,
   historico: [],
@@ -137,6 +150,8 @@ const projetarEstadoPersistido = (state: EstadoJogo): EstadoPersistido => {
     ...preferencias,
     regiao: state.regiao,
     versiculosColetados: state.versiculosColetados,
+    selahsConcluidos: state.selahsConcluidos,
+    momentosCriacaoConcluidos: state.momentosCriacaoConcluidos,
     selahsIniciados: state.selahsIniciados,
     selahsCompletados: state.selahsCompletados,
     historico: state.historico,
@@ -156,6 +171,18 @@ export const useGameStore = create<EstadoJogo>()(
       setSalvarProgresso: (salvarProgresso) => set({ salvarProgresso }),
       setCompartilharMetricas: (compartilharMetricas) => set({ compartilharMetricas }),
       concluirConfiguracaoInicial: () => set({ configuracaoInicialConcluida: true }),
+      setMomentosCriacaoConcluidos: (momentos) =>
+        set((state) => {
+          const normalizados = normalizarIdsUnicos(momentos)
+          const iguais =
+            normalizados.length === state.momentosCriacaoConcluidos.length &&
+            normalizados.every(
+              (momento, indice) =>
+                momento === state.momentosCriacaoConcluidos[indice],
+            )
+
+          return iguais ? state : { momentosCriacaoConcluidos: normalizados }
+        }),
       setDialogoAberto: (dialogoAberto) => set({ dialogoAberto }),
       setPainelAberto: (painelAberto) => set({ painelAberto }),
       abrirSelah: (gatilho) =>
@@ -244,10 +271,19 @@ export const useGameStore = create<EstadoJogo>()(
       cancelarSelah: () => set({ selahAtivo: null, narracaoAtiva: false }),
       concluirSelah: () =>
         set((state) => {
-          if (state.selahAtivo?.fase !== 'feedback') return state
+          const ativo = state.selahAtivo
+          if (ativo?.fase !== 'feedback') return state
+
+          const passagemId = ativo.gatilho.passagemId
+          const jaConcluido = state.selahsConcluidos.includes(passagemId)
           return {
             selahAtivo: null,
+            // Aggregate session metrics keep their original semantics; only
+            // the passage checkpoint is unique.
             selahsCompletados: state.selahsCompletados + 1,
+            selahsConcluidos: jaConcluido
+              ? state.selahsConcluidos
+              : [...state.selahsConcluidos, passagemId],
             pausaParentalAtiva: true,
             narracaoAtiva: false,
           }

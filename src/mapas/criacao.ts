@@ -189,7 +189,8 @@ export const mapaCriacao: MapaRegiao = {
       id: 'coletavel-vegetacao',
       historiaId: 'criacao',
       passagemId: 'genesis-1-11',
-      posicao: [-13, 2, 9],
+      // Separado do mirante para a descoberta espacial não emendar no Selah.
+      posicao: [-12, 1, 11],
       raioAtivacao: 1.5,
       cor: '#8dc76b',
     },

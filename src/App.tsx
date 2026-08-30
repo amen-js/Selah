@@ -36,11 +36,15 @@ function App({ reloadPage = reloadCurrentPage }: AppProps) {
   const configuracaoInicialConcluida = useGameStore(
     (state) => state.configuracaoInicialConcluida,
   )
-  const sceneLoadFailed = sceneProgress.errors.length > 0 || sceneRenderFailed
+  // The global loading manager gates only the first entry. Creation chunks are
+  // intentionally lazy; later downloads stay inside their local Suspense and
+  // must never pause exploration or release pointer lock.
+  const sceneLoadFailed =
+    sceneRenderFailed || (!hasStarted && sceneProgress.errors.length > 0)
   const sceneReady =
     !sceneLoadFailed &&
-    !sceneProgress.active &&
-    sceneContentReady
+    sceneContentReady &&
+    (hasStarted || !sceneProgress.active)
   const sceneBlocked = configuracaoInicialConcluida && !sceneReady
   const interfaceBloqueada =
     exploracaoBloqueada || !configuracaoInicialConcluida || sceneBlocked

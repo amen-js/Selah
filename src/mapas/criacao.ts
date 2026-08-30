@@ -66,7 +66,7 @@ export const mapaCriacao: MapaRegiao = {
       id: 'prop-campo-aberto',
       ...modelosNatureza.gramaAlta,
       posicao: [0, 0, 7],
-      escala: [5.2, 1.15, 5.2],
+      escala: [2.6, 0.75, 2.6],
       collider: false,
       fallback: { forma: 'caixa', cor: '#a3c96b' },
     },

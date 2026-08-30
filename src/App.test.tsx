@@ -11,6 +11,7 @@ const canvasMock = vi.hoisted(() => ({
   onProgressaoCriacaoChange: null as ((
     snapshot: SnapshotProgressaoCriacao | null,
   ) => void) | null,
+  onInatividadeCriacaoChange: null as ((inativo: boolean) => void) | null,
 }))
 
 const selahAudioMock = vi.hoisted(() => ({
@@ -45,6 +46,7 @@ vi.mock('./components/game/GameCanvas', async () => {
       onCanvasReady,
       onSceneReady,
       onProgressaoCriacaoChange,
+      onInatividadeCriacaoChange,
     }: {
       playing: boolean
       onCanvasReady?: (canvas: HTMLCanvasElement) => void
@@ -52,9 +54,12 @@ vi.mock('./components/game/GameCanvas', async () => {
       onProgressaoCriacaoChange?: (
         snapshot: SnapshotProgressaoCriacao | null,
       ) => void
+      onInatividadeCriacaoChange?: (inativo: boolean) => void
     }) => {
       if (canvasMock.shouldThrow) throw new Error('webgl-scene-failed')
       canvasMock.onProgressaoCriacaoChange = onProgressaoCriacaoChange ?? null
+      canvasMock.onInatividadeCriacaoChange =
+        onInatividadeCriacaoChange ?? null
 
       useEffect(() => {
         if (canvasMock.element) onCanvasReady?.(canvasMock.element)
@@ -70,14 +75,17 @@ vi.mock('./components/game/GameOverlay', () => ({
   GameOverlay: ({
     progressaoCriacao,
     exploracaoAtiva,
+    inatividadeCriacao,
   }: {
     progressaoCriacao?: SnapshotProgressaoCriacao
     exploracaoAtiva?: boolean
+    inatividadeCriacao?: boolean
   }) => (
     <aside
       data-testid="game-overlay"
       data-momento={progressaoCriacao?.momento.id}
       data-exploracao-ativa={String(exploracaoAtiva)}
+      data-inatividade-criacao={String(inatividadeCriacao)}
     />
   ),
 }))
@@ -115,6 +123,7 @@ describe('App integration', () => {
     canvasMock.element = document.createElement('canvas')
     canvasMock.shouldThrow = false
     canvasMock.onProgressaoCriacaoChange = null
+    canvasMock.onInatividadeCriacaoChange = null
     progressMock.state = {
       active: false,
       progress: 100,
@@ -171,7 +180,7 @@ describe('App integration', () => {
     )
   })
 
-  it('updates and clears transient progress without changing pointer lock or storage', () => {
+  it('updates and clears transient Creation state without changing pointer lock or storage', () => {
     render(<App />)
 
     act(() => {
@@ -181,9 +190,14 @@ describe('App integration', () => {
     const persistedBefore = localStorage.getItem(GAME_STORAGE_KEY)
 
     act(() => canvasMock.onProgressaoCriacaoChange?.(snapshotVazio))
+    act(() => canvasMock.onInatividadeCriacaoChange?.(true))
     act(() => canvasMock.onProgressaoCriacaoChange?.(snapshotLuz))
 
     expect(screen.getByTestId('game-overlay')).toHaveAttribute('data-momento', 'luz')
+    expect(screen.getByTestId('game-overlay')).toHaveAttribute(
+      'data-inatividade-criacao',
+      'true',
+    )
     expect(exitPointerLock).not.toHaveBeenCalled()
     expect(localStorage.getItem(GAME_STORAGE_KEY)).toBe(persistedBefore)
 
@@ -193,6 +207,10 @@ describe('App integration', () => {
     expect(screen.getByTestId('game-overlay')).toHaveAttribute(
       'data-exploracao-ativa',
       'true',
+    )
+    expect(screen.getByTestId('game-overlay')).toHaveAttribute(
+      'data-inatividade-criacao',
+      'false',
     )
     expect(exitPointerLock).not.toHaveBeenCalled()
     expect(localStorage.getItem(GAME_STORAGE_KEY)).toBe(persistedBefore)

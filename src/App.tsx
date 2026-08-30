@@ -24,6 +24,7 @@ function App({ reloadPage = reloadCurrentPage }: AppProps) {
   const [hasStarted, setHasStarted] = useState(false)
   const [progressaoCriacao, setProgressaoCriacao] =
     useState<SnapshotProgressaoCriacao | null>(null)
+  const [inatividadeCriacao, setInatividadeCriacao] = useState(false)
   const [sceneContentReady, setSceneContentReady] = useState(
     () =>
       sceneProgress.total > 0 &&
@@ -51,6 +52,14 @@ function App({ reloadPage = reloadCurrentPage }: AppProps) {
   const handleSceneReady = useCallback(() => {
     setSceneContentReady(true)
   }, [])
+
+  const handleProgressaoCriacaoChange = useCallback(
+    (snapshot: SnapshotProgressaoCriacao | null) => {
+      setProgressaoCriacao(snapshot)
+      if (!snapshot) setInatividadeCriacao(false)
+    },
+    [],
+  )
 
   useEffect(() => {
     const handlePointerLockChange = () => {
@@ -105,7 +114,8 @@ function App({ reloadPage = reloadCurrentPage }: AppProps) {
         <GameCanvas
           playing={exploracaoAtiva}
           onSceneReady={handleSceneReady}
-          onProgressaoCriacaoChange={setProgressaoCriacao}
+          onProgressaoCriacaoChange={handleProgressaoCriacaoChange}
+          onInatividadeCriacaoChange={setInatividadeCriacao}
           onCanvasReady={(canvas) => {
             canvasRef.current = canvas
           }}
@@ -116,6 +126,7 @@ function App({ reloadPage = reloadCurrentPage }: AppProps) {
         <GameOverlay
           progressaoCriacao={progressaoCriacao ?? undefined}
           exploracaoAtiva={exploracaoAtiva}
+          inatividadeCriacao={inatividadeCriacao}
         />
       )}
 

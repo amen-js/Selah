@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import { momentosCriacao } from '../components/game/creation/progression/catalogo'
 import type {
@@ -29,6 +29,11 @@ export function LabPage() {
   const abrirSelah = useGameStore((state) => state.abrirSelah)
   const setDialogoAberto = useGameStore((state) => state.setDialogoAberto)
   const apagarProgresso = useGameStore((state) => state.apagarProgresso)
+
+  useEffect(() => {
+    setRegiao('criacao')
+  }, [setRegiao])
+
   const momentoSelecionado =
     momentosCriacao.find((momento) => momento.id === momentoSelecionadoId) ??
     momentosCriacao[0]

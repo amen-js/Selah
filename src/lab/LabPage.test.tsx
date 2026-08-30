@@ -14,6 +14,7 @@ describe('LabPage', () => {
     const { container } = render(<LabPage />)
 
     expect(screen.getByText('Interface sem Canvas')).toBeInTheDocument()
+    expect(screen.getByText('A Criação')).toBeInTheDocument()
     expect(container.querySelector('canvas')).not.toBeInTheDocument()
   })
 

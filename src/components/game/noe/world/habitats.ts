@@ -133,7 +133,7 @@ export const habitatsArcaNoe: readonly DescritorHabitatNoe[] = [
     especie: 'ovelha',
     quantidade: 3,
     posicaoEspera: [1.7, 0.42, -6.9],
-    posicaoHabitat: [-3.85, 0.58, -29.1],
+    posicaoHabitat: [-3.85, 0.58, -27.6],
     raio: 1.8,
     prioridade: PRIORIDADE_HABITAT,
     ordem: 4,
@@ -147,7 +147,7 @@ export const habitatsArcaNoe: readonly DescritorHabitatNoe[] = [
     especie: 'zebra',
     quantidade: 3,
     posicaoEspera: [3.6, 0.48, -5.7],
-    posicaoHabitat: [3.85, 0.62, -29.1],
+    posicaoHabitat: [3.85, 0.62, -27.6],
     raio: 1.8,
     prioridade: PRIORIDADE_HABITAT,
     ordem: 5,
@@ -231,9 +231,11 @@ export function habitatConcluidoNoe(
 export function habitatsArcaNoeVisiveis(
   momentoAtualId: MomentoNoeId,
 ): boolean {
+  const indiceAtual = indiceMomentoNoe(momentoAtualId)
+
   return (
-    indiceMomentoNoe(momentoAtualId) >=
-    indiceMomentoNoe('acomodacao-animais')
+    indiceAtual >= indiceMomentoNoe('acomodacao-animais') &&
+    indiceAtual < indiceMomentoNoe('nova-terra-arco-iris')
   )
 }
 

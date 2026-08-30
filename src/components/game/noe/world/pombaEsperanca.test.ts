@@ -7,6 +7,9 @@ import { processarEventoProgressaoNoe } from '../progression/estado'
 import type { EstadoProgressaoNoe } from '../progression/types'
 import {
   obterEstadoVisualPombaEsperancaNoe,
+  POSICAO_JANELA_SUPERIOR_POMBA_NOE,
+  POSICAO_POMBA_NOVA_TERRA_NOE,
+  projetarLocalizacaoPombaEsperancaNoe,
   resolverCandidatoPombaEsperancaNoe,
 } from './pombaEsperanca'
 
@@ -37,6 +40,11 @@ describe('pomba da esperança de Noé', () => {
     })
 
     expect(obterEstadoVisualPombaEsperancaNoe(estado).visivel).toBe(false)
+    expect(projetarLocalizacaoPombaEsperancaNoe(estado)).toEqual({
+      localizacao: 'oculta',
+      posicaoJanela: POSICAO_JANELA_SUPERIOR_POMBA_NOE,
+      posicaoPomba: null,
+    })
     expect(
       resolverCandidatoPombaEsperancaNoe(
         { x: 0, y: 4.7, z: -28.35 },
@@ -48,6 +56,12 @@ describe('pomba da esperança de Noé', () => {
   it('exige envio antes do retorno e não depende de timer', () => {
     let estado = criarEstadoM8()
     const posicaoJanela = { x: 0, y: 4.7, z: -28.35 }
+
+    expect(projetarLocalizacaoPombaEsperancaNoe(estado)).toEqual({
+      localizacao: 'janela-superior',
+      posicaoJanela: POSICAO_JANELA_SUPERIOR_POMBA_NOE,
+      posicaoPomba: POSICAO_JANELA_SUPERIOR_POMBA_NOE,
+    })
 
     expect(
       resolverCandidatoPombaEsperancaNoe(posicaoJanela, estado),
@@ -66,6 +80,7 @@ describe('pomba da esperança de Noé', () => {
     expect(obterEstadoVisualPombaEsperancaNoe(estado)).toMatchObject({
       fase: 'retornando-com-oliveira',
       carregaRamoOliveira: true,
+      localizacao: 'janela-superior',
     })
     expect(
       resolverCandidatoPombaEsperancaNoe(posicaoJanela, estado),
@@ -110,6 +125,12 @@ describe('pomba da esperança de Noé', () => {
       fase: 'pousada-com-oliveira',
       carregaRamoOliveira: true,
       janelaIluminada: false,
+      localizacao: 'nova-terra',
+      posicaoJanela: POSICAO_JANELA_SUPERIOR_POMBA_NOE,
+      posicaoPomba: POSICAO_POMBA_NOVA_TERRA_NOE,
     })
+    expect(POSICAO_POMBA_NOVA_TERRA_NOE).not.toEqual(
+      POSICAO_JANELA_SUPERIOR_POMBA_NOE,
+    )
   })
 })

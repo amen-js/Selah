@@ -10,6 +10,7 @@ import type { Group } from 'three'
 import type { Ponto3D } from '../../../../mapas/types'
 import type { PosicaoJogador } from '../../creation/proximidade'
 import type { EstadoProgressaoNoe } from '../progression/types'
+import { FamiliaNoeEmGrupo } from './AnimaisFamiliaNoe'
 import {
   descreverTarefasNovaTerraNoe,
   MEIA_EXTENSAO_COLISOR_ALTAR_NOE,
@@ -385,6 +386,25 @@ function AltarGratidao({ construido }: { construido: boolean }) {
   )
 }
 
+function FamiliaNoeJuntoAoAltar({
+  altarConstruido,
+}: {
+  altarConstruido: boolean
+}) {
+  return (
+    <group
+      name="familia-noe-junto-ao-altar"
+      position={[3.2, 0, 30.7]}
+      rotation={[0, -Math.PI / 2, 0]}
+      userData={{ acompanhaAltar: true, altarConstruido }}
+    >
+      <group scale={0.82}>
+        <FamiliaNoeEmGrupo />
+      </group>
+    </group>
+  )
+}
+
 function ArcoIrisAlianca({ reducedMotion }: { reducedMotion: boolean }) {
   const arcoRef = useRef<Group>(null)
   const cores = [
@@ -519,6 +539,7 @@ export function NovaTerraNoe({
       })}
 
       <AltarGratidao construido={visual.altarConstruido} />
+      <FamiliaNoeJuntoAoAltar altarConstruido={visual.altarConstruido} />
       {visual.arcoIrisVisivel && (
         <ArcoIrisAlianca reducedMotion={reducedMotion} />
       )}

@@ -126,7 +126,11 @@ function PombaProcedural({
 
   useFrame(({ clock }) => {
     const tempo = clock.elapsedTime
-    const batida = reducedMotion ? 0.18 : Math.sin(tempo * 7.5) * 0.72
+    const batida = voando
+      ? reducedMotion
+        ? 0.18
+        : Math.sin(tempo * 7.5) * 0.72
+      : 0.1
 
     if (asaEsquerdaRef.current) asaEsquerdaRef.current.rotation.z = batida
     if (asaDireitaRef.current) asaDireitaRef.current.rotation.z = -batida
@@ -297,17 +301,35 @@ export function PombaEsperancaNoe({
 
   return (
     <group
-      name="pomba-esperanca-noe-m8"
-      position={[...tarefas[0].posicao]}
+      name="pomba-esperanca-noe-m8-m9"
       userData={{
         fase: visual.fase,
+        localizacao: visual.localizacao,
         ramoOliveira: visual.carregaRamoOliveira,
         semTimerObrigatorio: true,
       }}
     >
-      <JanelaSuperior iluminada={visual.janelaIluminada} />
-      <PombaProcedural fase={visual.fase} reducedMotion={reducedMotion} />
-      <MarcadorPomba ativo={tarefaDisponivel} />
+      <group
+        name="pomba-na-janela-superior"
+        position={[...visual.posicaoJanela]}
+      >
+        <JanelaSuperior iluminada={visual.janelaIluminada} />
+        {visual.localizacao === 'janela-superior' && (
+          <PombaProcedural fase={visual.fase} reducedMotion={reducedMotion} />
+        )}
+        <MarcadorPomba ativo={tarefaDisponivel} />
+      </group>
+
+      {visual.localizacao === 'nova-terra' && visual.posicaoPomba && (
+        <group
+          name="pomba-na-nova-terra"
+          position={[...visual.posicaoPomba]}
+          rotation={[0, -0.55, 0]}
+          userData={{ ramoOliveira: true }}
+        >
+          <PombaProcedural fase={visual.fase} reducedMotion={reducedMotion} />
+        </group>
+      )}
     </group>
   )
 }

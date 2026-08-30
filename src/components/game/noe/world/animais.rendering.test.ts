@@ -39,5 +39,14 @@ describe('contratos de renderização dos animais de Noé', () => {
     const habitats = ler('HabitatsArcaNoe.tsx')
     expect(habitats).toContain('familiaDescansando: concluido')
     expect(habitats).toContain('familia-descansando-')
+    expect(habitats.match(/<pointLight/g) ?? []).toHaveLength(2)
+  })
+
+  it('reúne a família na nova terra junto ao altar', () => {
+    const novaTerra = ler('NovaTerraNoe.tsx')
+
+    expect(novaTerra).toContain("import { FamiliaNoeEmGrupo }")
+    expect(novaTerra).toContain('name="familia-noe-junto-ao-altar"')
+    expect(novaTerra).toContain('<FamiliaNoeEmGrupo />')
   })
 })

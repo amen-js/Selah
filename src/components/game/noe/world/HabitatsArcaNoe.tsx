@@ -177,13 +177,6 @@ function HabitatAcolhedor({
             descansando
             escala={descritor.nivel === 'inferior' ? 0.68 : 0.62}
           />
-          <pointLight
-            position={[0, 1.25, 0]}
-            color="#ffc878"
-            intensity={1.25}
-            distance={3.4}
-            decay={2}
-          />
         </group>
       )}
     </group>

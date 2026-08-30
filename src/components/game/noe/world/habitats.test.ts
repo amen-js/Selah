@@ -33,7 +33,7 @@ describe('puzzle acolhedor de habitats em M5', () => {
     expect(new Set(habitatsArcaNoe.map(({ unidadeId }) => unidadeId)).size).toBe(8)
   })
 
-  it('mantém o puzzle fechado antes de M5 e apenas decorativo depois dele', () => {
+  it('mantém o puzzle fechado antes de M5, decorativo até M8 e vazio em M9', () => {
     const elefantes = habitatsArcaNoe[0]
     const jogador = {
       x: elefantes.posicaoEspera[0],
@@ -44,6 +44,8 @@ describe('puzzle acolhedor de habitats em M5', () => {
     expect(habitatsArcaNoeVisiveis('conducao-animais')).toBe(false)
     expect(habitatsArcaNoeVisiveis('acomodacao-animais')).toBe(true)
     expect(habitatsArcaNoeVisiveis('fechamento-porta')).toBe(true)
+    expect(habitatsArcaNoeVisiveis('retorno-pomba')).toBe(true)
+    expect(habitatsArcaNoeVisiveis('nova-terra-arco-iris')).toBe(false)
     expect(
       resolverCandidatoHabitatArcaNoe(
         jogador,
@@ -60,6 +62,14 @@ describe('puzzle acolhedor de habitats em M5', () => {
         null,
       ),
     ).toBeNull()
+  })
+
+  it('mantém ovelhas e zebras dentro do convés inferior antes do desembarque', () => {
+    const ovelhas = habitatsArcaNoe.find(({ id }) => id === 'ovelhas')
+    const zebras = habitatsArcaNoe.find(({ id }) => id === 'zebras')
+
+    expect(ovelhas?.posicaoHabitat[2]).toBeCloseTo(-27.6)
+    expect(zebras?.posicaoHabitat[2]).toBeCloseTo(-27.6)
   })
 
   it('faz seleção, encaixe somente no habitat correto e devolução amigável', () => {

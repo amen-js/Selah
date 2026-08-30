@@ -18,6 +18,17 @@ export type FaseVisualPombaNoe =
   | 'retornando-com-oliveira'
   | 'pousada-com-oliveira'
 
+export type LocalizacaoPombaEsperancaNoe =
+  | 'oculta'
+  | 'janela-superior'
+  | 'nova-terra'
+
+export interface ProjecaoLocalizacaoPombaEsperancaNoe {
+  localizacao: LocalizacaoPombaEsperancaNoe
+  posicaoJanela: Ponto3D
+  posicaoPomba: Ponto3D | null
+}
+
 export interface DescritorTarefaPombaNoe {
   id: string
   acaoId: AcaoPombaEsperancaNoeId
@@ -39,7 +50,8 @@ export interface CandidatoPombaEsperancaNoePuro
   distancia: number
 }
 
-export interface EstadoVisualPombaEsperancaNoe {
+export interface EstadoVisualPombaEsperancaNoe
+  extends ProjecaoLocalizacaoPombaEsperancaNoe {
   visivel: boolean
   fase: FaseVisualPombaNoe
   carregaRamoOliveira: boolean
@@ -48,13 +60,18 @@ export interface EstadoVisualPombaEsperancaNoe {
 
 const PRIORIDADE_POMBA = 380
 
+export const POSICAO_JANELA_SUPERIOR_POMBA_NOE: Ponto3D = [
+  0, 4.7, -28.35,
+]
+export const POSICAO_POMBA_NOVA_TERRA_NOE: Ponto3D = [-3.4, 0.18, 32]
+
 /** The interaction sits on the accessible upper deck, beside the stern window. */
 export const tarefasPombaEsperancaNoe: readonly DescritorTarefaPombaNoe[] = [
   {
     id: 'pomba-envio-janela-superior',
     acaoId: 'noe.pomba.enviada',
     unidadeId: 'envio-janela-superior',
-    posicao: [0, 4.7, -28.35],
+    posicao: POSICAO_JANELA_SUPERIOR_POMBA_NOE,
     raio: 2.35,
     prioridade: PRIORIDADE_POMBA,
     etapa: 1,
@@ -64,7 +81,7 @@ export const tarefasPombaEsperancaNoe: readonly DescritorTarefaPombaNoe[] = [
     id: 'pomba-retorno-com-oliveira',
     acaoId: 'noe.pomba.retornou',
     unidadeId: 'retorno-com-oliveira',
-    posicao: [0, 4.7, -28.35],
+    posicao: POSICAO_JANELA_SUPERIOR_POMBA_NOE,
     raio: 2.35,
     prioridade: PRIORIDADE_POMBA,
     etapa: 2,
@@ -99,6 +116,31 @@ function pombaJaFoiApresentada(estado: EstadoProgressaoNoe): boolean {
     indiceMomentoNoe(estado.momentoAtualId) >=
       indiceMomentoNoe('retorno-pomba')
   )
+}
+
+/** Keeps the ark window fixed while moving only the dove after M8. */
+export function projetarLocalizacaoPombaEsperancaNoe(
+  estado: EstadoProgressaoNoe,
+): ProjecaoLocalizacaoPombaEsperancaNoe {
+  if (!pombaJaFoiApresentada(estado)) {
+    return {
+      localizacao: 'oculta',
+      posicaoJanela: POSICAO_JANELA_SUPERIOR_POMBA_NOE,
+      posicaoPomba: null,
+    }
+  }
+
+  const naNovaTerra =
+    estado.momentoAtualId === 'nova-terra-arco-iris' ||
+    momentoConcluido(estado, 'retorno-pomba')
+
+  return {
+    localizacao: naNovaTerra ? 'nova-terra' : 'janela-superior',
+    posicaoJanela: POSICAO_JANELA_SUPERIOR_POMBA_NOE,
+    posicaoPomba: naNovaTerra
+      ? POSICAO_POMBA_NOVA_TERRA_NOE
+      : POSICAO_JANELA_SUPERIOR_POMBA_NOE,
+  }
 }
 
 export function descreverTarefasPombaEsperancaNoe(
@@ -159,16 +201,18 @@ export function obterEstadoVisualPombaEsperancaNoe(
   const tarefas = descreverTarefasPombaEsperancaNoe(estado)
   const enviada = tarefas[0].estado === 'concluida'
   const retornou = tarefas[1].estado === 'concluida'
-  const visivel = pombaJaFoiApresentada(estado)
+  const localizacao = projetarLocalizacaoPombaEsperancaNoe(estado)
 
   return {
-    visivel,
+    ...localizacao,
+    visivel: localizacao.localizacao !== 'oculta',
     fase: retornou
       ? 'pousada-com-oliveira'
       : enviada
         ? 'retornando-com-oliveira'
         : 'aguardando-envio',
     carregaRamoOliveira: enviada,
-    janelaIluminada: visivel && !retornou,
+    janelaIluminada:
+      localizacao.localizacao === 'janela-superior' && !retornou,
   }
 }

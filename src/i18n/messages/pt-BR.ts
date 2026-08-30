@@ -140,6 +140,17 @@ export const ptBR = {
   'noe.slice.eyebrow': 'Etapa concluída',
   'noe.slice.title': 'O canteiro está pronto',
   'noe.slice.hint': 'Explore o vale ou volte pelo portal quando quiser.',
+  'noe.sealing.eyebrow': 'Preparar o abrigo',
+  'noe.sealing.title': 'Aplique o betume na fenda',
+  'noe.sealing.instructions':
+    'Deslize o pincel pelos trechos claros. No teclado, avance com Tab e pressione Espaço ou Enter.',
+  'noe.sealing.pathAria': 'Fenda na madeira a ser vedada',
+  'noe.sealing.segmentAria': 'Trecho {current} de {total} da fenda',
+  'noe.sealing.progress': 'Cobertura da fenda',
+  'noe.sealing.progressAria': 'Vedação {progress}% concluída',
+  'noe.sealing.cancel': 'Voltar ao mundo',
+  'noe.sealing.keepPainting': 'Continue pincelando',
+  'noe.sealing.complete': 'Finalizar vedação',
 
   'portal.prompt.aria': 'Portal para {region}',
   'portal.prompt.eyebrow': 'Portal',

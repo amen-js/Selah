@@ -65,6 +65,8 @@ import {
   NoeInteractionPrompt,
   NoeSliceStatus,
   NoeWorldRuntime,
+  VedacaoBetume,
+  type SolicitacaoVedacaoNoe,
   type TipoInteracaoNoe,
 } from './noe'
 import { RiggedPlayer } from './player'
@@ -188,6 +190,7 @@ type WorldProps = {
   onInteracaoCriacaoProxima: (tipo: TipoInteracaoCriacao | null) => void
   onInteracaoNoeProxima: (tipo: TipoInteracaoNoe | null) => void
   onBlocoNoeConcluido: (concluido: boolean) => void
+  onVedacaoNoeSolicitada: (solicitacao: SolicitacaoVedacaoNoe) => void
 }
 
 function World({
@@ -202,6 +205,7 @@ function World({
   onInteracaoCriacaoProxima,
   onInteracaoNoeProxima,
   onBlocoNoeConcluido,
+  onVedacaoNoeSolicitada,
 }: WorldProps) {
   const reducedMotion = useReducedMotionPreference()
   const posicaoJogadorRef = useRef<PosicaoJogador | null>(null)
@@ -365,6 +369,7 @@ function World({
           onPortalAcionado={onPortalAcionado}
           onInteracaoProxima={onInteracaoNoeProxima}
           onBlocoConcluido={onBlocoNoeConcluido}
+          onVedacaoSolicitada={onVedacaoNoeSolicitada}
         />
       ) : (
         <ColetaveisRegiao
@@ -470,6 +475,7 @@ type GameCanvasProps = {
     snapshot: SnapshotProgressaoCriacao | null,
   ) => void
   onInatividadeCriacaoChange?: (inativo: boolean) => void
+  onAtividadeNoeChange?: (ativa: boolean) => void
 }
 
 export function GameCanvas({
@@ -478,6 +484,7 @@ export function GameCanvas({
   onSceneReady,
   onProgressaoCriacaoChange,
   onInatividadeCriacaoChange,
+  onAtividadeNoeChange,
 }: GameCanvasProps) {
   const regiao = useGameStore((state) => state.regiao)
   const setRegiao = useGameStore((state) => state.setRegiao)
@@ -488,6 +495,8 @@ export function GameCanvas({
   const [interacaoNoeProxima, setInteracaoNoeProxima] =
     useState<TipoInteracaoNoe | null>(null)
   const [blocoNoeConcluido, setBlocoNoeConcluido] = useState(false)
+  const [vedacaoNoe, setVedacaoNoe] =
+    useState<SolicitacaoVedacaoNoe | null>(null)
   const [faseTransicao, setFaseTransicao] =
     useState<FasePortalTransicao>('inativo')
   const [destinoTransicao, setDestinoTransicao] =
@@ -495,7 +504,35 @@ export function GameCanvas({
   const transicaoAtivaRef = useRef(false)
   const cooldownPortalRef = useRef(criarEstadoCooldownPortal())
   const temporizadoresRef = useRef<number[]>([])
-  const mundoAtivo = playing && faseTransicao === 'inativo'
+  const canvasElementRef = useRef<HTMLCanvasElement | null>(null)
+  const mundoAtivo =
+    playing && faseTransicao === 'inativo' && vedacaoNoe === null
+
+  const solicitarVedacaoNoe = useCallback(
+    (solicitacao: SolicitacaoVedacaoNoe) => {
+      setVedacaoNoe(solicitacao)
+      onAtividadeNoeChange?.(true)
+    },
+    [onAtividadeNoeChange],
+  )
+
+  const encerrarVedacaoNoe = useCallback(
+    (concluir: boolean) => {
+      if (concluir) vedacaoNoe?.concluir()
+      setVedacaoNoe(null)
+      onAtividadeNoeChange?.(false)
+
+      const canvas = canvasElementRef.current
+      if (!canvas) return
+      try {
+        const resultado = canvas.requestPointerLock()
+        if (resultado instanceof Promise) void resultado.catch(() => undefined)
+      } catch {
+        // Browsers without Pointer Lock return to the regular paused screen.
+      }
+    },
+    [onAtividadeNoeChange, vedacaoNoe],
+  )
 
   const limparTemporizadores = useCallback(() => {
     for (const temporizador of temporizadoresRef.current) {
@@ -505,6 +542,16 @@ export function GameCanvas({
   }, [])
 
   useEffect(() => limparTemporizadores, [limparTemporizadores])
+
+  useEffect(() => {
+    if (regiao === 'noe') return
+    onAtividadeNoeChange?.(false)
+  }, [onAtividadeNoeChange, regiao])
+
+  useEffect(
+    () => () => onAtividadeNoeChange?.(false),
+    [onAtividadeNoeChange],
+  )
 
   useEffect(() => {
     if (!mapa) setRegiao('hub')
@@ -573,6 +620,7 @@ export function GameCanvas({
         gl={{ antialias: true, powerPreference: 'high-performance' }}
         onCreated={({ gl, scene }) => {
           scene.background = new Color('#b8d7ca')
+          canvasElementRef.current = gl.domElement
           onCanvasReady?.(gl.domElement)
           onSceneReady?.()
         }}
@@ -593,6 +641,7 @@ export function GameCanvas({
                 onInteracaoCriacaoProxima={setInteracaoCriacaoProxima}
                 onInteracaoNoeProxima={setInteracaoNoeProxima}
                 onBlocoNoeConcluido={setBlocoNoeConcluido}
+                onVedacaoNoeSolicitada={solicitarVedacaoNoe}
               />
             ) : (
               <RegionFallback />
@@ -625,6 +674,14 @@ export function GameCanvas({
         fase={faseTransicao}
         destino={destinoTransicao}
       />
+      {vedacaoNoe && (
+        <VedacaoBetume
+          key={vedacaoNoe.unidadeId}
+          unidadeId={vedacaoNoe.unidadeId}
+          onConcluir={() => encerrarVedacaoNoe(true)}
+          onCancelar={() => encerrarVedacaoNoe(false)}
+        />
+      )}
     </KeyboardControls>
   )
 }

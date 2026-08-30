@@ -21,6 +21,12 @@ import {
 import { InteracaoNoeRuntime } from './InteracaoNoeRuntime'
 import type { TipoInteracaoNoe } from './NoeInteractionPrompt'
 import { useProgressaoNoeRuntime } from './ProgressaoNoeRuntime'
+import type { EstadoProgressaoNoe } from '../progression'
+
+export interface SolicitacaoVedacaoNoe {
+  unidadeId: string
+  concluir: () => void
+}
 
 export interface NoeWorldRuntimeProps {
   coletaveis: readonly ColetavelMapa[]
@@ -32,6 +38,8 @@ export interface NoeWorldRuntimeProps {
   onPortalAcionado: (portal: PortalMapa) => void
   onInteracaoProxima: (tipo: TipoInteracaoNoe | null) => void
   onBlocoConcluido: (concluido: boolean) => void
+  onProgressaoChange?: (estado: EstadoProgressaoNoe) => void
+  onVedacaoSolicitada?: (solicitacao: SolicitacaoVedacaoNoe) => void
 }
 
 /**
@@ -48,6 +56,8 @@ export function NoeWorldRuntime({
   onPortalAcionado,
   onInteracaoProxima,
   onBlocoConcluido,
+  onProgressaoChange,
+  onVedacaoSolicitada,
 }: NoeWorldRuntimeProps) {
   const { estado, emitir } = useProgressaoNoeRuntime(enabled)
   const selahsConcluidos = useGameStore((state) => state.selahsConcluidos)
@@ -85,12 +95,26 @@ export function NoeWorldRuntime({
         unidadeId: tarefaProxima.unidadeId,
         // Each detector already publishes only its nearest candidate.
         distancia: 0,
-        acionar: () =>
-          emitir({
+        acionar: () => {
+          const evento = {
             tipo: 'unidade-acao-concluida',
             acaoId: tarefaProxima.acaoId,
             unidadeId: tarefaProxima.unidadeId,
-          }),
+          } as const
+
+          if (
+            tarefaProxima.acaoId === 'noe.betume.aplicado' &&
+            onVedacaoSolicitada
+          ) {
+            onVedacaoSolicitada({
+              unidadeId: tarefaProxima.unidadeId,
+              concluir: () => emitir(evento),
+            })
+            return
+          }
+
+          emitir(evento)
+        },
       }
       proximos.push(candidato)
     }
@@ -129,6 +153,7 @@ export function NoeWorldRuntime({
     coletavelProximo,
     emitir,
     onPortalAcionado,
+    onVedacaoSolicitada,
     portalAcionavel,
     requisitoSelah,
     selahsConcluidos,
@@ -158,6 +183,10 @@ export function NoeWorldRuntime({
   useEffect(() => {
     onBlocoConcluido(blocoConcluido)
   }, [blocoConcluido, onBlocoConcluido])
+
+  useEffect(() => {
+    onProgressaoChange?.(estado)
+  }, [estado, onProgressaoChange])
 
   useEffect(
     () => () => onBlocoConcluido(false),

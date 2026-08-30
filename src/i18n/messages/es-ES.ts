@@ -142,6 +142,17 @@ export const esES = {
   'noe.slice.eyebrow': 'Etapa completada',
   'noe.slice.title': 'El astillero está listo',
   'noe.slice.hint': 'Explora el valle o vuelve por el portal cuando quieras.',
+  'noe.sealing.eyebrow': 'Preparar el refugio',
+  'noe.sealing.title': 'Aplica betún sobre la grieta',
+  'noe.sealing.instructions':
+    'Desliza el pincel por los tramos claros. Con teclado, usa Tab y presiona Espacio o Enter.',
+  'noe.sealing.pathAria': 'Grieta en la madera que debe sellarse',
+  'noe.sealing.segmentAria': 'Tramo {current} de {total} de la grieta',
+  'noe.sealing.progress': 'Cobertura de la grieta',
+  'noe.sealing.progressAria': 'Sellado completado al {progress}%',
+  'noe.sealing.cancel': 'Volver al mundo',
+  'noe.sealing.keepPainting': 'Sigue pincelando',
+  'noe.sealing.complete': 'Terminar sellado',
 
   'portal.prompt.aria': 'Portal a {region}',
   'portal.prompt.eyebrow': 'Portal',

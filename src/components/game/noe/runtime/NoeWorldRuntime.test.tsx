@@ -25,6 +25,22 @@ vi.mock('../world', () => ({
       >
         aproximar tarefa
       </button>
+      <button
+        type="button"
+        onClick={() =>
+          onCandidatoChange?.({
+            id: 'tarefa-noe-fenda-casco-1',
+            acaoId: 'noe.betume.aplicado',
+            unidadeId: 'fenda-casco-1',
+            posicao: [0, 0, 0],
+            raio: 2,
+            prioridade: 300,
+            estado: 'disponivel',
+          })
+        }
+      >
+        aproximar vedação
+      </button>
     </section>
   ),
 }))
@@ -93,10 +109,12 @@ const portais = [
 function renderRuntime({
   onPortalAcionado = vi.fn(),
   onBlocoConcluido = vi.fn(),
+  onVedacaoSolicitada = vi.fn(),
 } = {}) {
   return {
     onPortalAcionado,
     onBlocoConcluido,
+    onVedacaoSolicitada,
     ...render(
       <NoeWorldRuntime
         coletaveis={coletaveis}
@@ -108,6 +126,7 @@ function renderRuntime({
         onPortalAcionado={onPortalAcionado}
         onInteracaoProxima={vi.fn()}
         onBlocoConcluido={onBlocoConcluido}
+        onVedacaoSolicitada={onVedacaoSolicitada}
       />,
     ),
   }
@@ -130,6 +149,51 @@ describe('NoeWorldRuntime', () => {
       ),
     )
     expect(onPortalAcionado).not.toHaveBeenCalled()
+  })
+
+  it('só registra uma fenda depois que a atividade tátil confirma a cobertura', async () => {
+    useGameStore.setState({
+      checkpointNoe: {
+        versao: 1,
+        momentosConcluidos: ['chamado-canteiro'],
+        progressoMomentoAtual: [
+          {
+            acaoId: 'noe.madeira.coletada',
+            unidadesConcluidas: ['tabua-1', 'tabua-2', 'tabua-3', 'tabua-4'],
+          },
+          {
+            acaoId: 'noe.rampa.reparada',
+            unidadesConcluidas: ['rampa-principal'],
+          },
+        ],
+      },
+    })
+    const { onVedacaoSolicitada } = renderRuntime()
+
+    fireEvent.click(screen.getByRole('button', { name: 'aproximar vedação' }))
+    fireEvent.keyDown(window, { code: 'KeyE' })
+
+    expect(onVedacaoSolicitada).toHaveBeenCalledTimes(1)
+    expect(
+      useGameStore
+        .getState()
+        .checkpointNoe?.progressoMomentoAtual.some(
+          ({ acaoId }) => acaoId === 'noe.betume.aplicado',
+        ),
+    ).toBe(false)
+
+    act(() => onVedacaoSolicitada.mock.calls[0][0].concluir())
+
+    await waitFor(() =>
+      expect(useGameStore.getState().checkpointNoe?.progressoMomentoAtual).toEqual(
+        expect.arrayContaining([
+          {
+            acaoId: 'noe.betume.aplicado',
+            unidadesConcluidas: ['fenda-casco-1'],
+          },
+        ]),
+      ),
+    )
   })
 
   it('expõe só o Selah final de M2 e publica o handoff canônico para M3', async () => {

@@ -142,6 +142,17 @@ export const enUS = {
   'noe.slice.eyebrow': 'Stage completed',
   'noe.slice.title': 'The worksite is ready',
   'noe.slice.hint': 'Explore the valley or return through the portal anytime.',
+  'noe.sealing.eyebrow': 'Prepare the shelter',
+  'noe.sealing.title': 'Brush bitumen over the crack',
+  'noe.sealing.instructions':
+    'Brush across the bright sections. With a keyboard, use Tab and press Space or Enter.',
+  'noe.sealing.pathAria': 'Crack in the wood to be sealed',
+  'noe.sealing.segmentAria': 'Crack section {current} of {total}',
+  'noe.sealing.progress': 'Crack coverage',
+  'noe.sealing.progressAria': 'Sealing {progress}% complete',
+  'noe.sealing.cancel': 'Return to the world',
+  'noe.sealing.keepPainting': 'Keep brushing',
+  'noe.sealing.complete': 'Finish sealing',
 
   'portal.prompt.aria': 'Portal to {region}',
   'portal.prompt.eyebrow': 'Portal',

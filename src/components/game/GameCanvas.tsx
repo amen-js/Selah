@@ -66,6 +66,7 @@ import {
   NoeInteractionPrompt,
   NoeObjectiveGuide,
   NoeWorldRuntime,
+  obterSpawnNoe,
   VedacaoBetume,
   type SolicitacaoVedacaoNoe,
   type SolicitacaoDialogoNoe,
@@ -217,6 +218,7 @@ function World({
   const gatilhoSelah = useGameStore((state) => state.selahAtivo?.gatilho ?? null)
   const pausaParentalAtiva = useGameStore((state) => state.pausaParentalAtiva)
   const selahsConcluidos = useGameStore((state) => state.selahsConcluidos)
+  const checkpointNoe = useGameStore((state) => state.checkpointNoe)
   const momentosCriacaoConcluidos = useGameStore(
     (state) => state.momentosCriacaoConcluidos,
   )
@@ -229,6 +231,13 @@ function World({
   )
   const [interacaoCriacaoLocal, setInteracaoCriacaoLocal] =
     useState<TipoInteracaoCriacao | null>(null)
+  const spawn = useMemo(
+    () =>
+      regiao === 'noe'
+        ? obterSpawnNoe(checkpointNoe, mapa.spawn)
+        : mapa.spawn,
+    [checkpointNoe, mapa.spawn, regiao],
+  )
   const momentoCriacaoId = estadoCriacao.momentoAtualId
   const coletavelProximoRef = useRef<ColetavelMapa | null>(null)
   const objetivoProximoRef = useRef<ObjetivoZonaCriacao | null>(null)
@@ -453,7 +462,7 @@ function World({
         posicaoJogadorRef={posicaoJogadorRef}
         focoCamera={focoCamera}
         manterFoco={pausaParentalAtiva}
-        spawn={mapa.spawn}
+        spawn={spawn}
       />
     </>
   )

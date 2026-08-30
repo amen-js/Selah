@@ -48,6 +48,17 @@ describe('checkpoint da jornada de Noé', () => {
     expect(reconstruido.progressoMomentoAtual).toEqual([])
   })
 
+  it('não atravessa uma lacuna não textual no prefixo persistido', () => {
+    const reconstruido = reconstruirProgressaoNoe({
+      versao: VERSAO_CHECKPOINT_NOE,
+      momentosConcluidos: ['chamado-canteiro', 7, 'coleta-vedacao'],
+      progressoMomentoAtual: [],
+    })
+
+    expect(reconstruido.momentosConcluidos).toEqual(['chamado-canteiro'])
+    expect(reconstruido.momentoAtualId).toBe('coleta-vedacao')
+  })
+
   it('serializa e restaura progresso M2 parcial com IDs idempotentes', () => {
     const depoisDoChamado = processarEventoProgressaoNoe(
       criarEstadoProgressaoNoe(),

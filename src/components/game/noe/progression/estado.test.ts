@@ -78,6 +78,14 @@ describe('estado da jornada de Noé', () => {
 
   it('contabiliza M2 em 4/1/3 e trata a mesma unidade como idempotente', () => {
     const noSegundoMomento = concluirMomentoAtual(criarEstadoProgressaoNoe())
+    expect(
+      processarEventoProgressaoNoe(noSegundoMomento, {
+        tipo: 'unidade-acao-concluida',
+        acaoId: 'noe.rampa.reparada',
+        unidadeId: 'rampa-principal',
+      }),
+    ).toBe(noSegundoMomento)
+
     const primeiraTabua: EventoProgressaoNoe = {
       tipo: 'unidade-acao-concluida',
       acaoId: 'noe.madeira.coletada',
@@ -109,6 +117,48 @@ describe('estado da jornada de Noé', () => {
     })
     expect(terceiroMomento.momentoAtualId).toBe('estoque-mantimentos')
     expect(terceiroMomento.progressoMomentoAtual).toEqual([])
+  })
+
+  it('não deixa estado forjado liberar Selah nem pular a ordem local', () => {
+    const segundoMomento = concluirMomentoAtual(criarEstadoProgressaoNoe())
+    const corrompido: EstadoProgressaoNoe = {
+      ...segundoMomento,
+      progressoMomentoAtual: [
+        {
+          acaoId: 'noe.madeira.coletada',
+          unidadesConcluidas: ['inventada-1', 'inventada-2', 'tabua-1', 'tabua-1'],
+        },
+      ],
+    }
+
+    expect(
+      processarEventoProgressaoNoe(corrompido, {
+        tipo: 'selah-concluido',
+        passagemId: 'genesis-6-14',
+      }),
+    ).toBe(corrompido)
+    expect(
+      processarEventoProgressaoNoe(corrompido, {
+        tipo: 'unidade-acao-concluida',
+        acaoId: 'noe.betume.aplicado',
+        unidadeId: 'fenda-casco-1',
+      }),
+    ).toBe(corrompido)
+  })
+
+  it('exige desembarque antes da contemplação do arco-íris', () => {
+    const ultimoMomento = concluirAte(
+      criarEstadoProgressaoNoe(),
+      'nova-terra-arco-iris',
+    )
+
+    expect(
+      processarEventoProgressaoNoe(ultimoMomento, {
+        tipo: 'unidade-acao-concluida',
+        acaoId: 'noe.arco-iris.contemplado',
+        unidadeId: 'contemplacao-da-alianca',
+      }),
+    ).toBe(ultimoMomento)
   })
 
   it('ignora cada Selah final quando recebido antes das tarefas locais', () => {

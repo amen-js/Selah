@@ -32,10 +32,12 @@ function lerStrings(valor: unknown): readonly string[] {
     : []
 }
 
-function obterPrefixoCanonico(ids: readonly string[]): MomentoNoeId[] {
+function obterPrefixoCanonico(valor: unknown): MomentoNoeId[] {
+  if (!Array.isArray(valor)) return []
+
   const prefixo: MomentoNoeId[] = []
   for (const momento of momentosNoe) {
-    if (ids[prefixo.length] !== momento.id) break
+    if (valor[prefixo.length] !== momento.id) break
     prefixo.push(momento.id)
   }
   return prefixo
@@ -91,7 +93,7 @@ export function reconstruirProgressaoNoe(
     return criarEstadoProgressaoNoe()
   }
 
-  const prefixo = obterPrefixoCanonico(lerStrings(checkpoint.momentosConcluidos))
+  const prefixo = obterPrefixoCanonico(checkpoint.momentosConcluidos)
   if (prefixo.length === momentosNoe.length) {
     return {
       momentoAtualId: momentosNoe[momentosNoe.length - 1].id,

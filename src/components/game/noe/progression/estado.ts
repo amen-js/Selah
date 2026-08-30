@@ -44,7 +44,21 @@ export function quantidadeConcluidaTarefaNoe(
   estado: EstadoProgressaoNoe,
   acaoId: AcaoNoeId,
 ): number {
-  return obterProgressoAcao(estado, acaoId)?.unidadesConcluidas.length ?? 0
+  const tarefa = obterMomentoAtualNoe(estado).gatilhoConclusao.tarefas.find(
+    (requisito) => requisito.acaoId === acaoId,
+  )
+  if (!tarefa) return 0
+
+  const unidadesPermitidas = new Set<string>(tarefa.unidadesNecessarias)
+  const unidadesRegistradas = obterProgressoAcao(
+    estado,
+    acaoId,
+  )?.unidadesConcluidas
+  return new Set(
+    (unidadesRegistradas ?? []).filter((unidadeId) =>
+      unidadesPermitidas.has(unidadeId),
+    ),
+  ).size
 }
 
 export function tarefasLocaisConcluidasNoe(
@@ -93,20 +107,24 @@ function registrarUnidadeConcluida(
   }
 
   const progressoExistente = obterProgressoAcao(estado, tarefa.acaoId)
+  const permitidas = new Set<string>(tarefa.unidadesNecessarias)
+  const unidadesExistentes = [
+    ...new Set(
+      (progressoExistente?.unidadesConcluidas ?? []).filter((unidade) =>
+        permitidas.has(unidade),
+      ),
+    ),
+  ]
   if (
-    progressoExistente?.unidadesConcluidas.includes(idNormalizado) ||
-    (progressoExistente?.unidadesConcluidas.length ?? 0) >=
-      tarefa.unidadesNecessarias.length
+    unidadesExistentes.includes(idNormalizado) ||
+    unidadesExistentes.length >= tarefa.unidadesNecessarias.length
   ) {
     return estado
   }
 
   const progressoAtualizado: ProgressoAcaoNoe = {
     acaoId: tarefa.acaoId,
-    unidadesConcluidas: [
-      ...(progressoExistente?.unidadesConcluidas ?? []),
-      idNormalizado,
-    ],
+    unidadesConcluidas: [...unidadesExistentes, idNormalizado],
   }
   const progressoMomentoAtual = progressoExistente
     ? estado.progressoMomentoAtual.map((progresso) =>
@@ -144,6 +162,16 @@ export function processarEventoProgressaoNoe(
     (requisito) => requisito.acaoId === evento.acaoId,
   )
   if (!tarefa) return estado
+
+  const indiceTarefa = momentoAtual.gatilhoConclusao.tarefas.indexOf(tarefa)
+  const tarefasAnterioresConcluidas = momentoAtual.gatilhoConclusao.tarefas
+    .slice(0, indiceTarefa)
+    .every(
+      (requisito) =>
+        quantidadeConcluidaTarefaNoe(estado, requisito.acaoId) >=
+        requisito.unidadesNecessarias.length,
+    )
+  if (!tarefasAnterioresConcluidas) return estado
 
   const atualizado = registrarUnidadeConcluida(
     estado,

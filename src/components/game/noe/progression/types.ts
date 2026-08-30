@@ -49,6 +49,7 @@ export interface TarefaMomentoNoe {
 /** Local tasks must finish before the optional final Selah can close a beat. */
 export interface GatilhoConclusaoMomentoNoe {
   tipo: 'tarefas-locais-e-selah-opcional'
+  /** Tasks are unlocked in declaration order; units inside one task are free-order. */
   tarefas: readonly TarefaMomentoNoe[]
   selahFinal?: string
 }

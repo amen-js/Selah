@@ -1,75 +1,29 @@
-# React + TypeScript + Vite
+# Selah
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Jogo bíblico 3D para a web.
 
-Currently, two official plugins are available:
+Selah é um projeto de jogo interativo em 3D no navegador, inspirado em narrativas e atmosfera bíblica. O repositório concentra o código e o planejamento do produto.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Status
 
-## React Compiler
+Em planejamento / início de desenvolvimento.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Plano
 
-## Expanding the ESLint configuration
+O plano de produto e execução do hackathon está em [`plans/selah.plan.md`](plans/selah.plan.md).
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+O documento de design do jogo está em [`docs/GDD.md`](docs/GDD.md).
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Equipe
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+| Papel | Nome | GitHub |
+| --- | --- | --- |
+| Dev 1 | Pedro | [pedromlabio](https://github.com/pedromlabio) |
+| Dev 2 | Will | [willian-ishida](https://github.com/willian-ishida) |
+| Dev 3 | Mário | [marionantes](https://github.com/marionantes) |
+| Design | Matheus | [MatheusGomes-ctrl](https://github.com/MatheusGomes-ctrl) |
+| P.O. | Lilian | [lilianjanniffer](https://github.com/lilianjanniffer) |
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Licença
 
-```
-
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
-```
+Privado — organização [amen-js](https://github.com/amen-js).

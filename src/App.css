@@ -1279,6 +1279,57 @@ kbd {
   border-color: #ffe6a0;
 }
 
+.noe-objective-guide {
+  position: absolute;
+  top: clamp(74px, 10vh, 104px);
+  left: clamp(14px, 3vw, 36px);
+  z-index: 4;
+  display: grid;
+  gap: 7px;
+  width: min(330px, calc(100vw - 28px));
+  padding: 15px 17px;
+  color: #173c2d;
+  background: rgb(255 248 232 / 91%);
+  border: 1px solid rgb(255 255 255 / 68%);
+  border-left: 4px solid #d9a52e;
+  border-radius: 6px 16px 16px 6px;
+  box-shadow: 0 14px 34px rgb(5 20 14 / 20%);
+  pointer-events: none;
+}
+
+.noe-objective-guide__heading {
+  display: flex;
+  justify-content: space-between;
+  color: rgb(23 60 45 / 65%);
+  font-size: 0.67rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.noe-objective-guide h2 {
+  margin: 0;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.noe-objective-guide p {
+  margin: 0;
+  color: rgb(23 60 45 / 78%);
+  font-size: 0.82rem;
+  line-height: 1.42;
+}
+
+.noe-objective-guide progress {
+  width: 100%;
+  height: 5px;
+  overflow: hidden;
+  accent-color: #d9a52e;
+  border: 0;
+  border-radius: 999px;
+}
+
 @media (max-width: 560px) {
   .noe-sealing__actions {
     flex-direction: column-reverse;

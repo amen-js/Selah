@@ -64,12 +64,13 @@ import {
 import {
   DialogoMissaoNoe,
   NoeInteractionPrompt,
-  NoeSliceStatus,
+  NoeObjectiveGuide,
   NoeWorldRuntime,
   VedacaoBetume,
   type SolicitacaoVedacaoNoe,
   type SolicitacaoDialogoNoe,
   type TipoInteracaoNoe,
+  type EstadoProgressaoNoe,
 } from './noe'
 import { RiggedPlayer } from './player'
 import { Arte2DRegiao, Cenario3DRegiao, ColetaveisRegiao } from './region'
@@ -191,7 +192,7 @@ type WorldProps = {
   onInatividadeCriacaoChange?: (inativo: boolean) => void
   onInteracaoCriacaoProxima: (tipo: TipoInteracaoCriacao | null) => void
   onInteracaoNoeProxima: (tipo: TipoInteracaoNoe | null) => void
-  onBlocoNoeConcluido: (concluido: boolean) => void
+  onProgressaoNoeChange: (estado: EstadoProgressaoNoe) => void
   onVedacaoNoeSolicitada: (solicitacao: SolicitacaoVedacaoNoe) => void
   onDialogoNoeSolicitado: (solicitacao: SolicitacaoDialogoNoe) => void
 }
@@ -207,7 +208,7 @@ function World({
   onInatividadeCriacaoChange,
   onInteracaoCriacaoProxima,
   onInteracaoNoeProxima,
-  onBlocoNoeConcluido,
+  onProgressaoNoeChange,
   onVedacaoNoeSolicitada,
   onDialogoNoeSolicitado,
 }: WorldProps) {
@@ -372,7 +373,7 @@ function World({
           onPortalProximo={onPortalProximo}
           onPortalAcionado={onPortalAcionado}
           onInteracaoProxima={onInteracaoNoeProxima}
-          onBlocoConcluido={onBlocoNoeConcluido}
+          onProgressaoChange={onProgressaoNoeChange}
           onVedacaoSolicitada={onVedacaoNoeSolicitada}
           onDialogoSolicitado={onDialogoNoeSolicitado}
         />
@@ -499,7 +500,8 @@ export function GameCanvas({
     useState<TipoInteracaoCriacao | null>(null)
   const [interacaoNoeProxima, setInteracaoNoeProxima] =
     useState<TipoInteracaoNoe | null>(null)
-  const [blocoNoeConcluido, setBlocoNoeConcluido] = useState(false)
+  const [progressaoNoe, setProgressaoNoe] =
+    useState<EstadoProgressaoNoe | null>(null)
   const [vedacaoNoe, setVedacaoNoe] =
     useState<SolicitacaoVedacaoNoe | null>(null)
   const [dialogoNoe, setDialogoNoe] =
@@ -676,7 +678,7 @@ export function GameCanvas({
                 onInatividadeCriacaoChange={onInatividadeCriacaoChange}
                 onInteracaoCriacaoProxima={setInteracaoCriacaoProxima}
                 onInteracaoNoeProxima={setInteracaoNoeProxima}
-                onBlocoNoeConcluido={setBlocoNoeConcluido}
+                onProgressaoNoeChange={setProgressaoNoe}
                 onVedacaoNoeSolicitada={solicitarVedacaoNoe}
                 onDialogoNoeSolicitado={solicitarDialogoNoe}
               />
@@ -699,13 +701,9 @@ export function GameCanvas({
       <NoeInteractionPrompt
         tipo={mundoAtivo ? interacaoNoeProxima : null}
       />
-      <NoeSliceStatus
-        visible={
-          mundoAtivo &&
-          blocoNoeConcluido &&
-          !portalProximo &&
-          !interacaoNoeProxima
-        }
+      <NoeObjectiveGuide
+        estado={regiao === 'noe' ? progressaoNoe : null}
+        visible={mundoAtivo && !portalProximo && !interacaoNoeProxima}
       />
       <PortalTransitionOverlay
         fase={faseTransicao}

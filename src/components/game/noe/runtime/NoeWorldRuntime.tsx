@@ -41,7 +41,6 @@ export interface NoeWorldRuntimeProps {
   onPortalProximo: (portal: PortalMapa | null) => void
   onPortalAcionado: (portal: PortalMapa) => void
   onInteracaoProxima: (tipo: TipoInteracaoNoe | null) => void
-  onBlocoConcluido: (concluido: boolean) => void
   onProgressaoChange?: (estado: EstadoProgressaoNoe) => void
   onVedacaoSolicitada?: (solicitacao: SolicitacaoVedacaoNoe) => void
   onDialogoSolicitado?: (solicitacao: SolicitacaoDialogoNoe) => void
@@ -60,7 +59,6 @@ export function NoeWorldRuntime({
   onPortalProximo,
   onPortalAcionado,
   onInteracaoProxima,
-  onBlocoConcluido,
   onProgressaoChange,
   onVedacaoSolicitada,
   onDialogoSolicitado,
@@ -183,9 +181,6 @@ export function NoeWorldRuntime({
     candidatoSelecionado?.tipo === 'selah'
       ? candidatoSelecionado.tipo
       : null
-  const blocoConcluido =
-    estado.momentoAtualId === 'estoque-mantimentos' && !estado.concluida
-
   useEffect(() => {
     onInteracaoProxima(tipoInteracao)
   }, [onInteracaoProxima, tipoInteracao])
@@ -196,17 +191,8 @@ export function NoeWorldRuntime({
   )
 
   useEffect(() => {
-    onBlocoConcluido(blocoConcluido)
-  }, [blocoConcluido, onBlocoConcluido])
-
-  useEffect(() => {
     onProgressaoChange?.(estado)
   }, [estado, onProgressaoChange])
-
-  useEffect(
-    () => () => onBlocoConcluido(false),
-    [onBlocoConcluido],
-  )
 
   return (
     <>

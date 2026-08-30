@@ -108,12 +108,10 @@ const portais = [
 
 function renderRuntime({
   onPortalAcionado = vi.fn(),
-  onBlocoConcluido = vi.fn(),
   onVedacaoSolicitada = vi.fn(),
 } = {}) {
   return {
     onPortalAcionado,
-    onBlocoConcluido,
     onVedacaoSolicitada,
     ...render(
       <NoeWorldRuntime
@@ -125,7 +123,6 @@ function renderRuntime({
         onPortalProximo={vi.fn()}
         onPortalAcionado={onPortalAcionado}
         onInteracaoProxima={vi.fn()}
-        onBlocoConcluido={onBlocoConcluido}
         onVedacaoSolicitada={onVedacaoSolicitada}
       />,
     ),
@@ -221,7 +218,7 @@ describe('NoeWorldRuntime', () => {
         ],
       },
     })
-    const { onBlocoConcluido } = renderRuntime()
+    renderRuntime()
 
     expect(screen.getByTestId('coletaveis-noe')).toHaveTextContent(
       'genesis-6-14',
@@ -241,7 +238,6 @@ describe('NoeWorldRuntime', () => {
         'estoque-mantimentos',
       ),
     )
-    expect(onBlocoConcluido).toHaveBeenLastCalledWith(true)
     expect(screen.getByTestId('coletaveis-noe')).toHaveTextContent('')
     expect(useGameStore.getState().selahAtivo).toBeNull()
   })

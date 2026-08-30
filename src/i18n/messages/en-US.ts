@@ -6,6 +6,22 @@ export const enUS = {
     'Selah — a 3D biblical journey of exploration and reflection.',
   'root.loadingLab': 'Loading laboratory…',
 
+  'scene.loading.aria': '3D scene loading',
+  'scene.loading.eyebrow': 'Before the first step',
+  'scene.loading.title': 'The world is waking up',
+  'scene.loading.description':
+    'Tracing paths, kindling the light, and preparing the garden for you.',
+  'scene.loading.progressLabel': 'World preparation',
+  'scene.loading.progressAria': '{progress}% complete',
+  'scene.loading.progress': '{progress}%',
+  'scene.loading.status': 'Gathering the details of Creation',
+  'scene.error.aria': '3D scene preparation failed',
+  'scene.error.eyebrow': 'A moment to breathe',
+  'scene.error.title': 'The garden needs another moment',
+  'scene.error.description':
+    'We could not prepare the world right now. Your settings are still safe.',
+  'scene.error.retry': 'Try again',
+
   'language.selector.label': 'Interface language',
   'language.ptBR': 'Português',
   'language.enUS': 'English',
@@ -184,8 +200,6 @@ export const enUS = {
   'selah.tts.pauseAction': 'Pause reading',
   'selah.tts.resumeAria': 'Continue reading aloud',
   'selah.tts.resumeAction': 'Continue reading',
-  'selah.tts.disclosure':
-    'AI-generated voice; if unavailable, your device voice will be used.',
   'selah.tts.fallbackStatus': 'Using this device’s voice.',
   'selah.tts.error': 'This passage could not be played.',
   'selah.quiz.continueAria': 'Continue to the question',

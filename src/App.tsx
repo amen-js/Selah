@@ -1,25 +1,53 @@
-import { useEffect, useRef, useState } from 'react'
+import { useProgress } from '@react-three/drei'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { GameCanvas } from './components/game/GameCanvas'
 import { GameOverlay } from './components/game/GameOverlay'
 import { ResponsibleOnboarding } from './components/game/ResponsibleOnboarding'
+import { SceneErrorBoundary } from './components/game/SceneErrorBoundary'
+import { SceneLoadingOverlay } from './components/game/SceneLoadingOverlay'
 import { useTranslation } from './i18n'
 import { useSelahAudio } from './hooks/useSelahAudio'
 import { selectExploracaoBloqueada, useGameStore } from './stores/gameStore'
 import './App.css'
 
-function App() {
+interface AppProps {
+  reloadPage?: () => void
+}
+
+const reloadCurrentPage = () => window.location.reload()
+
+function App({ reloadPage = reloadCurrentPage }: AppProps) {
   const { t } = useTranslation()
+  const sceneProgress = useProgress()
   const [playing, setPlaying] = useState(false)
   const [hasStarted, setHasStarted] = useState(false)
+  const [sceneContentReady, setSceneContentReady] = useState(
+    () =>
+      sceneProgress.total > 0 &&
+      !sceneProgress.active &&
+      sceneProgress.loaded >= sceneProgress.total,
+  )
+  const [sceneRenderFailed, setSceneRenderFailed] = useState(false)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const exploracaoBloqueada = useGameStore(selectExploracaoBloqueada)
   const configuracaoInicialConcluida = useGameStore(
     (state) => state.configuracaoInicialConcluida,
   )
-  const interfaceBloqueada = exploracaoBloqueada || !configuracaoInicialConcluida
+  const sceneLoadFailed = sceneProgress.errors.length > 0 || sceneRenderFailed
+  const sceneReady =
+    !sceneLoadFailed &&
+    !sceneProgress.active &&
+    sceneContentReady
+  const sceneBlocked = configuracaoInicialConcluida && !sceneReady
+  const interfaceBloqueada =
+    exploracaoBloqueada || !configuracaoInicialConcluida || sceneBlocked
   const exploracaoAtiva = playing && !interfaceBloqueada
 
   useSelahAudio()
+
+  const handleSceneReady = useCallback(() => {
+    setSceneContentReady(true)
+  }, [])
 
   useEffect(() => {
     const handlePointerLockChange = () => {
@@ -60,7 +88,7 @@ function App() {
   }, [interfaceBloqueada])
 
   const enterWorld = () => {
-    if (!configuracaoInicialConcluida) return
+    if (!configuracaoInicialConcluida || !sceneReady) return
     void canvasRef.current?.requestPointerLock()
   }
 
@@ -70,20 +98,23 @@ function App() {
         interfaceBloqueada ? ' is-overlay-active' : ''
       }`}
     >
-      <GameCanvas
-        playing={exploracaoAtiva}
-        onCanvasReady={(canvas) => {
-          canvasRef.current = canvas
-        }}
-      />
+      <SceneErrorBoundary onError={() => setSceneRenderFailed(true)}>
+        <GameCanvas
+          playing={exploracaoAtiva}
+          onSceneReady={handleSceneReady}
+          onCanvasReady={(canvas) => {
+            canvasRef.current = canvas
+          }}
+        />
+      </SceneErrorBoundary>
       <span className="camera-reticle" aria-hidden="true" />
-      {configuracaoInicialConcluida && <GameOverlay />}
+      {configuracaoInicialConcluida && sceneReady && <GameOverlay />}
 
-      {configuracaoInicialConcluida ? (
+      {configuracaoInicialConcluida && sceneReady ? (
         <section
           className="start-screen"
           aria-label={hasStarted ? t('app.paused.aria') : t('app.start.aria')}
-          aria-hidden={playing || exploracaoBloqueada}
+          aria-hidden={playing || interfaceBloqueada}
         >
           <div className="start-screen__panel">
             <div className="start-screen__brand" aria-label="Selah">
@@ -206,8 +237,16 @@ function App() {
             <small>{t('app.controls.pauseHint')}</small>
           </div>
         </section>
-      ) : (
+      ) : !configuracaoInicialConcluida ? (
         <ResponsibleOnboarding />
+      ) : null}
+
+      {configuracaoInicialConcluida && !sceneReady && (
+        <SceneLoadingOverlay
+          state={sceneLoadFailed ? 'error' : 'loading'}
+          progress={sceneProgress.progress}
+          onRetry={reloadPage}
+        />
       )}
     </main>
   )

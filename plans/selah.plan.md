@@ -275,6 +275,30 @@ flowchart TD
     Proxy --> HUD
 ```
 
+### Estrutura de pastas e divisão de responsabilidades
+
+Para reduzir conflitos entre as frentes da hackathon, a estrutura abaixo é a convenção oficial. Cada pessoa deve limitar suas alterações à sua área, salvo alinhamento explícito quando um contrato compartilhado precisar mudar.
+
+```text
+src/
+├── game/                 # Dev 1 — Canvas, jogador, física, regiões e interações 3D
+├── maps/                 # Dev 1 + Designer — layout declarativo de criação, Noé e José
+├── components/
+│   └── ui/               # Dev 3 — HUD, diálogo, quiz, diário e telas parentais
+├── stores/               # Dev 3 — contratos e estado global Zustand
+├── services/             # Dev 2 — clientes do proxy, YouVersion e TTS
+├── content/              # P.O. + Dev 2 — histórias aprovadas, passagens e quizzes fallback
+└── types/                # Contratos compartilhados entre jogo, UI e serviços
+server/
+├── routes/               # Dev 2 — endpoints de quiz, versículo e métricas
+├── services/             # Dev 2 — integrações OpenRouter e YouVersion
+└── validators/           # Dev 2 — schemas e validações etárias, bíblicas e de privacidade
+public/
+└── models/               # Designer + Dev 1 — assets 3D CC0 baixados para uso offline
+```
+
+Responsáveis principais: **Dev 1** atua em `src/game/` e `src/maps/`; **Dev 2** em `server/`, `src/services/` e, junto à P.O., `src/content/`; **Dev 3** em `src/components/ui/` e `src/stores/`; o **Designer** mantém os assets em `public/models/` e colabora nos layouts declarativos de `src/maps/`. Mudanças em `src/types/` e no contrato do store devem ser comunicadas ao time antes de serem integradas.
+
 ### Estratégia mobile e publicação em lojas — escopo opcional
 
 O projeto continua **web-first** com React, Vite e React Three Fiber; não migrar para React Native. A mesma aplicação deve aceitar teclado/mouse e touch por uma camada de controles desacoplada da movimentação do personagem.

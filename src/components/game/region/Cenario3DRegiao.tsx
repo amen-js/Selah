@@ -18,9 +18,10 @@ function Cenario3DCarregado({ cenario }: { cenario: Cenario3DMapa }) {
   useEffect(
     () => () => {
       liberarCenario3D(clone)
-      useGLTF.clear(cenario.arquivo)
+      // Keep the source asset cached: clearing it during StrictMode cleanup
+      // immediately suspends this component again and starts a reload loop.
     },
-    [cenario.arquivo, clone],
+    [clone],
   )
 
   const visual = (

@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { validarQuiz, type QuizGerado } from './validation.ts'
+import { embaralharAlternativas, validarQuiz, type QuizGerado } from './validation.ts'
 
 const quizLuz = (): QuizGerado => ({
   pergunta: 'O que aconteceu quando Deus falou?',
@@ -51,5 +51,20 @@ describe('validarQuiz', () => {
       'geral',
     )
     expect(resultado).toMatchObject({ ok: false, motivo: 'sem-suporte-na-passagem' })
+  })
+})
+
+describe('embaralharAlternativas', () => {
+  it('keeps the correct text and relabels A-D after a shuffle', () => {
+    const resultado = embaralharAlternativas(quizLuz(), () => 0)
+    expect(resultado.alternativas.map((item) => item.id)).toEqual(['A', 'B', 'C', 'D'])
+    expect(resultado.alternativas.map((item) => item.texto).sort()).toEqual(
+      quizLuz()
+        .alternativas.map((item) => item.texto)
+        .sort(),
+    )
+    const correta = resultado.alternativas.find((item) => item.id === resultado.respostaCorretaId)
+    expect(correta?.texto).toBe('Houve luz')
+    expect(resultado.respostaCorretaId).toBe('D')
   })
 })

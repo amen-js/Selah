@@ -109,6 +109,33 @@ const asString = (value: unknown): string | null =>
 const idsIguais = (value: unknown): value is AlternativaId =>
   ALTERNATIVA_IDS.includes(value as AlternativaId)
 
+export const embaralharAlternativas = (
+  quiz: QuizGerado,
+  sortear: () => number = Math.random,
+): QuizGerado => {
+  const correta = quiz.alternativas.find((item) => item.id === quiz.respostaCorretaId)
+  if (!correta) return quiz
+
+  const textos = quiz.alternativas.map((item) => item.texto)
+  for (let i = textos.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(sortear() * (i + 1))
+    const atual = textos[i]
+    const escolhido = textos[j]
+    if (atual === undefined || escolhido === undefined) continue
+    textos[i] = escolhido
+    textos[j] = atual
+  }
+
+  const alternativas = ALTERNATIVA_IDS.flatMap((id, index) => {
+    const texto = textos[index]
+    return texto ? [{ id, texto }] : []
+  })
+  const respostaCorretaId = alternativas.find((item) => item.texto === correta.texto)?.id
+  if (alternativas.length !== 4 || !respostaCorretaId) return quiz
+
+  return { ...quiz, alternativas, respostaCorretaId }
+}
+
 export const parseQuizGerado = (value: unknown): QuizGerado | null => {
   const data = asRecord(value)
   const pergunta = asString(data?.pergunta)

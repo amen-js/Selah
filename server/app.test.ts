@@ -73,10 +73,16 @@ describe('Selah API proxy', () => {
       }),
     )
 
+    const alternativas = gerado.alternativas as { id: string; texto: string }[]
+    const correta = alternativas.find((item) => item.texto === 'Houve luz')
+    const errada = alternativas.find((item) => item.texto !== 'Houve luz')
+    expect(correta?.id).toBeDefined()
+    expect(errada?.id).toBeDefined()
+
     const acerto = await app.request('/api/quiz/responder', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ quizId: gerado.id, alternativaId: 'A' }),
+      body: JSON.stringify({ quizId: gerado.id, alternativaId: correta?.id }),
     })
     expect(acerto.status).toBe(200)
     await expect(json(acerto)).resolves.toMatchObject({ acertou: true, referencia: 'Gênesis 1:3' })
@@ -84,7 +90,7 @@ describe('Selah API proxy', () => {
     const erro = await app.request('/api/quiz/responder', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ quizId: gerado.id, alternativaId: 'B' }),
+      body: JSON.stringify({ quizId: gerado.id, alternativaId: errada?.id }),
     })
     await expect(json(erro)).resolves.toMatchObject({ acertou: false })
   })

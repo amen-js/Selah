@@ -28,6 +28,10 @@ export interface SolicitacaoVedacaoNoe {
   concluir: () => void
 }
 
+export interface SolicitacaoDialogoNoe {
+  concluir: () => void
+}
+
 export interface NoeWorldRuntimeProps {
   coletaveis: readonly ColetavelMapa[]
   portais: readonly PortalMapa[]
@@ -40,6 +44,7 @@ export interface NoeWorldRuntimeProps {
   onBlocoConcluido: (concluido: boolean) => void
   onProgressaoChange?: (estado: EstadoProgressaoNoe) => void
   onVedacaoSolicitada?: (solicitacao: SolicitacaoVedacaoNoe) => void
+  onDialogoSolicitado?: (solicitacao: SolicitacaoDialogoNoe) => void
 }
 
 /**
@@ -58,6 +63,7 @@ export function NoeWorldRuntime({
   onBlocoConcluido,
   onProgressaoChange,
   onVedacaoSolicitada,
+  onDialogoSolicitado,
 }: NoeWorldRuntimeProps) {
   const { estado, emitir } = useProgressaoNoeRuntime(enabled)
   const selahsConcluidos = useGameStore((state) => state.selahsConcluidos)
@@ -113,6 +119,14 @@ export function NoeWorldRuntime({
             return
           }
 
+          if (
+            tarefaProxima.acaoId === 'noe.chamado.confirmado' &&
+            onDialogoSolicitado
+          ) {
+            onDialogoSolicitado({ concluir: () => emitir(evento) })
+            return
+          }
+
           emitir(evento)
         },
       }
@@ -153,6 +167,7 @@ export function NoeWorldRuntime({
     coletavelProximo,
     emitir,
     onPortalAcionado,
+    onDialogoSolicitado,
     onVedacaoSolicitada,
     portalAcionavel,
     requisitoSelah,

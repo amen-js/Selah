@@ -1140,6 +1140,145 @@ kbd {
   cursor: not-allowed;
 }
 
+.noe-mission-dialog {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: end center;
+  padding: clamp(18px, 5vw, 56px);
+  color: #fff8e8;
+  background: linear-gradient(180deg, transparent 24%, rgb(8 20 15 / 72%));
+  pointer-events: auto;
+}
+
+.noe-mission-dialog__panel {
+  display: grid;
+  grid-template-columns: minmax(96px, 0.28fr) minmax(0, 1fr);
+  gap: clamp(18px, 4vw, 34px);
+  width: min(820px, 100%);
+  padding: clamp(20px, 4vw, 34px);
+  background: linear-gradient(145deg, rgb(39 57 43 / 98%), rgb(16 32 25 / 98%));
+  border: 1px solid rgb(244 201 93 / 38%);
+  border-radius: 24px;
+  box-shadow: 0 24px 70px rgb(0 0 0 / 44%);
+}
+
+.noe-mission-dialog__portrait {
+  position: relative;
+  align-self: center;
+  aspect-ratio: 0.8;
+  min-height: 170px;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 28%, #e2aa78 0 20%, transparent 21%);
+  border-radius: 18px;
+}
+
+.noe-mission-dialog__head,
+.noe-mission-dialog__beard,
+.noe-mission-dialog__robe {
+  position: absolute;
+  left: 50%;
+  display: block;
+  transform: translateX(-50%);
+}
+
+.noe-mission-dialog__head {
+  top: 15%;
+  width: 45%;
+  aspect-ratio: 0.82;
+  background: #dca16e;
+  border-radius: 48% 48% 45% 45%;
+}
+
+.noe-mission-dialog__beard {
+  top: 35%;
+  z-index: 2;
+  width: 48%;
+  height: 32%;
+  background: #ddd0b8;
+  border-radius: 24% 24% 55% 55%;
+  clip-path: polygon(0 0, 100% 0, 82% 100%, 50% 84%, 18% 100%);
+}
+
+.noe-mission-dialog__robe {
+  bottom: -15%;
+  width: 86%;
+  height: 62%;
+  background: linear-gradient(90deg, #7e5a41, #a67b57 50%, #755039);
+  border-radius: 48% 48% 0 0;
+}
+
+.noe-mission-dialog__content {
+  display: grid;
+  align-content: center;
+  gap: 10px;
+}
+
+.noe-mission-dialog__eyebrow {
+  color: #f4c95d;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.noe-mission-dialog h2 {
+  margin: 0;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(1.45rem, 3.5vw, 2.2rem);
+  font-weight: 500;
+}
+
+.noe-mission-dialog p {
+  min-height: 3.2em;
+  margin: 0;
+  color: rgb(255 248 232 / 86%);
+  font-size: clamp(1rem, 2.3vw, 1.18rem);
+  line-height: 1.55;
+}
+
+.noe-mission-dialog__steps {
+  display: flex;
+  gap: 7px;
+  margin-block: 4px;
+}
+
+.noe-mission-dialog__steps span {
+  width: 22px;
+  height: 4px;
+  background: rgb(255 248 232 / 18%);
+  border-radius: 999px;
+}
+
+.noe-mission-dialog__steps .is-active {
+  background: #f4c95d;
+}
+
+.noe-mission-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.noe-mission-dialog__actions button {
+  min-height: 44px;
+  padding: 10px 16px;
+  color: #fff8e8;
+  font: inherit;
+  font-weight: 750;
+  background: transparent;
+  border: 1px solid rgb(255 248 232 / 26%);
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.noe-mission-dialog__actions .is-primary {
+  color: #173c2d;
+  background: #f4c95d;
+  border-color: #ffe6a0;
+}
+
 @media (max-width: 560px) {
   .noe-sealing__actions {
     flex-direction: column-reverse;
@@ -1147,6 +1286,18 @@ kbd {
 
   .noe-sealing__actions button {
     width: 100%;
+  }
+
+  .noe-mission-dialog__panel {
+    grid-template-columns: 1fr;
+  }
+
+  .noe-mission-dialog__portrait {
+    display: none;
+  }
+
+  .noe-mission-dialog__actions {
+    flex-direction: column-reverse;
   }
 }
 

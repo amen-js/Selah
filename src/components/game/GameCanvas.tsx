@@ -62,11 +62,13 @@ import {
   type PortalMapa,
 } from './portals'
 import {
+  DialogoMissaoNoe,
   NoeInteractionPrompt,
   NoeSliceStatus,
   NoeWorldRuntime,
   VedacaoBetume,
   type SolicitacaoVedacaoNoe,
+  type SolicitacaoDialogoNoe,
   type TipoInteracaoNoe,
 } from './noe'
 import { RiggedPlayer } from './player'
@@ -191,6 +193,7 @@ type WorldProps = {
   onInteracaoNoeProxima: (tipo: TipoInteracaoNoe | null) => void
   onBlocoNoeConcluido: (concluido: boolean) => void
   onVedacaoNoeSolicitada: (solicitacao: SolicitacaoVedacaoNoe) => void
+  onDialogoNoeSolicitado: (solicitacao: SolicitacaoDialogoNoe) => void
 }
 
 function World({
@@ -206,6 +209,7 @@ function World({
   onInteracaoNoeProxima,
   onBlocoNoeConcluido,
   onVedacaoNoeSolicitada,
+  onDialogoNoeSolicitado,
 }: WorldProps) {
   const reducedMotion = useReducedMotionPreference()
   const posicaoJogadorRef = useRef<PosicaoJogador | null>(null)
@@ -370,6 +374,7 @@ function World({
           onInteracaoProxima={onInteracaoNoeProxima}
           onBlocoConcluido={onBlocoNoeConcluido}
           onVedacaoSolicitada={onVedacaoNoeSolicitada}
+          onDialogoSolicitado={onDialogoNoeSolicitado}
         />
       ) : (
         <ColetaveisRegiao
@@ -497,6 +502,8 @@ export function GameCanvas({
   const [blocoNoeConcluido, setBlocoNoeConcluido] = useState(false)
   const [vedacaoNoe, setVedacaoNoe] =
     useState<SolicitacaoVedacaoNoe | null>(null)
+  const [dialogoNoe, setDialogoNoe] =
+    useState<SolicitacaoDialogoNoe | null>(null)
   const [faseTransicao, setFaseTransicao] =
     useState<FasePortalTransicao>('inativo')
   const [destinoTransicao, setDestinoTransicao] =
@@ -506,11 +513,22 @@ export function GameCanvas({
   const temporizadoresRef = useRef<number[]>([])
   const canvasElementRef = useRef<HTMLCanvasElement | null>(null)
   const mundoAtivo =
-    playing && faseTransicao === 'inativo' && vedacaoNoe === null
+    playing &&
+    faseTransicao === 'inativo' &&
+    vedacaoNoe === null &&
+    dialogoNoe === null
 
   const solicitarVedacaoNoe = useCallback(
     (solicitacao: SolicitacaoVedacaoNoe) => {
       setVedacaoNoe(solicitacao)
+      onAtividadeNoeChange?.(true)
+    },
+    [onAtividadeNoeChange],
+  )
+
+  const solicitarDialogoNoe = useCallback(
+    (solicitacao: SolicitacaoDialogoNoe) => {
+      setDialogoNoe(solicitacao)
       onAtividadeNoeChange?.(true)
     },
     [onAtividadeNoeChange],
@@ -532,6 +550,24 @@ export function GameCanvas({
       }
     },
     [onAtividadeNoeChange, vedacaoNoe],
+  )
+
+  const encerrarDialogoNoe = useCallback(
+    (concluir: boolean) => {
+      if (concluir) dialogoNoe?.concluir()
+      setDialogoNoe(null)
+      onAtividadeNoeChange?.(false)
+
+      const canvas = canvasElementRef.current
+      if (!canvas) return
+      try {
+        const resultado = canvas.requestPointerLock()
+        if (resultado instanceof Promise) void resultado.catch(() => undefined)
+      } catch {
+        // Browsers without Pointer Lock return to the regular paused screen.
+      }
+    },
+    [dialogoNoe, onAtividadeNoeChange],
   )
 
   const limparTemporizadores = useCallback(() => {
@@ -642,6 +678,7 @@ export function GameCanvas({
                 onInteracaoNoeProxima={setInteracaoNoeProxima}
                 onBlocoNoeConcluido={setBlocoNoeConcluido}
                 onVedacaoNoeSolicitada={solicitarVedacaoNoe}
+                onDialogoNoeSolicitado={solicitarDialogoNoe}
               />
             ) : (
               <RegionFallback />
@@ -680,6 +717,12 @@ export function GameCanvas({
           unidadeId={vedacaoNoe.unidadeId}
           onConcluir={() => encerrarVedacaoNoe(true)}
           onCancelar={() => encerrarVedacaoNoe(false)}
+        />
+      )}
+      {dialogoNoe && (
+        <DialogoMissaoNoe
+          onConcluir={() => encerrarDialogoNoe(true)}
+          onCancelar={() => encerrarDialogoNoe(false)}
         />
       )}
     </KeyboardControls>

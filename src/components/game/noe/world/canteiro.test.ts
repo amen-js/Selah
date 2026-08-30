@@ -6,13 +6,16 @@ import {
   descreverTarefasCanteiroNoe,
   estruturaArcaCanteiroNoe,
   estruturaRampaCanteiroNoe,
+  idsFendasCanteiroNoe,
   instanciasRelevoValeNoe,
+  obterEstadoVisualCanteiroNoe,
   obterTarefasDisponiveisCanteiroNoe,
   resolverCandidatoTarefaCanteiroNoe,
   selecionarInstanciasAssetsCanteiroNoe,
   tarefasCanteiroNoe,
 } from './canteiro'
 import { obterAssetNoe } from './assets'
+import { instanciasBosqueGoferNoe, posicoesFamiliaNoe } from './cenografia'
 
 const madeirasConcluidas: readonly ProgressoAcaoNoe[] = [
   {
@@ -116,6 +119,31 @@ describe('canteiro navegável de Noé', () => {
       expect(Math.abs(instancia.posicao[0]) - meiaLargura).toBeGreaterThan(30)
       expect(instancia.unidadeId).toBeUndefined()
     }
+  })
+
+  it('cerca o vale com árvores de gôfer sem ocupar a rota central', () => {
+    expect(instanciasBosqueGoferNoe).toHaveLength(16)
+    expect(
+      instanciasBosqueGoferNoe.every(([x]) => Math.abs(x) >= 24),
+    ).toBe(true)
+    expect(
+      instanciasBosqueGoferNoe.every(([, , , , escala]) => escala >= 4),
+    ).toBe(true)
+  })
+
+  it('mantém Noé e dois filhos ao alcance do chamado no canteiro', () => {
+    expect(posicoesFamiliaNoe.map(({ id }) => id)).toEqual([
+      'noe',
+      'sem',
+      'jafe',
+    ])
+    const chamado = tarefasCanteiroNoe.find(
+      ({ unidadeId }) => unidadeId === 'chamado-noe',
+    )
+    const noe = posicoesFamiliaNoe.find(({ id }) => id === 'noe')
+    expect(chamado?.posicao).toEqual([-10.5, 0.9, 9.5])
+    expect(noe?.posicao[0]).toBe(chamado?.posicao[0])
+    expect(noe?.posicao[2]).toBe(chamado?.posicao[2])
   })
 
   it('espelha exatamente as unidades allowlisted de M1 e M2', () => {
@@ -247,5 +275,39 @@ describe('canteiro navegável de Noé', () => {
     expect(
       depoisDoCanteiro.some(({ id }) => id === 'm2-madeira-ambiente'),
     ).toBe(true)
+  })
+
+  it('projeta rampa quebrada, reparo e betume persistente pelo checkpoint', () => {
+    expect(obterEstadoVisualCanteiroNoe('chamado-canteiro', [])).toEqual({
+      rampa: 'quebrada',
+      fendasVedadas: [],
+      familiaNoCanteiro: true,
+    })
+    expect(
+      obterEstadoVisualCanteiroNoe('coleta-vedacao', madeirasConcluidas),
+    ).toMatchObject({ rampa: 'quebrada', fendasVedadas: [] })
+    expect(
+      obterEstadoVisualCanteiroNoe('coleta-vedacao', [
+        ...rampaConcluida,
+        {
+          acaoId: 'noe.betume.aplicado',
+          unidadesConcluidas: ['fenda-casco-1', 'fenda-casco-3'],
+        },
+      ]),
+    ).toEqual({
+      rampa: 'reparada',
+      fendasVedadas: ['fenda-casco-1', 'fenda-casco-3'],
+      familiaNoCanteiro: true,
+    })
+
+    const depoisDoM2 = obterEstadoVisualCanteiroNoe(
+      'estoque-mantimentos',
+      [],
+    )
+    expect(depoisDoM2).toEqual({
+      rampa: 'reparada',
+      fendasVedadas: idsFendasCanteiroNoe,
+      familiaNoCanteiro: false,
+    })
   })
 })

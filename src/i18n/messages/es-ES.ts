@@ -153,6 +153,18 @@ export const esES = {
   'noe.sealing.cancel': 'Volver al mundo',
   'noe.sealing.keepPainting': 'Sigue pincelando',
   'noe.sealing.complete': 'Terminar sellado',
+  'noe.mission.eyebrow': 'El llamado y el astillero',
+  'noe.mission.noah': 'Noé',
+  'noe.mission.sons': 'Los hijos de Noé',
+  'noe.mission.line1':
+    'Dios nos confió una gran misión: preparar un refugio seguro para la vida.',
+  'noe.mission.line2':
+    'Estamos construyendo juntos. Cada tabla y cada cuidado forman parte de este trabajo.',
+  'noe.mission.line3':
+    'Conoce el astillero con calma. Después podrás ayudarnos a terminar el Arca.',
+  'noe.mission.later': 'Escuchar después',
+  'noe.mission.continue': 'Continuar',
+  'noe.mission.start': 'Comenzar la misión',
 
   'portal.prompt.aria': 'Portal a {region}',
   'portal.prompt.eyebrow': 'Portal',

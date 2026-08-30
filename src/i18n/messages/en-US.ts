@@ -153,6 +153,18 @@ export const enUS = {
   'noe.sealing.cancel': 'Return to the world',
   'noe.sealing.keepPainting': 'Keep brushing',
   'noe.sealing.complete': 'Finish sealing',
+  'noe.mission.eyebrow': 'The call and the worksite',
+  'noe.mission.noah': 'Noah',
+  'noe.mission.sons': "Noah's sons",
+  'noe.mission.line1':
+    'God entrusted us with a great mission: prepare a safe shelter for life.',
+  'noe.mission.line2':
+    'We are building it together. Every plank and every act of care belongs to this work.',
+  'noe.mission.line3':
+    'Explore the worksite calmly. Then you can help us finish the Ark.',
+  'noe.mission.later': 'Listen later',
+  'noe.mission.continue': 'Continue',
+  'noe.mission.start': 'Begin the mission',
 
   'portal.prompt.aria': 'Portal to {region}',
   'portal.prompt.eyebrow': 'Portal',

@@ -1,5 +1,6 @@
 export * from './interacao'
 export * from './InteracaoNoeRuntime'
+export * from './DialogoMissaoNoe'
 export * from './NoeInteractionPrompt'
 export * from './NoeSliceStatus'
 export * from './NoeWorldRuntime'

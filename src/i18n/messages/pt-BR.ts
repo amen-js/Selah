@@ -151,6 +151,18 @@ export const ptBR = {
   'noe.sealing.cancel': 'Voltar ao mundo',
   'noe.sealing.keepPainting': 'Continue pincelando',
   'noe.sealing.complete': 'Finalizar vedação',
+  'noe.mission.eyebrow': 'O chamado e o canteiro',
+  'noe.mission.noah': 'Noé',
+  'noe.mission.sons': 'Os filhos de Noé',
+  'noe.mission.line1':
+    'Deus nos confiou uma grande missão: preparar um abrigo seguro para a vida.',
+  'noe.mission.line2':
+    'Estamos construindo juntos. Cada tábua e cada cuidado fazem parte desse trabalho.',
+  'noe.mission.line3':
+    'Conheça o canteiro com calma. Depois, você poderá nos ajudar a terminar a Arca.',
+  'noe.mission.later': 'Ouvir depois',
+  'noe.mission.continue': 'Continuar',
+  'noe.mission.start': 'Começar a missão',
 
   'portal.prompt.aria': 'Portal para {region}',
   'portal.prompt.eyebrow': 'Portal',

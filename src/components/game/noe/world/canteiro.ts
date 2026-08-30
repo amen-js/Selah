@@ -16,6 +16,20 @@ export interface ColisorCuboidCanteiroNoe {
   rotacao?: Ponto3D
 }
 
+export const idsFendasCanteiroNoe = [
+  'fenda-casco-1',
+  'fenda-casco-2',
+  'fenda-casco-3',
+] as const
+
+export type FendaCanteiroNoeId = (typeof idsFendasCanteiroNoe)[number]
+
+export interface EstadoVisualCanteiroNoe {
+  rampa: 'quebrada' | 'reparada'
+  fendasVedadas: readonly FendaCanteiroNoeId[]
+  familiaNoCanteiro: boolean
+}
+
 export const estruturaArcaCanteiroNoe = {
   posicao: [0, 0, -16] as Ponto3D,
   largura: 12,
@@ -345,6 +359,33 @@ function unidadesConcluidas(
       unidadesConcluidas.map((unidadeId) => unidadeId.trim()),
     ),
   )
+}
+
+/**
+ * Projects the durable M1/M2 checkpoint into scene-only state. Progress for a
+ * completed moment is intentionally reconstructed from the canonical moment
+ * order because the runtime clears `progressoMomentoAtual` when it advances.
+ */
+export function obterEstadoVisualCanteiroNoe(
+  momentoAtualId: MomentoNoeId,
+  progressoMomentoAtual: readonly ProgressoAcaoNoe[],
+): EstadoVisualCanteiroNoe {
+  const indiceAtual = indiceMomentoNoe(momentoAtualId)
+  const indiceM1 = indiceMomentoNoe('chamado-canteiro')
+  const indiceM2 = indiceMomentoNoe('coleta-vedacao')
+  const concluidas = unidadesConcluidas(progressoMomentoAtual)
+  const m2Concluido = indiceAtual > indiceM2
+  const rampaReparada =
+    m2Concluido ||
+    (indiceAtual === indiceM2 && concluidas.has('rampa-principal'))
+
+  return {
+    rampa: rampaReparada ? 'reparada' : 'quebrada',
+    fendasVedadas: idsFendasCanteiroNoe.filter(
+      (fendaId) => m2Concluido || concluidas.has(fendaId),
+    ),
+    familiaNoCanteiro: indiceAtual >= indiceM1 && indiceAtual <= indiceM2,
+  }
 }
 
 export function descreverTarefasCanteiroNoe(

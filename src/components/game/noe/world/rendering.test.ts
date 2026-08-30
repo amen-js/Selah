@@ -33,6 +33,26 @@ describe('contratos de renderização do canteiro de Noé', () => {
     expect(fonte).not.toMatch(
       /trimesh|convexHull|colliders=["'{](?:hull|cuboid)/i,
     )
+    expect(fonte).toContain("if (!reparada) return <RampaQuebrada />")
+    expect(fonte).toContain('name="rampa-arca-reparada"')
+    expect(fonte).toContain('name="selos-betume-persistentes"')
+  })
+
+  it('usa família procedural apropriada e bosque CC0 sem colisão automática', () => {
+    const familia = ler('FamiliaNoe.tsx')
+    const bosque = ler('BosqueGoferNoe.tsx')
+    const cenografia = ler('cenografia.ts')
+
+    expect(cenografia).toContain("{ id: 'noe'")
+    expect(cenografia).toContain("{ id: 'sem'")
+    expect(cenografia).toContain("{ id: 'jafe'")
+    expect(familia).toContain('export function FamiliaNoe')
+    expect(familia).not.toMatch(/RigidBody|Collider/)
+    expect(bosque).toContain(
+      '/models/creation/shared/kenney/tree_default.glb',
+    )
+    expect(bosque).toContain("colisor: 'nenhum'")
+    expect(bosque).not.toMatch(/RigidBody|Collider/)
   })
 
   it('detecta proximidade sem capturar teclado, store ou progressão', () => {

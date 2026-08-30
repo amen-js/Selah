@@ -7,6 +7,8 @@ import type { CampoAnimaisNoeProps } from '../world/CampoAnimaisNoe'
 import type { HabitatsArcaNoeProps } from '../world/HabitatsArcaNoe'
 import type { MantimentosArcaNoeProps } from '../world/MantimentosArcaNoe'
 import type { AbrigoTempestadeNoeProps } from '../world/AbrigoTempestadeNoe'
+import type { NovaTerraNoeProps } from '../world/NovaTerraNoe'
+import type { PombaEsperancaNoeProps } from '../world/PombaEsperancaNoe'
 import { NoeWorldRuntime } from './NoeWorldRuntime'
 
 vi.mock('../world', () => ({
@@ -168,7 +170,71 @@ vi.mock('../world', () => ({
           })
         }
       >
-        acomodar elefantes
+      acomodar elefantes
+      </button>
+    ) : null,
+  PombaEsperancaNoe: ({
+    estado,
+    onCandidatoChange,
+    onConcluirUnidade,
+  }: PombaEsperancaNoeProps) =>
+    estado.momentoAtualId === 'retorno-pomba' ? (
+      <button
+        type="button"
+        onClick={() =>
+          onCandidatoChange?.({
+            tipo: 'tarefa',
+            id: 'pomba-envio',
+            acaoId: 'noe.pomba.enviada',
+            unidadeId: 'envio-janela-superior',
+            posicao: [0, 0, 0],
+            raio: 2,
+            prioridade: 380,
+            distancia: 0,
+            etapa: 1,
+            ordem: 1,
+            acionar: () =>
+              onConcluirUnidade(
+                'noe.pomba.enviada',
+                'envio-janela-superior',
+              ),
+          })
+        }
+      >
+        enviar pomba
+      </button>
+    ) : null,
+  NovaTerraNoe: ({
+    estado,
+    onCandidatoChange,
+    onConcluirUnidade,
+  }: NovaTerraNoeProps) =>
+    estado.momentoAtualId === 'nova-terra-arco-iris' ? (
+      <button
+        type="button"
+        onClick={() =>
+          onCandidatoChange?.({
+            tipo: 'tarefa',
+            id: 'desembarque-aves',
+            acaoId: 'noe.desembarque.aves',
+            unidadeId: 'aves-desembarcadas-em-grupo',
+            posicao: [0, 0, 0],
+            posicaoDestino: [0, 0, 1],
+            raio: 2,
+            prioridade: 390,
+            distancia: 0,
+            etapa: 1,
+            ordem: 1,
+            tipoVisual: 'aves',
+            acionar: () =>
+              onConcluirUnidade(
+                'noe.desembarque.aves',
+                'aves-desembarcadas-em-grupo',
+              ),
+          })
+        }
+      >
+        desembarcar aves
       </button>
     ) : null,
 }))
@@ -481,6 +547,75 @@ describe('NoeWorldRuntime', () => {
           {
             acaoId: 'noe.abrigo.chamado-ouvido',
             unidadesConcluidas: ['chamado-final-noe'],
+          },
+        ],
+      ),
+    )
+  })
+
+  it('encaminha o envio da pomba em M8 pelo árbitro único', async () => {
+    useGameStore.setState({
+      checkpointNoe: {
+        versao: 1,
+        momentosConcluidos: [
+          'chamado-canteiro',
+          'coleta-vedacao',
+          'estoque-mantimentos',
+          'conducao-animais',
+          'acomodacao-animais',
+          'fechamento-porta',
+          'refugio-tempestade',
+        ],
+        progressoMomentoAtual: [],
+      },
+    })
+    renderRuntime()
+
+    fireEvent.click(screen.getByRole('button', { name: 'enviar pomba' }))
+    fireEvent.keyDown(window, { code: 'KeyE' })
+
+    await waitFor(() =>
+      expect(useGameStore.getState().checkpointNoe?.progressoMomentoAtual).toEqual(
+        [
+          {
+            acaoId: 'noe.pomba.enviada',
+            unidadesConcluidas: ['envio-janela-superior'],
+          },
+        ],
+      ),
+    )
+  })
+
+  it('encaminha o desembarque em M9 pelo árbitro único', async () => {
+    useGameStore.setState({
+      checkpointNoe: {
+        versao: 1,
+        momentosConcluidos: [
+          'chamado-canteiro',
+          'coleta-vedacao',
+          'estoque-mantimentos',
+          'conducao-animais',
+          'acomodacao-animais',
+          'fechamento-porta',
+          'refugio-tempestade',
+          'retorno-pomba',
+        ],
+        progressoMomentoAtual: [],
+      },
+    })
+    renderRuntime()
+
+    fireEvent.click(
+      screen.getByRole('button', { name: 'desembarcar aves' }),
+    )
+    fireEvent.keyDown(window, { code: 'KeyE' })
+
+    await waitFor(() =>
+      expect(useGameStore.getState().checkpointNoe?.progressoMomentoAtual).toEqual(
+        [
+          {
+            acaoId: 'noe.desembarque.aves',
+            unidadesConcluidas: ['aves-desembarcadas-em-grupo'],
           },
         ],
       ),

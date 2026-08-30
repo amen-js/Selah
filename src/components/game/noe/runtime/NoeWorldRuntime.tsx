@@ -14,10 +14,14 @@ import {
   type CandidatoAbrigoTempestadeNoe,
   type CandidatoCampoAnimaisNoe,
   type CandidatoHabitatNoe,
+  type CandidatoNovaTerraNoe,
+  type CandidatoPombaEsperancaNoe,
   type CandidatoTarefaNoe as CandidatoTarefaCanteiroNoe,
   HabitatsArcaNoe,
   MantimentosArcaNoe,
   type CandidatoMantimentoNoe,
+  NovaTerraNoe,
+  PombaEsperancaNoe,
 } from '../world'
 import {
   obterRequisitoSelahFinalNoe,
@@ -84,6 +88,10 @@ export function NoeWorldRuntime({
     useState<CandidatoHabitatNoe | null>(null)
   const [abrigoProximo, setAbrigoProximo] =
     useState<CandidatoAbrigoTempestadeNoe | null>(null)
+  const [pombaProxima, setPombaProxima] =
+    useState<CandidatoPombaEsperancaNoe | null>(null)
+  const [novaTerraProxima, setNovaTerraProxima] =
+    useState<CandidatoNovaTerraNoe | null>(null)
   const [coletavelProximo, setColetavelProximo] =
     useState<ColetavelMapa | null>(null)
   const [portalAcionavel, setPortalAcionavel] = useState<PortalMapa | null>(null)
@@ -192,6 +200,28 @@ export function NoeWorldRuntime({
       })
     }
 
+    if (pombaProxima) {
+      proximos.push({
+        tipo: 'tarefa',
+        id: pombaProxima.id,
+        acaoId: pombaProxima.acaoId,
+        unidadeId: pombaProxima.unidadeId,
+        distancia: pombaProxima.distancia,
+        acionar: pombaProxima.acionar,
+      })
+    }
+
+    if (novaTerraProxima) {
+      proximos.push({
+        tipo: 'tarefa',
+        id: novaTerraProxima.id,
+        acaoId: novaTerraProxima.acaoId,
+        unidadeId: novaTerraProxima.unidadeId,
+        distancia: novaTerraProxima.distancia,
+        acionar: novaTerraProxima.acionar,
+      })
+    }
+
     if (
       coletavelProximo &&
       requisitoSelah &&
@@ -229,10 +259,12 @@ export function NoeWorldRuntime({
     grupoAnimalProximo,
     habitatProximo,
     mantimentoProximo,
+    novaTerraProxima,
     onPortalAcionado,
     onDialogoSolicitado,
     onVedacaoSolicitada,
     portalAcionavel,
+    pombaProxima,
     requisitoSelah,
     selahsConcluidos,
     tarefaProxima,
@@ -306,6 +338,22 @@ export function NoeWorldRuntime({
         enabled={enabled}
         reducedMotion={reducedMotion}
         onCandidatoChange={setAbrigoProximo}
+        onConcluirUnidade={concluirUnidade}
+      />
+      <PombaEsperancaNoe
+        estado={estado}
+        playerRef={posicaoJogadorRef}
+        enabled={enabled}
+        reducedMotion={reducedMotion}
+        onCandidatoChange={setPombaProxima}
+        onConcluirUnidade={concluirUnidade}
+      />
+      <NovaTerraNoe
+        estado={estado}
+        playerRef={posicaoJogadorRef}
+        enabled={enabled}
+        reducedMotion={reducedMotion}
+        onCandidatoChange={setNovaTerraProxima}
         onConcluirUnidade={concluirUnidade}
       />
       <ColetaveisRegiao

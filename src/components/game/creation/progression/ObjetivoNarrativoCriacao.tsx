@@ -10,6 +10,7 @@ export interface ObjetivoNarrativoCriacaoProps {
   momentoId: MomentoCriacaoId
   enabled: boolean
   jornadaConcluida?: boolean
+  reducedMotion?: boolean
 }
 
 /** A small in-world beacon for narrative zones; it has no collider or UI state. */
@@ -17,6 +18,7 @@ export function ObjetivoNarrativoCriacao({
   momentoId,
   enabled,
   jornadaConcluida = false,
+  reducedMotion = false,
 }: ObjetivoNarrativoCriacaoProps) {
   const grupoRef = useRef<Group>(null)
   const tempoRef = useRef(0)
@@ -28,6 +30,13 @@ export function ObjetivoNarrativoCriacao({
   useFrame((_, delta) => {
     const grupo = grupoRef.current
     if (!grupo || !enabled || !objetivo) return
+
+    if (reducedMotion) {
+      grupo.rotation.y = 0
+      grupo.position.y = objetivo.posicao[1] + 0.08
+      grupo.scale.setScalar(1)
+      return
+    }
 
     tempoRef.current += delta
     grupo.rotation.y += delta * 0.7

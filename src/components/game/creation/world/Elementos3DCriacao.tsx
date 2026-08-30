@@ -11,6 +11,7 @@ import {
   type InstanciaAssetCriacao,
 } from './elementos'
 import { ModeloPersonagemCriacao } from './ModeloPersonagemCriacao'
+import { DetalhesNarrativosCriacao } from './DetalhesNarrativosCriacao'
 
 function escalaVetor(escala: EscalaInstancia): Ponto3D {
   return typeof escala === 'number'
@@ -33,7 +34,13 @@ function ModeloAssetCriacao({
   )
 }
 
-function InstanciaAsset({ instancia }: { instancia: InstanciaAssetCriacao }) {
+function InstanciaAsset({
+  instancia,
+  reducedMotion,
+}: {
+  instancia: InstanciaAssetCriacao
+  reducedMotion: boolean
+}) {
   const entrada = obterManifestoAssetCriacao(instancia.assetId)
   if (!entrada) return null
 
@@ -44,6 +51,7 @@ function InstanciaAsset({ instancia }: { instancia: InstanciaAssetCriacao }) {
           arquivo={entrada.arquivo}
           animacao={instancia.animacao}
           escala={instancia.escala}
+          reducedMotion={reducedMotion}
         />
       ) : (
         <ModeloAssetCriacao entrada={entrada} escala={instancia.escala} />
@@ -81,7 +89,13 @@ function InstanciaAsset({ instancia }: { instancia: InstanciaAssetCriacao }) {
 }
 
 /** Mounts discovered GLBs on demand without blocking play with speculative loads. */
-export function Elementos3DCriacao({ momentoId }: { momentoId: MomentoCriacaoId }) {
+export function Elementos3DCriacao({
+  momentoId,
+  reducedMotion = false,
+}: {
+  momentoId: MomentoCriacaoId
+  reducedMotion?: boolean
+}) {
   const visiveis = useMemo(
     () => obterInstanciasAssetsCriacaoVisiveis(momentoId),
     [momentoId],
@@ -90,8 +104,16 @@ export function Elementos3DCriacao({ momentoId }: { momentoId: MomentoCriacaoId 
   return (
     <group name="assets-criacao">
       {visiveis.map((instancia) => (
-        <InstanciaAsset key={instancia.id} instancia={instancia} />
+        <InstanciaAsset
+          key={instancia.id}
+          instancia={instancia}
+          reducedMotion={reducedMotion}
+        />
       ))}
+      <DetalhesNarrativosCriacao
+        momentoId={momentoId}
+        reducedMotion={reducedMotion}
+      />
     </group>
   )
 }

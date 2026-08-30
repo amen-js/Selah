@@ -21,6 +21,7 @@ import {
 } from 'react'
 import { Color } from 'three'
 import { portaisPorRegiao } from '../../mapas/portais'
+import { useReducedMotionPreference } from '../../hooks/useReducedMotionPreference'
 import { obterMapaRegiao } from '../../mapas/regioes'
 import type { ColetavelMapa, MapaRegiao } from '../../mapas/types'
 import { useGameStore } from '../../stores/gameStore'
@@ -192,6 +193,7 @@ function World({
   onInatividadeCriacaoChange,
   onInteracaoCriacaoProxima,
 }: WorldProps) {
+  const reducedMotion = useReducedMotionPreference()
   const posicaoJogadorRef = useRef<PosicaoJogador | null>(null)
   const gatilhoSelah = useGameStore((state) => state.selahAtivo?.gatilho ?? null)
   const pausaParentalAtiva = useGameStore((state) => state.pausaParentalAtiva)
@@ -334,6 +336,7 @@ function World({
         coletaveis={coletaveisDisponiveis}
         posicaoJogadorRef={posicaoJogadorRef}
         enabled={playing}
+        reducedMotion={reducedMotion}
         interacaoExplicita={regiao === 'criacao'}
         bloquearPassagensRespondidas={regiao !== 'criacao'}
         onColetavelProximo={
@@ -342,12 +345,19 @@ function World({
       />
       {regiao === 'criacao' && (
         <>
-          <EfeitosCriacao momentoId={momentoCriacaoId} />
-          <Elementos3DCriacao momentoId={momentoCriacaoId} />
+          <EfeitosCriacao
+            momentoId={momentoCriacaoId}
+            reducedMotion={reducedMotion}
+          />
+          <Elementos3DCriacao
+            momentoId={momentoCriacaoId}
+            reducedMotion={reducedMotion}
+          />
           <ObjetivoNarrativoCriacao
             momentoId={momentoCriacaoId}
             enabled={playing && !estadoCriacao.concluida}
             jornadaConcluida={estadoCriacao.concluida}
+            reducedMotion={reducedMotion}
           />
           <ProgressaoCriacaoRuntime
             posicaoJogadorRef={posicaoJogadorRef}
@@ -365,6 +375,7 @@ function World({
           playing &&
           !(regiao === 'criacao' && interacaoCriacaoLocal !== null)
         }
+        reducedMotion={reducedMotion}
         onPortalProximo={onPortalProximo}
         onPortalAcionado={onPortalAcionado}
       />

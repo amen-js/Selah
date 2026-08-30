@@ -161,6 +161,25 @@ describe('ColetaveisRegiao', () => {
     window.removeEventListener('keydown', onPortalAcionado)
   })
 
+  it('não captura Enter de um controle do HUD', () => {
+    render(
+      <ColetaveisRegiao
+        coletaveis={[coletaveis[1]]}
+        posicaoJogadorRef={posicaoJogadorRef}
+        enabled
+        interacaoExplicita
+      />,
+    )
+    const botaoHud = document.createElement('button')
+    document.body.append(botaoHud)
+
+    act(executarFrameDeInteracao)
+    fireEvent.keyDown(botaoHud, { key: 'Enter' })
+
+    expect(useGameStore.getState().selahAtivo).toBeNull()
+    botaoHud.remove()
+  })
+
   it('rearma cancelamento só depois de sair e não reabre Selah concluído', () => {
     render(
       <ColetaveisRegiao

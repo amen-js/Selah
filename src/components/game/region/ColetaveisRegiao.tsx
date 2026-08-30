@@ -27,18 +27,21 @@ export type ColetaveisRegiaoProps = {
   bloquearPassagensRespondidas?: boolean
   /** Notifica somente o coletável acionável mais próximo para um prompt externo. */
   onColetavelProximo?: (coletavel: ColetavelMapa | null) => void
+  reducedMotion?: boolean
 }
 
 type ColetavelRegiaoProps = {
   coletavel: ColetavelMapa
   enabled: boolean
   indice: number
+  reducedMotion: boolean
 }
 
 function ColetavelRegiao({
   coletavel,
   enabled,
   indice,
+  reducedMotion,
 }: ColetavelRegiaoProps) {
   const grupoRef = useRef<Group>(null)
   const tempoAnimadoRef = useRef(0)
@@ -52,6 +55,11 @@ function ColetavelRegiao({
   useFrame((_, delta) => {
     const grupo = grupoRef.current
     if (grupo && enabled) {
+      if (reducedMotion) {
+        grupo.rotation.y = 0
+        grupo.position.y = posicao[1]
+        return
+      }
       tempoAnimadoRef.current += delta
       grupo.rotation.y += delta * 1.8
       grupo.position.y =
@@ -88,6 +96,7 @@ export function ColetaveisRegiao({
   interacaoExplicita = false,
   bloquearPassagensRespondidas = true,
   onColetavelProximo,
+  reducedMotion = false,
 }: ColetaveisRegiaoProps) {
   const coletaveisAcionadosRef = useRef<Set<string>>(new Set())
   const proximoNotificadoIdRef = useRef<string | null>(null)
@@ -200,6 +209,7 @@ export function ColetaveisRegiao({
           coletavel={coletavel}
           enabled={enabled}
           indice={indice}
+          reducedMotion={reducedMotion}
         />
       ))}
     </>

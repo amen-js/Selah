@@ -113,11 +113,12 @@ function entradaPersonagemEden(
 /**
  * Curated, independently loadable Creation chunks.
  *
- * Kenney source GLBs remain unmodified; Quaternius character sources are
- * converted or recompressed as documented beside the outputs. Ground and
- * river files are visual tiles, while collision remains owned by the runtime.
- * Audio, VFX, lion and giraffe stay omitted instead of receiving invented
- * paths.
+ * Kenney source GLBs remain unmodified and the Quaternius sheep retains its
+ * documented conversion/clips. Adam and Eve point to project-authored
+ * `.model.json` descriptors rendered procedurally; lion, giraffe and fruit are
+ * procedural visuals without invented GLB paths. Ground and river files are
+ * visual tiles, while collision remains owned by the runtime. Audio and VFX
+ * stay outside this file.
  */
 export const manifestoAssetsCriacao: ManifestoAssetsCriacao = {
   versao: 1,

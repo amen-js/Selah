@@ -18,6 +18,7 @@ export interface PortaisRegiaoProps {
   onPortalAcionavel?: (portal: PortalMapa | null) => void
   /** Chamado por E/Enter somente para um portal disponível. */
   onPortalAcionado?: (portal: PortalMapa) => void
+  reducedMotion?: boolean
 }
 
 /** Renderiza portais e mantém a detecção desacoplada da navegação global. */
@@ -28,6 +29,7 @@ export function PortaisRegiao({
   onPortalProximo,
   onPortalAcionavel,
   onPortalAcionado,
+  reducedMotion = false,
 }: PortaisRegiaoProps) {
   const [portalEmFocoId, setPortalEmFocoId] = useState<string | null>(null)
   const portalAcionavelRef = useRef<PortalMapa | null>(null)
@@ -85,6 +87,7 @@ export function PortaisRegiao({
           portal={portal}
           ativo={portal.id === portalEmFocoId}
           indice={indice}
+          reducedMotion={reducedMotion}
         />
       ))}
     </>

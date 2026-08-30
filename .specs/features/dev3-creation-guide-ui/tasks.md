@@ -40,6 +40,7 @@ outside Creation.
 
 ### T2: Create the localized Creation UI catalogue
 
+**Status**: Implemented
 **What**: Map all nine moment IDs to translated title and concise objective
 keys, with a pure coverage test.
 **Where**: `src/components/game/creationJourneyUi.ts`,
@@ -53,9 +54,9 @@ keys, with a pure coverage test.
 
 **Done when**:
 
-- [ ] All nine moment IDs resolve to a title and objective in three languages.
-- [ ] Objectives match implemented movement/proximity behavior.
-- [ ] `npm run test:run -- src/components/game/creationJourneyUi.test.ts` passes 2 tests.
+- [x] All nine moment IDs resolve to a title and objective in three languages.
+- [x] Objectives match implemented movement/proximity behavior.
+- [x] `npm run test:run -- src/components/game/creationJourneyUi.test.ts` passes 2 tests.
 
 **Commit**: `feat(ui): define Creation journey copy`
 

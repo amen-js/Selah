@@ -93,6 +93,34 @@ export const esES = {
   'hud.settings.open': 'Abrir configuración parental',
   'hud.settings.label': 'Familia',
 
+  'creation.journey.vazio.title': 'El vacío',
+  'creation.journey.vazio.objective':
+    'Da unos pasos y descubre el primer camino.',
+  'creation.journey.luz.title': 'La luz',
+  'creation.journey.luz.objective':
+    'Sigue las señales brillantes y acércate a la luz.',
+  'creation.journey.ceu-terra-aguas.title': 'Cielo, tierra y aguas',
+  'creation.journey.ceu-terra-aguas.objective':
+    'Camina hasta el punto más alto y observa los ríos.',
+  'creation.journey.natureza.title': 'La naturaleza cobra vida',
+  'creation.journey.natureza.objective':
+    'Acércate al brillo entre las plantas para revelar la naturaleza.',
+  'creation.journey.ceu-ritmo.title': 'El cielo encuentra su ritmo',
+  'creation.journey.ceu-ritmo.objective':
+    'Sigue el camino hasta el mirador y contempla el cielo.',
+  'creation.journey.criaturas.title': 'Las criaturas',
+  'creation.journey.criaturas.objective':
+    'Acércate a los animales y obsérvalos con calma.',
+  'creation.journey.eden.title': 'El Jardín del Edén',
+  'creation.journey.eden.objective':
+    'Explora las orillas del río y encuentra el corazón del Jardín.',
+  'creation.journey.adao-e-eva.title': 'Adán y Eva',
+  'creation.journey.adao-e-eva.objective':
+    'Acércate al brillo del Jardín para conocer a Adán y Eva.',
+  'creation.journey.fruto-escolha.title': 'El fruto y la gran elección',
+  'creation.journey.fruto-escolha.objective':
+    'Camina hasta el árbol especial y observa la gran elección.',
+
   'portal.prompt.aria': 'Portal a {region}',
   'portal.prompt.eyebrow': 'Portal',
   'portal.prompt.enter': 'Presiona E o Enter para entrar',

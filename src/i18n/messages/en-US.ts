@@ -93,6 +93,34 @@ export const enUS = {
   'hud.settings.open': 'Open parental settings',
   'hud.settings.label': 'Parents',
 
+  'creation.journey.vazio.title': 'The void',
+  'creation.journey.vazio.objective':
+    'Take a few steps and discover the first path.',
+  'creation.journey.luz.title': 'The light',
+  'creation.journey.luz.objective':
+    'Follow the glowing signs and move closer to the light.',
+  'creation.journey.ceu-terra-aguas.title': 'Sky, land, and waters',
+  'creation.journey.ceu-terra-aguas.objective':
+    'Walk to the highest point and watch the rivers.',
+  'creation.journey.natureza.title': 'Nature comes to life',
+  'creation.journey.natureza.objective':
+    'Move closer to the glow among the plants to reveal nature.',
+  'creation.journey.ceu-ritmo.title': 'The sky finds its rhythm',
+  'creation.journey.ceu-ritmo.objective':
+    'Follow the path to the lookout and contemplate the sky.',
+  'creation.journey.criaturas.title': 'The creatures',
+  'creation.journey.criaturas.objective':
+    'Move closer to the animals and observe them calmly.',
+  'creation.journey.eden.title': 'The Garden of Eden',
+  'creation.journey.eden.objective':
+    'Explore the riverbanks and find the heart of the Garden.',
+  'creation.journey.adao-e-eva.title': 'Adam and Eve',
+  'creation.journey.adao-e-eva.objective':
+    'Move closer to the glow in the Garden to meet Adam and Eve.',
+  'creation.journey.fruto-escolha.title': 'The fruit and the great choice',
+  'creation.journey.fruto-escolha.objective':
+    'Walk to the special tree and observe the great choice.',
+
   'portal.prompt.aria': 'Portal to {region}',
   'portal.prompt.eyebrow': 'Portal',
   'portal.prompt.enter': 'Press E or Enter to enter',

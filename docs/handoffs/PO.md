@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-Garantir que a demo conte uma história bíblica adequada para crianças, com decisões de produto claras, conteúdo previamente aprovado e um pitch coerente. A P.O. define **o que** entra; os devs e o designer definem **como** implementar.
+Garantir que a demo conte uma história bíblica adequada para crianças, com decisões de produto claras e conteúdo previamente aprovado. A P.O. define **o que** entra; os devs e o designer definem **como** implementar.
 
 ## Escopo já decidido
 
@@ -113,7 +113,7 @@ A pausa não pode oferecer recompensa por deixar a tela aberta, usar contagem re
 - **4:00:** testar o Momento Selah como criança, responsável e criança que ainda não lê.
 - **4:30:** cortar Noé se A Criação não estiver fluida.
 - **5:45:** congelar o código sem exceção.
-- **6:15–7:00:** conduzir três ensaios cronometrados.
+- **6:15–7:00:** reservar o período para o pitch; roteiro e ensaios serão definidos separadamente.
 
 ## Teste de aceite da P.O.
 
@@ -129,16 +129,7 @@ A pausa não pode oferecer recompensa por deixar a tela aberta, usar contagem re
 
 ## Pitch
 
-Preparar com o Dev3:
-
-1. problema e significado do nome Selah;
-2. exploração de A Criação;
-3. Momento Selah ao vivo, sem falar por cima da pausa;
-4. quiz ancorado na passagem e transparência sobre IA;
-5. TTS, se disponível;
-6. liberação local pelo responsável;
-7. contador de Selahs e funcionamento no navegador;
-8. vídeo de backup de dois minutos.
+O pitch foi separado deste handoff para que as ideias da P.O. sejam desenvolvidas sem misturar decisões de produto com roteiro de apresentação. Usar o [rascunho de pitch](PITCH.md) quando chegar a hora.
 
 ## Fora da responsabilidade da P.O.
 
@@ -152,4 +143,4 @@ Preparar com o Dev3:
 
 - [Game Design Document](../GDD.md)
 - [Plano de execução](../../plans/selah.plan.md)
-
+- [Rascunho de pitch](PITCH.md)

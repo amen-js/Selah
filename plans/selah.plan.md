@@ -461,3 +461,31 @@ Três vezes, cronometrado. P.O. apresenta, Dev 1 opera o jogo, os outros ficam c
 5. Se o TTS estiver pronto: mostrem a criança **ouvindo** o versículo e o quiz — acessibilidade para quem ainda não lê
 6. Mostrem o dashboard: **"não medimos tempo de tela, medimos Selahs"**
 7. Fechem no "roda em qualquer navegador, inclusive Chromebook de escola pública"
+
+## Review da stack — o que compõe o Selah
+
+Texto para a banca: o que cada camada faz na demo e por que foi escolhida. As versões abaixo batem com o `package.json` do repositório. Capacitor e PWA ficam fora desta demo — o plano já os marca como publicação futura.
+
+### Cliente web
+
+**Vite 8, React 19, TypeScript e Tailwind CSS 4.** O jurado abre um link: não há instalador, conta de loja nem runtime próprio. TypeScript no cliente e no proxy reduz erro de contrato no timebox; o Tailwind cobre HUD, Selah e telas parentais sem um design system paralelo.
+
+### Mundo 3D
+
+**Three.js 0.185, React Three Fiber 9, `@react-three/drei`, Rapier (`@react-three/rapier`), `ecctrl` e `@react-spring/three`.** A engine roda no WebGL do navegador. Rapier trata colisão e gatilhos de versículo; `ecctrl` entrega o personagem em terceira pessoa sem gastar o dia em controller; o spring da câmera fecha o Momento Selah.
+
+### Estado, UI e áudio
+
+**zustand** persiste só no `localStorage` (passagens, Selahs, A/B/C/D) — sem conta e sem perfil remoto. **howler** faz o fade da trilha quando a exploração trava. **leva** afina luz e movimento em runtime e some na demo. A fala do texto usa **Web Speech** no aparelho e, quando a rede e a chave permitem, **TTS via OpenRouter**, para a criança que ainda não lê.
+
+### Backend e IA
+
+**Hono + `@hono/node-server` na porta 8787** proxiam OpenRouter e YouVersion: a chave nunca entra no bundle (`VITE_` só aponta URL). O SDK **openai** fala com o OpenRouter trocando a `baseURL`; o quiz usa `openai/gpt-4o-mini` com fallback `google/gemini-2.5-flash`, ZDR e `data_collection: deny`. A **YouVersion** entrega o versículo âncora nas versões licenciadas (BLT, BSB, VBL). Schema e validação etária/bíblica rodam no servidor; se a LLM ou a rede falham, o jogo usa quiz e snapshot locais.
+
+### Qualidade e publicação
+
+**Vitest, Testing Library e ESLint** cobrem proxy, gateway e UI sem depender da cena 3D. Os modelos vêm de **Kenney e Quaternius (CC0)**. O front é o `dist` estático; o Hono fica atrás de Nginx ou Caddy em `selah.wtitec.com` (jogo) e `api-selah.wtitec.com` (API).
+
+### Como isso se junta na demo
+
+O jurado abre o link. O mundo 3D e o HUD rodam no cliente. A passagem vem da YouVersion. O NPC apresenta um quiz gerado pela LLM e travado pelo Hono — uma certa, quatro letras, texto só daquela passagem. A pausa parental e o progresso ficam no dispositivo. Se a rede cair, o fallback local ainda fecha o Momento Selah.

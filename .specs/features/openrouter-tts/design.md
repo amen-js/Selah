@@ -1,7 +1,7 @@
 # OpenRouter TTS Design
 
 **Spec:** `.specs/features/openrouter-tts/spec.md`
-**Status:** Approved
+**Status:** Verified
 
 ## Architecture
 
@@ -25,7 +25,7 @@ request or playback fails.
 
 ```ts
 interface OpenRouterTtsClient {
-  sintetizar(texto: string): Promise<ArrayBuffer | null>
+  sintetizar(texto: string, signal?: AbortSignal): Promise<ArrayBuffer | null>
 }
 
 type TtsEstado = 'idle' | 'loading' | 'playing' | 'paused' | 'fallback' | 'error'
@@ -59,4 +59,3 @@ interface TtsController {
 - Prefer local voices whose names contain Natural, Neural, Enhanced, or Premium,
   then any exact/base-language match.
 - Use rate `1.02` and pitch `1.05` only for the local fallback.
-

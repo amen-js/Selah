@@ -1,7 +1,7 @@
 # OpenRouter TTS Tasks
 
 **Design:** `.specs/features/openrouter-tts/design.md`
-**Status:** In Progress
+**Status:** Done
 **Baseline:** 30 files, 125 tests passing
 
 ## Execution plan
@@ -66,7 +66,7 @@ disclosure, and volume restoration are verified.
 
 ### T5: Validate and document completion
 
-**Status:** Pending
+**Status:** Complete
 **What:** Run the full gate and update traceability/task status.
 **Where:** `.specs/features/openrouter-tts/`.
 **Depends on:** T4
@@ -76,6 +76,9 @@ disclosure, and volume restoration are verified.
 **Tools:** Built-in filesystem/shell; `tlc-spec-driven`.
 
 **Done when:** lint, all tests, and production build pass with no skipped/deleted tests.
+
+**Result:** After rebasing onto `origin/main`, `npm run lint`, 41 files/190
+tests, and `npm run build` passed.
 
 ## Validation checks
 

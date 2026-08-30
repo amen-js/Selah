@@ -1,7 +1,7 @@
 # OpenRouter TTS Specification
 
 **Date:** 2026-08-30
-**Status:** Approved
+**Status:** Verified
 
 ## Problem
 
@@ -54,7 +54,16 @@ biblical wording.
 
 | Requirement | Task | Status |
 | --- | --- | --- |
-| TTS-01, TTS-07 | T1, T2 | Pending |
-| TTS-02, TTS-03, TTS-04, TTS-05 | T3, T4 | Pending |
-| TTS-06 | T4 | Pending |
+| TTS-01, TTS-07 | T1, T2 | Verified |
+| TTS-02, TTS-03, TTS-04, TTS-05 | T3, T4 | Verified |
+| TTS-06 | T4 | Verified |
 
+## Validation result
+
+- The proxy synthesizes only allowlisted, localized scripture and returns a
+  non-cacheable MP3 with timeout and rate limiting.
+- Neural playback, local voice fallback, pause/resume, stale language
+  cancellation, disclosure, and ambient ducking are covered by automated tests.
+- Final gate after rebasing onto `origin/main`: 41 test files and 190 tests
+  passed; lint and production build
+  passed; no tests were removed or skipped.

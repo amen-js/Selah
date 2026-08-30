@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { GameCanvas } from './components/game/GameCanvas'
 import { GameOverlay } from './components/game/GameOverlay'
+import { ResponsibleOnboarding } from './components/game/ResponsibleOnboarding'
 import { useTranslation } from './i18n'
 import { useSelahAudio } from './hooks/useSelahAudio'
 import { selectExploracaoBloqueada, useGameStore } from './stores/gameStore'
@@ -12,7 +13,11 @@ function App() {
   const [hasStarted, setHasStarted] = useState(false)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const exploracaoBloqueada = useGameStore(selectExploracaoBloqueada)
-  const exploracaoAtiva = playing && !exploracaoBloqueada
+  const configuracaoInicialConcluida = useGameStore(
+    (state) => state.configuracaoInicialConcluida,
+  )
+  const interfaceBloqueada = exploracaoBloqueada || !configuracaoInicialConcluida
+  const exploracaoAtiva = playing && !interfaceBloqueada
 
   useSelahAudio()
 
@@ -49,19 +54,20 @@ function App() {
   }, [playing])
 
   useEffect(() => {
-    if (exploracaoBloqueada && document.pointerLockElement === canvasRef.current) {
+    if (interfaceBloqueada && document.pointerLockElement === canvasRef.current) {
       document.exitPointerLock()
     }
-  }, [exploracaoBloqueada])
+  }, [interfaceBloqueada])
 
   const enterWorld = () => {
+    if (!configuracaoInicialConcluida) return
     void canvasRef.current?.requestPointerLock()
   }
 
   return (
     <main
       className={`game-shell${exploracaoAtiva ? ' is-playing' : ''}${
-        exploracaoBloqueada ? ' is-overlay-active' : ''
+        interfaceBloqueada ? ' is-overlay-active' : ''
       }`}
     >
       <GameCanvas
@@ -71,52 +77,56 @@ function App() {
         }}
       />
       <span className="camera-reticle" aria-hidden="true" />
-      <GameOverlay />
+      {configuracaoInicialConcluida && <GameOverlay />}
 
-      <section
-        className="start-screen"
-        aria-label={hasStarted ? t('app.paused.aria') : t('app.start.aria')}
-        aria-hidden={playing || exploracaoBloqueada}
-      >
-        <div className="start-screen__panel">
-          <span className="start-screen__eyebrow">
-            {hasStarted ? t('app.paused.eyebrow') : t('app.start.eyebrow')}
-          </span>
-          <h1>{hasStarted ? 'Selah.' : 'Selah'}</h1>
-          <p>
-            {hasStarted
-              ? t('app.paused.description')
-              : t('app.start.description')}
-          </p>
+      {configuracaoInicialConcluida ? (
+        <section
+          className="start-screen"
+          aria-label={hasStarted ? t('app.paused.aria') : t('app.start.aria')}
+          aria-hidden={playing || exploracaoBloqueada}
+        >
+          <div className="start-screen__panel">
+            <span className="start-screen__eyebrow">
+              {hasStarted ? t('app.paused.eyebrow') : t('app.start.eyebrow')}
+            </span>
+            <h1>{hasStarted ? 'Selah.' : 'Selah'}</h1>
+            <p>
+              {hasStarted
+                ? t('app.paused.description')
+                : t('app.start.description')}
+            </p>
 
-          <button type="button" onClick={enterWorld}>
-            {hasStarted ? t('app.resume') : t('app.enter')}
-          </button>
+            <button type="button" onClick={enterWorld}>
+              {hasStarted ? t('app.resume') : t('app.enter')}
+            </button>
 
-          <div
-            className="start-screen__controls"
-            aria-label={t('app.controls.aria')}
-          >
-            <span>
-              <kbd>WASD</kbd> {t('app.controls.move')}
-            </span>
-            <span>
-              <kbd>{t('app.controls.space')}</kbd> {t('app.controls.jump')}
-            </span>
-            <span>
-              <kbd>{t('app.controls.shift')}</kbd> {t('app.controls.run')}
-            </span>
-            <span>
-              <kbd>{t('app.controls.mouse')}</kbd> {t('app.controls.camera')}
-            </span>
-            <span>
-              <kbd>P</kbd> {t('app.controls.pause')}
-            </span>
+            <div
+              className="start-screen__controls"
+              aria-label={t('app.controls.aria')}
+            >
+              <span>
+                <kbd>WASD</kbd> {t('app.controls.move')}
+              </span>
+              <span>
+                <kbd>{t('app.controls.space')}</kbd> {t('app.controls.jump')}
+              </span>
+              <span>
+                <kbd>{t('app.controls.shift')}</kbd> {t('app.controls.run')}
+              </span>
+              <span>
+                <kbd>{t('app.controls.mouse')}</kbd> {t('app.controls.camera')}
+              </span>
+              <span>
+                <kbd>P</kbd> {t('app.controls.pause')}
+              </span>
+            </div>
+
+            <small>{t('app.controls.pauseHint')}</small>
           </div>
-
-          <small>{t('app.controls.pauseHint')}</small>
-        </div>
-      </section>
+        </section>
+      ) : (
+        <ResponsibleOnboarding />
+      )}
     </main>
   )
 }

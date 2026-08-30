@@ -48,6 +48,20 @@ describe('gameStore', () => {
     expect(state.salvarProgresso).toBe(false)
     expect(state.compartilharMetricas).toBe(false)
     expect(state.ttsAtivo).toBe(false)
+    expect(state.configuracaoInicialConcluida).toBe(false)
+  })
+
+  it('persists responsible onboarding completion without enabling progress saving', () => {
+    useGameStore.getState().concluirConfiguracaoInicial()
+
+    expect(useGameStore.getState()).toMatchObject({
+      configuracaoInicialConcluida: true,
+      salvarProgresso: false,
+      compartilharMetricas: false,
+    })
+    expect(localStorage.getItem(GAME_STORAGE_KEY)).toContain(
+      '"configuracaoInicialConcluida":true',
+    )
   })
 
   it('opens one Selah at a time and blocks exploration', () => {
@@ -133,5 +147,6 @@ describe('gameStore', () => {
     useGameStore.getState().apagarProgresso()
     expect(localStorage.getItem(GAME_STORAGE_KEY)).toBeNull()
     expect(useGameStore.getState().selahsIniciados).toBe(0)
+    expect(useGameStore.getState().configuracaoInicialConcluida).toBe(false)
   })
 })

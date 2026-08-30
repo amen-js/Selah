@@ -46,6 +46,7 @@ interface EstadoBase {
   iaAtiva: boolean
   salvarProgresso: boolean
   compartilharMetricas: boolean
+  configuracaoInicialConcluida: boolean
   versiculosColetados: string[]
   selahsIniciados: number
   selahsCompletados: number
@@ -63,6 +64,7 @@ interface EstadoPersistido {
   iaAtiva: boolean
   salvarProgresso: boolean
   compartilharMetricas: boolean
+  configuracaoInicialConcluida: boolean
   pausaParentalAtiva: boolean
   regiao?: Regiao
   versiculosColetados?: string[]
@@ -79,6 +81,7 @@ export interface EstadoJogo extends EstadoBase {
   setIaAtiva: (iaAtiva: boolean) => void
   setSalvarProgresso: (salvarProgresso: boolean) => void
   setCompartilharMetricas: (compartilharMetricas: boolean) => void
+  concluirConfiguracaoInicial: () => void
   setDialogoAberto: (dialogoAberto: boolean) => void
   setPainelAberto: (painelAberto: PainelAberto) => void
   abrirSelah: (gatilho: GatilhoSelah) => void
@@ -102,6 +105,7 @@ const criarEstadoInicial = (): EstadoBase => ({
   iaAtiva: true,
   salvarProgresso: false,
   compartilharMetricas: false,
+  configuracaoInicialConcluida: false,
   versiculosColetados: [],
   selahsIniciados: 0,
   selahsCompletados: 0,
@@ -120,6 +124,7 @@ const projetarEstadoPersistido = (state: EstadoJogo): EstadoPersistido => {
     iaAtiva: state.iaAtiva,
     salvarProgresso: state.salvarProgresso,
     compartilharMetricas: state.compartilharMetricas,
+    configuracaoInicialConcluida: state.configuracaoInicialConcluida,
     pausaParentalAtiva: state.pausaParentalAtiva,
   }
 
@@ -146,6 +151,7 @@ export const useGameStore = create<EstadoJogo>()(
       setIaAtiva: (iaAtiva) => set({ iaAtiva }),
       setSalvarProgresso: (salvarProgresso) => set({ salvarProgresso }),
       setCompartilharMetricas: (compartilharMetricas) => set({ compartilharMetricas }),
+      concluirConfiguracaoInicial: () => set({ configuracaoInicialConcluida: true }),
       setDialogoAberto: (dialogoAberto) => set({ dialogoAberto }),
       setPainelAberto: (painelAberto) => set({ painelAberto }),
       abrirSelah: (gatilho) =>
@@ -243,7 +249,7 @@ export const useGameStore = create<EstadoJogo>()(
         }),
       liberarPausaParental: () => set({ pausaParentalAtiva: false }),
       apagarProgresso: () => {
-        set(criarEstadoInicial())
+        set((state) => ({ ...criarEstadoInicial(), idioma: state.idioma }))
         localStorage.removeItem(GAME_STORAGE_KEY)
       },
     }),

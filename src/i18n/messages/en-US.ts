@@ -31,6 +31,21 @@ export const enUS = {
   'app.controls.pause': 'Pause',
   'app.controls.pauseHint': 'Press P at any time to pause.',
 
+  'onboarding.eyebrow': 'Before the first journey',
+  'onboarding.title': 'Responsible adult setup',
+  'onboarding.description':
+    'Choose how this journey will work for the child. Everything can be changed later in the parent and guardian area.',
+  'onboarding.pause.title': 'Family pause',
+  'onboarding.pause.description':
+    'After each reflection, exploration pauses until a responsible adult unlocks the journey.',
+  'onboarding.privacy.title': 'Privacy by default',
+  'onboarding.privacy.description':
+    'There is no account or identification. Saving progress and sharing metrics start turned off.',
+  'onboarding.footer':
+    'By continuing, you confirm that you reviewed these choices for the first journey.',
+  'onboarding.action.withoutSave': 'Play without saving',
+  'onboarding.action.save': 'Save and continue',
+
   'hud.aria': 'Exploration information and actions',
   'hud.region.hub': 'Central Valley',
   'hud.region.criacao': 'Creation',

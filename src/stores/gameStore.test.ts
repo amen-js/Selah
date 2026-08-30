@@ -253,7 +253,7 @@ describe('gameStore', () => {
     )
   })
 
-  it('hydrates legacy snapshots without a concluded Selah list', async () => {
+  it('hydrates legacy snapshots without the newer progress arrays', async () => {
     localStorage.setItem(
       GAME_STORAGE_KEY,
       JSON.stringify({
@@ -277,8 +277,94 @@ describe('gameStore', () => {
     await useGameStore.persist.rehydrate()
 
     expect(useGameStore.getState().selahsConcluidos).toEqual([])
+    expect(useGameStore.getState().momentosCriacaoConcluidos).toEqual([])
     expect(useGameStore.getState().versiculosColetados).toEqual([versiculo.passagemId])
+    expect(useGameStore.getState().historico).toEqual([])
     expect(useGameStore.getState().checkpointNoe).toBeNull()
+  })
+
+  it('preserves current defaults when persisted arrays are null or invalid', async () => {
+    const resultadoAtual = {
+      quizId: 'quiz-atual',
+      passagemId: 'genesis-1-1',
+      alternativaId: 'B' as const,
+      acertou: false,
+    }
+    useGameStore.setState({
+      versiculosColetados: ['genesis-1-1'],
+      selahsConcluidos: ['genesis-1-3'],
+      momentosCriacaoConcluidos: ['vazio'],
+      historico: [resultadoAtual],
+    })
+    localStorage.setItem(
+      GAME_STORAGE_KEY,
+      JSON.stringify({
+        state: {
+          versiculosColetados: { passagemId: 'genesis-1-1' },
+          selahsConcluidos: null,
+          momentosCriacaoConcluidos: 'luz',
+          historico: false,
+        },
+        version: 1,
+      }),
+    )
+
+    await useGameStore.persist.rehydrate()
+
+    expect(useGameStore.getState()).toMatchObject({
+      versiculosColetados: ['genesis-1-1'],
+      selahsConcluidos: ['genesis-1-3'],
+      momentosCriacaoConcluidos: ['vazio'],
+      historico: [resultadoAtual],
+    })
+  })
+
+  it('filters mixed persisted arrays and keeps only valid unique entries', async () => {
+    const resultadoValido = {
+      quizId: 'quiz-valido',
+      passagemId: 'genesis-6-14',
+      alternativaId: 'A',
+      acertou: true,
+    }
+    const segundoResultadoValido = {
+      quizId: 'quiz-valido-2',
+      passagemId: 'genesis-6-19',
+      alternativaId: 'D',
+      acertou: false,
+    }
+    localStorage.setItem(
+      GAME_STORAGE_KEY,
+      JSON.stringify({
+        state: {
+          versiculosColetados: [
+            'genesis-6-14',
+            null,
+            7,
+            'genesis-6-14',
+            'genesis-6-19',
+          ],
+          selahsConcluidos: [null, 'genesis-6-14', {}, 'genesis-6-14'],
+          momentosCriacaoConcluidos: ['vazio', false, 'luz', 'vazio'],
+          historico: [
+            resultadoValido,
+            null,
+            { ...resultadoValido },
+            { ...segundoResultadoValido, alternativaId: 'Z' },
+            segundoResultadoValido,
+          ],
+        },
+        version: 1,
+      }),
+    )
+
+    await useGameStore.persist.rehydrate()
+
+    expect(useGameStore.getState()).toMatchObject({
+      versiculosColetados: ['genesis-6-14', 'genesis-6-19'],
+      selahsConcluidos: ['genesis-6-14'],
+      momentosCriacaoConcluidos: ['vazio', 'luz'],
+      historico: [resultadoValido, segundoResultadoValido],
+    })
   })
 
   it('replaces a malformed persisted Noah checkpoint without throwing', async () => {

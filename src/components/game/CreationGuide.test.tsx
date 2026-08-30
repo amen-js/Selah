@@ -56,6 +56,39 @@ describe('CreationGuide', () => {
     ).toBeInTheDocument()
   })
 
+  it('types a narrated line while exposing its complete accessible copy', async () => {
+    vi.useFakeTimers()
+
+    try {
+      const linha = buscarNarracaoCriacao('criacao.vazio.inicial', 'pt-BR')
+      expect(linha).toBeDefined()
+      if (!linha) throw new Error('A narração aprovada deveria existir')
+
+      render(
+        <CreationGuide
+          snapshot={snapshotVazio}
+          exploracaoAtiva
+          linha={linha}
+        />,
+      )
+
+      const guide = screen.getByRole('status', { name: 'Voz Guia' })
+      const message = guide.querySelector('p')
+      const visibleText = message?.querySelector('.typewriter-text__visible')
+      expect(message).toHaveAccessibleName(linha.texto)
+      expect(guide).toHaveClass('creation-guide--enter')
+      expect(visibleText).toHaveTextContent('')
+
+      await act(async () => vi.advanceTimersByTimeAsync(280))
+      expect(visibleText?.textContent).not.toBe('')
+
+      await act(async () => vi.advanceTimersByTimeAsync(10_000))
+      expect(visibleText).toHaveTextContent(linha.texto)
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
   it.each(casosNarrativos)(
     'renders the resolved $narracaoId line in $idioma without controls',
     ({ narracaoId, idioma }) => {

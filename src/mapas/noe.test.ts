@@ -166,6 +166,8 @@ describe('mapa de Noé', () => {
       )
     }
 
-    expect(porPassagem.get('genesis-9-13')?.posicao[2]).toBeLessThan(-30)
+    const alianca = porPassagem.get('genesis-9-13')
+    expect(alianca?.posicao[2]).toBeGreaterThan(34)
+    expect(Math.abs(alianca?.posicao[0] ?? Number.POSITIVE_INFINITY)).toBeLessThan(5)
   })
 })

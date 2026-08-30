@@ -12,6 +12,8 @@ import {
   idsAssetsCanteiroNoe,
   manifestoAssetsNoe,
   obterAssetNoe,
+  obterDeslocamentoFallbackAssetNoe,
+  obterDeslocamentoModeloAssetNoe,
   selecionarAssetsNoePorAreaEMomento,
 } from './assets'
 
@@ -129,6 +131,17 @@ describe('manifesto de assets do canteiro de Noé', () => {
         caminhoPublico('/models/noah/terrain/project-supplied/LICENSE.md'),
       ),
     ).toBe(true)
+  })
+
+  it('aplica a correção de origem do morro igualmente no GLB e no fallback', () => {
+    const morro = obterAssetNoe('vale-pedra-morro')
+    const bancada = obterAssetNoe('canteiro-bancada')
+    if (!morro || !bancada) throw new Error('assets obrigatórios ausentes')
+
+    expect(obterDeslocamentoModeloAssetNoe(morro)).toEqual([0, 4.1, 0])
+    expect(obterDeslocamentoFallbackAssetNoe(morro)).toEqual([0, 4.1, 0])
+    expect(obterDeslocamentoModeloAssetNoe(bancada)).toEqual([0, 0, 0])
+    expect(obterDeslocamentoFallbackAssetNoe(bancada)).toEqual([0, 0.36, 0])
   })
 
   it('libera M1 e M2 cumulativamente apenas dentro do canteiro', () => {

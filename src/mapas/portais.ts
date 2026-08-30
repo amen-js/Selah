@@ -45,7 +45,7 @@ export const portaisPorRegiao: Readonly<Record<Regiao, readonly PortalMapa[]>> =
     {
       id: 'portal-noe-hub',
       destino: 'hub',
-      posicao: [13, 0, -13],
+      posicao: [40, 0, 38],
       raioAtivacao: 1.5,
       disponivel: true,
     },

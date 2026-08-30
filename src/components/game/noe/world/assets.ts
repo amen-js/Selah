@@ -359,3 +359,31 @@ export function obterAssetNoe(
 ): EntradaManifestoAssetNoe | undefined {
   return manifestoAssetsNoe.entradas.find((entrada) => entrada.id === id)
 }
+
+/**
+ * GLB origins are preserved. An explicit correction is authored in world
+ * metres so it is not accidentally multiplied by `escalaVisual`.
+ */
+export function obterDeslocamentoModeloAssetNoe(
+  entrada: EntradaManifestoAssetNoe,
+): Vetor3AssetNoe {
+  return entrada.deslocamentoVisualMetros ?? [0, 0, 0]
+}
+
+/**
+ * Primitive fallbacks are centred at their local origin. Without an authored
+ * correction they are lifted by half their height to sit on the ground. When
+ * a correction exists (as in the centred hill GLB), model and fallback share
+ * exactly the same origin contract.
+ */
+export function obterDeslocamentoFallbackAssetNoe(
+  entrada: EntradaManifestoAssetNoe,
+): Vetor3AssetNoe {
+  return (
+    entrada.deslocamentoVisualMetros ?? [
+      0,
+      entrada.fallback.dimensoes[1] / 2,
+      0,
+    ]
+  )
+}

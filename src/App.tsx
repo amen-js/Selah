@@ -2,6 +2,7 @@ import { useProgress } from '@react-three/drei'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { GameCanvas } from './components/game/GameCanvas'
 import { GameOverlay } from './components/game/GameOverlay'
+import type { SnapshotProgressaoCriacao } from './components/game/creation/progression'
 import { ResponsibleOnboarding } from './components/game/ResponsibleOnboarding'
 import { SceneErrorBoundary } from './components/game/SceneErrorBoundary'
 import { SceneLoadingOverlay } from './components/game/SceneLoadingOverlay'
@@ -21,6 +22,8 @@ function App({ reloadPage = reloadCurrentPage }: AppProps) {
   const sceneProgress = useProgress()
   const [playing, setPlaying] = useState(false)
   const [hasStarted, setHasStarted] = useState(false)
+  const [progressaoCriacao, setProgressaoCriacao] =
+    useState<SnapshotProgressaoCriacao | null>(null)
   const [sceneContentReady, setSceneContentReady] = useState(
     () =>
       sceneProgress.total > 0 &&
@@ -102,13 +105,19 @@ function App({ reloadPage = reloadCurrentPage }: AppProps) {
         <GameCanvas
           playing={exploracaoAtiva}
           onSceneReady={handleSceneReady}
+          onProgressaoCriacaoChange={setProgressaoCriacao}
           onCanvasReady={(canvas) => {
             canvasRef.current = canvas
           }}
         />
       </SceneErrorBoundary>
       <span className="camera-reticle" aria-hidden="true" />
-      {configuracaoInicialConcluida && sceneReady && <GameOverlay />}
+      {configuracaoInicialConcluida && sceneReady && (
+        <GameOverlay
+          progressaoCriacao={progressaoCriacao ?? undefined}
+          exploracaoAtiva={exploracaoAtiva}
+        />
+      )}
 
       {configuracaoInicialConcluida && sceneReady ? (
         <section

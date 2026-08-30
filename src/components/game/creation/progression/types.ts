@@ -49,3 +49,8 @@ export interface EstadoProgressaoCriacao {
   momentosConcluidos: readonly MomentoCriacaoId[]
   concluida: boolean
 }
+
+export interface SnapshotProgressaoCriacao {
+  readonly momento: MomentoCriacao
+  readonly estado: EstadoProgressaoCriacao
+}

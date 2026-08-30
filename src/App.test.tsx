@@ -1,11 +1,16 @@
 import { act, fireEvent, render, screen } from '@testing-library/react'
 
 import App from './App'
-import { useGameStore } from './stores/gameStore'
+import { momentosCriacao } from './components/game/creation/progression/catalogo'
+import type { SnapshotProgressaoCriacao } from './components/game/creation/progression/types'
+import { GAME_STORAGE_KEY, useGameStore } from './stores/gameStore'
 
 const canvasMock = vi.hoisted(() => ({
   element: null as HTMLCanvasElement | null,
   shouldThrow: false,
+  onProgressaoCriacaoChange: null as ((
+    snapshot: SnapshotProgressaoCriacao | null,
+  ) => void) | null,
 }))
 
 const selahAudioMock = vi.hoisted(() => ({
@@ -39,12 +44,17 @@ vi.mock('./components/game/GameCanvas', async () => {
       playing,
       onCanvasReady,
       onSceneReady,
+      onProgressaoCriacaoChange,
     }: {
       playing: boolean
       onCanvasReady?: (canvas: HTMLCanvasElement) => void
       onSceneReady?: () => void
+      onProgressaoCriacaoChange?: (
+        snapshot: SnapshotProgressaoCriacao | null,
+      ) => void
     }) => {
       if (canvasMock.shouldThrow) throw new Error('webgl-scene-failed')
+      canvasMock.onProgressaoCriacaoChange = onProgressaoCriacaoChange ?? null
 
       useEffect(() => {
         if (canvasMock.element) onCanvasReady?.(canvasMock.element)
@@ -57,8 +67,38 @@ vi.mock('./components/game/GameCanvas', async () => {
 })
 
 vi.mock('./components/game/GameOverlay', () => ({
-  GameOverlay: () => <aside data-testid="game-overlay" />,
+  GameOverlay: ({
+    progressaoCriacao,
+    exploracaoAtiva,
+  }: {
+    progressaoCriacao?: SnapshotProgressaoCriacao
+    exploracaoAtiva?: boolean
+  }) => (
+    <aside
+      data-testid="game-overlay"
+      data-momento={progressaoCriacao?.momento.id}
+      data-exploracao-ativa={String(exploracaoAtiva)}
+    />
+  ),
 }))
+
+const snapshotVazio: SnapshotProgressaoCriacao = {
+  momento: momentosCriacao[0],
+  estado: {
+    momentoAtualId: 'vazio',
+    momentosConcluidos: [],
+    concluida: false,
+  },
+}
+
+const snapshotLuz: SnapshotProgressaoCriacao = {
+  momento: momentosCriacao[1],
+  estado: {
+    momentoAtualId: 'luz',
+    momentosConcluidos: ['vazio'],
+    concluida: false,
+  },
+}
 
 describe('App integration', () => {
   let pointerLockElement: Element | null
@@ -74,6 +114,7 @@ describe('App integration', () => {
     requestPointerLock = vi.fn()
     canvasMock.element = document.createElement('canvas')
     canvasMock.shouldThrow = false
+    canvasMock.onProgressaoCriacaoChange = null
     progressMock.state = {
       active: false,
       progress: 100,
@@ -112,6 +153,49 @@ describe('App integration', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Entrar no mundo' }))
     expect(requestPointerLock).toHaveBeenCalledOnce()
+  })
+
+  it('forwards the active Creation snapshot and exploration status to the overlay', () => {
+    render(<App />)
+
+    act(() => {
+      pointerLockElement = canvasMock.element
+      document.dispatchEvent(new Event('pointerlockchange'))
+      canvasMock.onProgressaoCriacaoChange?.(snapshotVazio)
+    })
+
+    expect(screen.getByTestId('game-overlay')).toHaveAttribute('data-momento', 'vazio')
+    expect(screen.getByTestId('game-overlay')).toHaveAttribute(
+      'data-exploracao-ativa',
+      'true',
+    )
+  })
+
+  it('updates and clears transient progress without changing pointer lock or storage', () => {
+    render(<App />)
+
+    act(() => {
+      pointerLockElement = canvasMock.element
+      document.dispatchEvent(new Event('pointerlockchange'))
+    })
+    const persistedBefore = localStorage.getItem(GAME_STORAGE_KEY)
+
+    act(() => canvasMock.onProgressaoCriacaoChange?.(snapshotVazio))
+    act(() => canvasMock.onProgressaoCriacaoChange?.(snapshotLuz))
+
+    expect(screen.getByTestId('game-overlay')).toHaveAttribute('data-momento', 'luz')
+    expect(exitPointerLock).not.toHaveBeenCalled()
+    expect(localStorage.getItem(GAME_STORAGE_KEY)).toBe(persistedBefore)
+
+    act(() => canvasMock.onProgressaoCriacaoChange?.(null))
+
+    expect(screen.getByTestId('game-overlay')).not.toHaveAttribute('data-momento')
+    expect(screen.getByTestId('game-overlay')).toHaveAttribute(
+      'data-exploracao-ativa',
+      'true',
+    )
+    expect(exitPointerLock).not.toHaveBeenCalled()
+    expect(localStorage.getItem(GAME_STORAGE_KEY)).toBe(persistedBefore)
   })
 
   it('requires responsible setup before requesting pointer lock', () => {

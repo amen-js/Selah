@@ -90,6 +90,38 @@ export const ptBR = {
   'hud.metrics.label': 'Métricas',
   'hud.settings.open': 'Abrir configurações parentais',
   'hud.settings.label': 'Pais',
+  'hud.creation.moment': 'Momento {current} de {total}',
+  'hud.creation.progressAria':
+    '{completed} de {total} momentos concluídos',
+
+  'creation.guide.label': 'Voz Guia',
+  'creation.journey.vazio.title': 'O vazio',
+  'creation.journey.vazio.objective':
+    'Dê alguns passos e descubra o primeiro caminho.',
+  'creation.journey.luz.title': 'A luz',
+  'creation.journey.luz.objective':
+    'Siga os sinais luminosos e aproxime-se da luz.',
+  'creation.journey.ceu-terra-aguas.title': 'Céu, terra e águas',
+  'creation.journey.ceu-terra-aguas.objective':
+    'Caminhe até o ponto mais alto e observe os rios.',
+  'creation.journey.natureza.title': 'A natureza ganha vida',
+  'creation.journey.natureza.objective':
+    'Aproxime-se do brilho entre as plantas para revelar a natureza.',
+  'creation.journey.ceu-ritmo.title': 'O céu ganha ritmo',
+  'creation.journey.ceu-ritmo.objective':
+    'Siga o caminho até o mirante e contemple o céu.',
+  'creation.journey.criaturas.title': 'As criaturas',
+  'creation.journey.criaturas.objective':
+    'Aproxime-se dos animais e observe-os com calma.',
+  'creation.journey.eden.title': 'O Jardim do Éden',
+  'creation.journey.eden.objective':
+    'Explore as margens do rio e encontre o coração do Jardim.',
+  'creation.journey.adao-e-eva.title': 'Adão e Eva',
+  'creation.journey.adao-e-eva.objective':
+    'Aproxime-se do brilho no Jardim para conhecer Adão e Eva.',
+  'creation.journey.fruto-escolha.title': 'O fruto e a grande escolha',
+  'creation.journey.fruto-escolha.objective':
+    'Caminhe até a árvore especial e observe a grande escolha.',
 
   'portal.prompt.aria': 'Portal para {region}',
   'portal.prompt.eyebrow': 'Portal',
@@ -219,6 +251,7 @@ export const ptBR = {
   'lab.scenario.success': 'Sucesso com IA',
   'lab.scenario.fallback': 'Fallback aprovado',
   'lab.scenario.error': 'Erro de rede',
+  'lab.creationMoment.label': 'Momento da Criação',
   'lab.startSelah': 'Abrir Selah',
   'lab.showDialog': 'Mostrar diálogo',
   'lab.activatePause': 'Ativar pausa parental',

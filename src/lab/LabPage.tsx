@@ -1,5 +1,11 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
+import { momentosCriacao } from '../components/game/creation/progression/catalogo'
+import type {
+  MomentoCriacaoId,
+  SnapshotProgressaoCriacao,
+} from '../components/game/creation/progression/types'
+import { traduzirJornadaCriacao } from '../components/game/creationJourneyUi'
 import { GameOverlay } from '../components/game/GameOverlay'
 import { useTranslation, type TranslationKey } from '../i18n'
 import { createTtsController } from '../services/tts'
@@ -13,8 +19,10 @@ const cenarioKeys: Record<CenarioLab, TranslationKey> = {
 }
 
 export function LabPage() {
-  const { t } = useTranslation()
+  const { idioma, t } = useTranslation()
   const [cenario, setCenario] = useState<CenarioLab>('sucesso')
+  const [momentoSelecionadoId, setMomentoSelecionadoId] =
+    useState<MomentoCriacaoId>('vazio')
   const gateway = useMemo(() => createLabGateway(cenario), [cenario])
   const tts = useMemo(() => createTtsController(), [])
   const setRegiao = useGameStore((state) => state.setRegiao)
@@ -22,12 +30,31 @@ export function LabPage() {
   const setDialogoAberto = useGameStore((state) => state.setDialogoAberto)
   const apagarProgresso = useGameStore((state) => state.apagarProgresso)
 
+  useEffect(() => {
+    setRegiao('criacao')
+  }, [setRegiao])
+
+  const momentoSelecionado =
+    momentosCriacao.find((momento) => momento.id === momentoSelecionadoId) ??
+    momentosCriacao[0]
+  const snapshotProgressaoCriacao: SnapshotProgressaoCriacao = {
+    momento: momentoSelecionado,
+    estado: {
+      momentoAtualId: momentoSelecionado.id,
+      momentosConcluidos: momentosCriacao
+        .filter((momento) => momento.ordem < momentoSelecionado.ordem)
+        .map((momento) => momento.id),
+      concluida: false,
+    },
+  }
+
   const iniciarSelah = () => {
     setRegiao('criacao')
     abrirSelah({ historiaId: 'criacao', passagemId: versiculoLab.passagemId })
   }
 
   const reiniciar = () => {
+    setMomentoSelecionadoId('vazio')
     apagarProgresso()
     useGameStore.getState().setRegiao('criacao')
   }
@@ -46,6 +73,22 @@ export function LabPage() {
             {(Object.keys(cenarioKeys) as CenarioLab[]).map((value) => (
               <option key={value} value={value}>
                 {t(cenarioKeys[value])}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          <span className="sr-only">{t('lab.creationMoment.label')}</span>
+          <select
+            aria-label={t('lab.creationMoment.label')}
+            value={momentoSelecionadoId}
+            onChange={(event) =>
+              setMomentoSelecionadoId(event.target.value as MomentoCriacaoId)
+            }
+          >
+            {momentosCriacao.map((momento) => (
+              <option key={momento.id} value={momento.id}>
+                {traduzirJornadaCriacao(momento.id, idioma).titulo}
               </option>
             ))}
           </select>
@@ -92,6 +135,8 @@ export function LabPage() {
         gateway={gateway}
         tts={tts}
         appVersion="lab"
+        progressaoCriacao={snapshotProgressaoCriacao}
+        exploracaoAtiva
         dialogo={{
           personagem: 'Lumi',
           mensagem: t('lab.dialog.message'),

@@ -31,6 +31,7 @@ import type { FocoCameraSelah } from './camera/types'
 import {
   AtmosferaCriacao,
   coletavelCriacaoDisponivelNoMomento,
+  type EstadoProgressaoCriacao,
   EfeitosCriacao,
   Elementos3DCriacao,
   type MomentoCriacao,
@@ -42,6 +43,7 @@ import {
   PropMapaRenderer,
   TerrenoCriacao,
   type PosicaoJogador,
+  type SnapshotProgressaoCriacao,
 } from './creation'
 import {
   criarEstadoCooldownPortal,
@@ -168,6 +170,9 @@ type WorldProps = {
   portais: readonly PortalMapa[]
   onPortalProximo: (portal: PortalMapa | null) => void
   onPortalAcionado: (portal: PortalMapa) => void
+  onProgressaoCriacaoChange?: (
+    snapshot: SnapshotProgressaoCriacao | null,
+  ) => void
 }
 
 function World({
@@ -177,6 +182,7 @@ function World({
   portais,
   onPortalProximo,
   onPortalAcionado,
+  onProgressaoCriacaoChange,
 }: WorldProps) {
   const posicaoJogadorRef = useRef<PosicaoJogador | null>(null)
   const gatilhoSelah = useGameStore((state) => state.selahAtivo?.gatilho ?? null)
@@ -217,9 +223,13 @@ function World({
         : (mapa.artes2D ?? []),
     [mapa.artes2D, momentoCriacaoId, regiao],
   )
-  const atualizarMomentoCriacao = useCallback((momento: MomentoCriacao) => {
-    setMomentoCriacaoId(momento.id)
-  }, [])
+  const atualizarMomentoCriacao = useCallback(
+    (momento: MomentoCriacao, estado: EstadoProgressaoCriacao) => {
+      setMomentoCriacaoId(momento.id)
+      onProgressaoCriacaoChange?.({ momento, estado })
+    },
+    [onProgressaoCriacaoChange],
+  )
 
   return (
     <>
@@ -337,12 +347,16 @@ type GameCanvasProps = {
   playing: boolean
   onCanvasReady?: (canvas: HTMLCanvasElement) => void
   onSceneReady?: () => void
+  onProgressaoCriacaoChange?: (
+    snapshot: SnapshotProgressaoCriacao | null,
+  ) => void
 }
 
 export function GameCanvas({
   playing,
   onCanvasReady,
   onSceneReady,
+  onProgressaoCriacaoChange,
 }: GameCanvasProps) {
   const regiao = useGameStore((state) => state.regiao)
   const setRegiao = useGameStore((state) => state.setRegiao)
@@ -369,6 +383,10 @@ export function GameCanvas({
   useEffect(() => {
     if (!mapa) setRegiao('hub')
   }, [mapa, setRegiao])
+
+  useEffect(() => {
+    if (regiao !== 'criacao') onProgressaoCriacaoChange?.(null)
+  }, [onProgressaoCriacaoChange, regiao])
 
   const acionarPortal = useCallback((portal: PortalMapa) => {
     const destino = resolverDestinoPortal(portal)
@@ -442,6 +460,7 @@ export function GameCanvas({
                 portais={portaisPorRegiao[regiao]}
                 onPortalProximo={setPortalProximo}
                 onPortalAcionado={acionarPortal}
+                onProgressaoCriacaoChange={onProgressaoCriacaoChange}
               />
             ) : (
               <RegionFallback />

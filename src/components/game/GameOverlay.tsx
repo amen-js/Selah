@@ -2,6 +2,8 @@ import { useTranslation } from '../../i18n'
 import { selahGateway, type SelahGateway } from '../../services/selahGateway'
 import { ttsController, type TtsController } from '../../services/tts'
 import { useGameStore } from '../../stores/gameStore'
+import { CreationGuide } from './CreationGuide'
+import type { SnapshotProgressaoCriacao } from './creation/progression'
 import { DialogBox } from './DialogBox'
 import { Hud } from './Hud'
 import { Journal } from './Journal'
@@ -14,6 +16,8 @@ interface GameOverlayProps {
   gateway?: SelahGateway
   tts?: TtsController
   appVersion?: string
+  progressaoCriacao?: SnapshotProgressaoCriacao
+  exploracaoAtiva?: boolean
   dialogo?: {
     personagem: string
     mensagem: string
@@ -24,6 +28,8 @@ export function GameOverlay({
   gateway = selahGateway,
   tts = ttsController,
   appVersion,
+  progressaoCriacao,
+  exploracaoAtiva = false,
   dialogo,
 }: GameOverlayProps) {
   const { t } = useTranslation()
@@ -54,7 +60,13 @@ export function GameOverlay({
 
   return (
     <div className="game-overlay">
-      <Hud />
+      <Hud snapshot={progressaoCriacao} />
+      {progressaoCriacao && !dialogoAberto && painelAberto === null && (
+        <CreationGuide
+          snapshot={progressaoCriacao}
+          exploracaoAtiva={exploracaoAtiva}
+        />
+      )}
       {dialogoAberto && <DialogBox {...dialogoAtual} />}
       {painelAberto === 'diario' && <Journal />}
       {painelAberto === 'configuracoes' && <ParentSettings />}

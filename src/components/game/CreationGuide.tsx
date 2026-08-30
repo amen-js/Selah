@@ -1,0 +1,34 @@
+import { useTranslation } from '../../i18n'
+import type { SnapshotProgressaoCriacao } from './creation/progression'
+import { traduzirJornadaCriacao } from './creationJourneyUi'
+
+interface CreationGuideProps {
+  snapshot: SnapshotProgressaoCriacao
+  exploracaoAtiva: boolean
+}
+
+export function CreationGuide({
+  snapshot,
+  exploracaoAtiva,
+}: CreationGuideProps) {
+  const { idioma, t } = useTranslation()
+
+  if (!exploracaoAtiva) return null
+
+  const texto = traduzirJornadaCriacao(snapshot.momento.id, idioma)
+  const rotulo = t('creation.guide.label')
+
+  return (
+    <aside
+      className="creation-guide"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+      aria-label={rotulo}
+    >
+      <span className="creation-guide__label">{rotulo}</span>
+      <strong className="creation-guide__title">{texto.titulo}</strong>
+      <p>{texto.objetivo}</p>
+    </aside>
+  )
+}

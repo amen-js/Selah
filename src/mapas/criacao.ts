@@ -1,8 +1,8 @@
 import type { MapaRegiao } from './types'
 import { modelosNatureza } from './assets'
 
-const MEIA_LARGURA_MUNDO = 16
-const MEIA_PROFUNDIDADE_MUNDO = 16
+const MEIA_LARGURA_MUNDO = 24
+const MEIA_PROFUNDIDADE_MUNDO = 22
 
 /**
  * Mapa inicial da região da criação, sem dependência de modelos externos.
@@ -11,7 +11,7 @@ const MEIA_PROFUNDIDADE_MUNDO = 16
  * exploração continue navegável mesmo quando os fallbacks forem renderizados.
  */
 export const mapaCriacao: MapaRegiao = {
-  spawn: [4, 2, 12],
+  spawn: [0, 2, 19],
   limites: {
     meiaLargura: MEIA_LARGURA_MUNDO,
     meiaProfundidade: MEIA_PROFUNDIDADE_MUNDO,
@@ -20,8 +20,8 @@ export const mapaCriacao: MapaRegiao = {
     {
       id: 'prop-pedra-luz',
       ...modelosNatureza.pedra4,
-      posicao: [-7, 0, -6],
-      escala: [1.4, 0.8, 1.4],
+      posicao: [9, 0, 13],
+      escala: [1.5, 0.9, 1.5],
       colisor: {
         forma: 'cuboid',
         meiaExtensao: [0.72, 0.72, 0.72],
@@ -30,50 +30,17 @@ export const mapaCriacao: MapaRegiao = {
       fallback: { forma: 'esfera', cor: '#d9c7a3' },
     },
     {
-      id: 'prop-arvore-vida',
-      ...modelosNatureza.arvore1,
-      posicao: [7, 0, -7],
-      escala: 0.64,
-      colisor: {
-        forma: 'cuboid',
-        meiaExtensao: [0.34, 2.1, 0.34],
-        deslocamento: [0, 2.1, 0],
-      },
-      fallback: { forma: 'cone', cor: '#4f8f5b' },
-    },
-    {
-      id: 'prop-lago-sereno',
-      posicao: [8, 0, 4],
-      escala: [3.2, 0.12, 2.2],
-      collider: false,
-      fallback: { forma: 'cilindro', cor: '#65a9c7' },
-    },
-    {
-      id: 'prop-colina-verde',
-      posicao: [-8, 0, 5],
-      escala: [3, 1.8, 2.6],
-      collider: 'hull',
-      fallback: { forma: 'esfera', cor: '#73a65b' },
-    },
-    {
-      id: 'prop-arco-do-jardim',
-      posicao: [0, 0, -12],
-      escala: [2.8, 2.6, 0.7],
-      collider: 'cuboid',
-      fallback: { forma: 'caixa', cor: '#c28b52' },
-    },
-    {
-      id: 'prop-campo-aberto',
+      id: 'prop-campo-sul',
       ...modelosNatureza.gramaAlta,
-      posicao: [0, 0, 7],
-      escala: [2.6, 0.75, 2.6],
+      posicao: [0, 0, 11],
+      escala: [3.2, 0.82, 3.2],
       collider: false,
       fallback: { forma: 'caixa', cor: '#a3c96b' },
     },
     {
       id: 'prop-criacao-arvore-noroeste',
       ...modelosNatureza.arvore2,
-      posicao: [-14, 0, -13],
+      posicao: [-20, 0.4, -16],
       rotacao: 0.5,
       escala: 0.44,
       collider: false,
@@ -82,7 +49,7 @@ export const mapaCriacao: MapaRegiao = {
     {
       id: 'prop-criacao-arvore-nordeste',
       ...modelosNatureza.arvore3,
-      posicao: [14, 0, -14],
+      posicao: [20, 0.4, -17],
       rotacao: -0.6,
       escala: 0.5,
       collider: false,
@@ -91,7 +58,7 @@ export const mapaCriacao: MapaRegiao = {
     {
       id: 'prop-criacao-arvore-oeste',
       ...modelosNatureza.arvore4,
-      posicao: [-14, 0, 1],
+      posicao: [-21, 0.15, 2],
       rotacao: -0.35,
       escala: 0.5,
       collider: false,
@@ -100,7 +67,7 @@ export const mapaCriacao: MapaRegiao = {
     {
       id: 'prop-criacao-arvore-leste',
       ...modelosNatureza.arvore5,
-      posicao: [14, 0, 0],
+      posicao: [21, 0.05, 1],
       rotacao: 0.8,
       escala: 0.68,
       collider: false,
@@ -109,7 +76,7 @@ export const mapaCriacao: MapaRegiao = {
     {
       id: 'prop-criacao-arvore-sudoeste',
       ...modelosNatureza.arvore3,
-      posicao: [-14, 0, 14],
+      posicao: [-20, 0, 18],
       rotacao: 0.2,
       escala: 0.46,
       collider: false,
@@ -118,7 +85,7 @@ export const mapaCriacao: MapaRegiao = {
     {
       id: 'prop-criacao-arvore-sudeste',
       ...modelosNatureza.arvore2,
-      posicao: [14, 0, 14],
+      posicao: [20, 0, 18],
       rotacao: -0.75,
       escala: 0.44,
       collider: false,
@@ -127,7 +94,7 @@ export const mapaCriacao: MapaRegiao = {
     {
       id: 'prop-criacao-grama-vegetacao',
       ...modelosNatureza.gramaBaixa,
-      posicao: [-10.5, 0, 7.2],
+      posicao: [-13, 0.7, 8.5],
       rotacao: 0.3,
       escala: [6.5, 1.8, 6.5],
       collider: false,
@@ -136,7 +103,7 @@ export const mapaCriacao: MapaRegiao = {
     {
       id: 'prop-criacao-flor-vegetacao-a',
       ...modelosNatureza.arbustoFlorido,
-      posicao: [-8.6, 0, 9.5],
+      posicao: [-10.5, 0.55, 11],
       rotacao: -0.4,
       escala: 1.15,
       collider: false,
@@ -145,7 +112,7 @@ export const mapaCriacao: MapaRegiao = {
     {
       id: 'prop-criacao-flor-vegetacao-b',
       ...modelosNatureza.folhagem,
-      posicao: [-13, 0, 6],
+      posicao: [-17, 0.6, 7],
       rotacao: 0.55,
       escala: 1.2,
       collider: false,
@@ -154,7 +121,7 @@ export const mapaCriacao: MapaRegiao = {
     {
       id: 'prop-criacao-pedra-lago',
       ...modelosNatureza.pedra5,
-      posicao: [11.8, 0, 2.2],
+      posicao: [16.5, 0, 2.5],
       rotacao: 0.45,
       escala: 1.05,
       collider: false,
@@ -199,34 +166,6 @@ export const mapaCriacao: MapaRegiao = {
       escala: [5, 3.9],
       opacidade: 0.62,
     },
-    {
-      id: 'arte-criacao-animal-elefante',
-      arquivo: '/art/animals/kenney/elephant.png',
-      posicao: [13.2, 1.25, 6.1],
-      escala: [1.5, 1.35],
-      opacidade: 0.94,
-    },
-    {
-      id: 'arte-criacao-animal-girafa',
-      arquivo: '/art/animals/kenney/giraffe.png',
-      posicao: [9.2, 1.45, 10.5],
-      escala: [1.35, 1.55],
-      opacidade: 0.94,
-    },
-    {
-      id: 'arte-criacao-animal-coelho',
-      arquivo: '/art/animals/kenney/rabbit.png',
-      posicao: [12.8, 1.05, 10.2],
-      escala: [0.95, 1.25],
-      opacidade: 0.94,
-    },
-    {
-      id: 'arte-criacao-animal-pato',
-      arquivo: '/art/animals/kenney/duck.png',
-      posicao: [9.1, 0.95, 6.2],
-      escala: [1, 1],
-      opacidade: 0.94,
-    },
   ],
   // IDs públicos aprovados pelo proxy; a referência USFM permanece no backend.
   coletaveis: [
@@ -234,7 +173,7 @@ export const mapaCriacao: MapaRegiao = {
       id: 'coletavel-primeiro-dia',
       historiaId: 'criacao',
       passagemId: 'genesis-1-1',
-      posicao: [-11, 1, -11],
+      posicao: [-18, 1, -15],
       raioAtivacao: 1.5,
       cor: '#f5d76e',
     },
@@ -242,7 +181,7 @@ export const mapaCriacao: MapaRegiao = {
       id: 'coletavel-luz',
       historiaId: 'criacao',
       passagemId: 'genesis-1-3',
-      posicao: [10, 1, -10],
+      posicao: [10, 1, 13],
       raioAtivacao: 1.5,
       cor: '#ffe9a6',
     },
@@ -250,7 +189,7 @@ export const mapaCriacao: MapaRegiao = {
       id: 'coletavel-vegetacao',
       historiaId: 'criacao',
       passagemId: 'genesis-1-11',
-      posicao: [-11, 1, 9],
+      posicao: [-13, 2, 9],
       raioAtivacao: 1.5,
       cor: '#8dc76b',
     },
@@ -258,7 +197,7 @@ export const mapaCriacao: MapaRegiao = {
       id: 'coletavel-animais',
       historiaId: 'criacao',
       passagemId: 'genesis-1-24',
-      posicao: [11, 1, 8],
+      posicao: [15, 1, 9],
       raioAtivacao: 1.5,
       cor: '#83c9d8',
     },
@@ -267,7 +206,7 @@ export const mapaCriacao: MapaRegiao = {
       historiaId: 'criacao',
       passagemId: 'genesis-1-27',
       // Fora do raio do coração do Éden para não abrir dois gatilhos em sequência.
-      posicao: [4, 1, 0],
+      posicao: [5, 1, -2],
       raioAtivacao: 1.5,
       cor: '#d8a36e',
     },

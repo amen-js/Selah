@@ -32,11 +32,16 @@ import {
   AtmosferaCriacao,
   coletavelCriacaoDisponivelNoMomento,
   type EstadoProgressaoCriacao,
+  EfeitosCriacao,
+  Elementos3DCriacao,
   type MomentoCriacao,
   type MomentoCriacaoId,
   ObjetivoNarrativoCriacao,
+  obterArtesCriacaoVisiveis,
+  obterPropsCriacaoVisiveis,
   ProgressaoCriacaoRuntime,
   PropMapaRenderer,
+  TerrenoCriacao,
   type PosicaoJogador,
   type SnapshotProgressaoCriacao,
 } from './creation'
@@ -201,6 +206,23 @@ function World({
         : mapa.coletaveis,
     [mapa.coletaveis, momentoCriacaoId, regiao],
   )
+  const propsDisponiveis = useMemo(
+    () =>
+      regiao === 'criacao'
+        ? obterPropsCriacaoVisiveis(mapa.props, momentoCriacaoId)
+        : mapa.props,
+    [mapa.props, momentoCriacaoId, regiao],
+  )
+  const artesDisponiveis = useMemo(
+    () =>
+      regiao === 'criacao'
+        ? obterArtesCriacaoVisiveis(
+            mapa.artes2D ?? [],
+            momentoCriacaoId,
+          )
+        : (mapa.artes2D ?? []),
+    [mapa.artes2D, momentoCriacaoId, regiao],
+  )
   const atualizarMomentoCriacao = useCallback(
     (momento: MomentoCriacao, estado: EstadoProgressaoCriacao) => {
       setMomentoCriacaoId(momento.id)
@@ -226,7 +248,9 @@ function World({
         </>
       )}
 
-      {mapa.chaoColisor !== false && (
+      {regiao === 'criacao' ? (
+        <TerrenoCriacao momentoId={momentoCriacaoId} />
+      ) : mapa.chaoColisor !== false ? (
         <RigidBody type="fixed" colliders={false}>
           <CuboidCollider
             args={[meiaLargura, 0.25, meiaProfundidade]}
@@ -240,12 +264,12 @@ function World({
             </mesh>
           )}
         </RigidBody>
-      )}
+      ) : null}
 
       <Cenario3DRegiao cenario={mapa.cenario3D} />
-      <PropMapaRenderer props={mapa.props} />
+      <PropMapaRenderer props={propsDisponiveis} />
       <Suspense fallback={null}>
-        <Arte2DRegiao artes={mapa.artes2D ?? []} />
+        <Arte2DRegiao artes={artesDisponiveis} />
       </Suspense>
       <ColetaveisRegiao
         coletaveis={coletaveisDisponiveis}
@@ -254,6 +278,8 @@ function World({
       />
       {regiao === 'criacao' && (
         <>
+          <EfeitosCriacao momentoId={momentoCriacaoId} />
+          <Elementos3DCriacao momentoId={momentoCriacaoId} />
           <ObjetivoNarrativoCriacao
             momentoId={momentoCriacaoId}
             enabled={playing}

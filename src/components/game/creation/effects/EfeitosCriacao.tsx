@@ -36,10 +36,10 @@ export function EfeitosCriacao({
         <AmbienteVazio reducedMotion={reducedMotion} />
       )}
       {assetsVisiveis.has('luz-guia') && (
-        <LuzGuia reducedMotion={reducedMotion} />
+        <LuzGuia posicao={[0, 1.2, 15]} reducedMotion={reducedMotion} />
       )}
       {assetsVisiveis.has('nucleo-luz') && (
-        <NucleoLuz reducedMotion={reducedMotion} />
+        <NucleoLuz posicao={[10, 1.35, 13]} reducedMotion={reducedMotion} />
       )}
       {assetsVisiveis.has('marcadores-caminho-luz') && (
         <MarcadoresCaminhoLuz reducedMotion={reducedMotion} />

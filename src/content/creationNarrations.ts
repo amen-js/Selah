@@ -1,5 +1,5 @@
-import type { MomentoCriacaoId } from '../components/game/creation/progression'
-import type { Idioma } from '../types/selah'
+import type { MomentoCriacaoId } from '../components/game/creation/progression/types.ts'
+import type { Idioma } from '../types/selah.ts'
 
 export type FaseNarracaoCriacao = 'inicial' | 'apoio' | 'transicao'
 

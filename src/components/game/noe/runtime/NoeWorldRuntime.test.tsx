@@ -4,9 +4,44 @@ import type { ColetaveisRegiaoProps } from '../../region/ColetaveisRegiao'
 import type { PortaisRegiaoProps } from '../../portals/PortaisRegiao'
 import type { CanteiroNoeProps } from '../world/types'
 import type { MantimentosArcaNoeProps } from '../world/MantimentosArcaNoe'
+import type { AbrigoTempestadeNoeProps } from '../world/AbrigoTempestadeNoe'
 import { NoeWorldRuntime } from './NoeWorldRuntime'
 
 vi.mock('../world', () => ({
+  AbrigoTempestadeNoe: ({
+    estado,
+    onCandidatoChange,
+    onConcluirUnidade,
+  }: AbrigoTempestadeNoeProps) =>
+    estado.momentoAtualId === 'fechamento-porta' ? (
+      <button
+        type="button"
+        onClick={() =>
+          onCandidatoChange?.({
+            id: 'abrigo-chamado-final-noe',
+            momentoId: 'fechamento-porta',
+            acaoId: 'noe.abrigo.chamado-ouvido',
+            unidadeId: 'chamado-final-noe',
+            posicao: [0, 0, 0],
+            raio: 2,
+            prioridade: 360,
+            etapa: 1,
+            ordem: 1,
+            tipoVisual: 'chamado',
+            distancia: 0,
+            estado: 'disponivel',
+            acionar: () =>
+              onConcluirUnidade(
+                'noe.abrigo.chamado-ouvido',
+                'chamado-final-noe',
+              ),
+          })
+        }
+      >
+        ouvir chamado final
+      </button>
+    ) : null,
+  AtmosferaNoe: () => null,
   CanteiroNoe: ({ momentoAtualId, onCandidatoChange }: CanteiroNoeProps) => (
     <section>
       <output data-testid="momento-noe">{momentoAtualId}</output>
@@ -291,6 +326,37 @@ describe('NoeWorldRuntime', () => {
           {
             acaoId: 'noe.mantimento.feno-armazenado',
             unidadesConcluidas: ['feno-estabulos-inferiores'],
+          },
+        ],
+      ),
+    )
+  })
+
+  it('encaminha a sequência segura de M6 pelo árbitro único', async () => {
+    useGameStore.setState({
+      checkpointNoe: {
+        versao: 1,
+        momentosConcluidos: [
+          'chamado-canteiro',
+          'coleta-vedacao',
+          'estoque-mantimentos',
+          'conducao-animais',
+          'acomodacao-animais',
+        ],
+        progressoMomentoAtual: [],
+      },
+    })
+    renderRuntime()
+
+    fireEvent.click(screen.getByRole('button', { name: 'ouvir chamado final' }))
+    fireEvent.keyDown(window, { code: 'KeyE' })
+
+    await waitFor(() =>
+      expect(useGameStore.getState().checkpointNoe?.progressoMomentoAtual).toEqual(
+        [
+          {
+            acaoId: 'noe.abrigo.chamado-ouvido',
+            unidadesConcluidas: ['chamado-final-noe'],
           },
         ],
       ),

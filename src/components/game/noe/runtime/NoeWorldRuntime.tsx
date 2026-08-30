@@ -7,7 +7,10 @@ import type { PosicaoJogador } from '../../creation/proximidade'
 import { useGameStore } from '../../../../stores/gameStore'
 import { obterRequisitosPendentesNoe } from '../progression'
 import {
+  AbrigoTempestadeNoe,
+  AtmosferaNoe,
   CanteiroNoe,
+  type CandidatoAbrigoTempestadeNoe,
   type CandidatoTarefaNoe as CandidatoTarefaCanteiroNoe,
   MantimentosArcaNoe,
   type CandidatoMantimentoNoe,
@@ -71,6 +74,8 @@ export function NoeWorldRuntime({
     useState<CandidatoTarefaCanteiroNoe | null>(null)
   const [mantimentoProximo, setMantimentoProximo] =
     useState<CandidatoMantimentoNoe | null>(null)
+  const [abrigoProximo, setAbrigoProximo] =
+    useState<CandidatoAbrigoTempestadeNoe | null>(null)
   const [coletavelProximo, setColetavelProximo] =
     useState<ColetavelMapa | null>(null)
   const [portalAcionavel, setPortalAcionavel] = useState<PortalMapa | null>(null)
@@ -146,6 +151,17 @@ export function NoeWorldRuntime({
       })
     }
 
+    if (abrigoProximo) {
+      proximos.push({
+        tipo: 'tarefa',
+        id: abrigoProximo.id,
+        acaoId: abrigoProximo.acaoId,
+        unidadeId: abrigoProximo.unidadeId,
+        distancia: abrigoProximo.distancia,
+        acionar: abrigoProximo.acionar,
+      })
+    }
+
     if (
       coletavelProximo &&
       requisitoSelah &&
@@ -177,6 +193,7 @@ export function NoeWorldRuntime({
 
     return proximos
   }, [
+    abrigoProximo,
     coletavelProximo,
     emitir,
     mantimentoProximo,
@@ -219,6 +236,7 @@ export function NoeWorldRuntime({
 
   return (
     <>
+      <AtmosferaNoe estado={estado} reducedMotion={reducedMotion} />
       <CanteiroNoe
         momentoAtualId={estado.momentoAtualId}
         progressoMomentoAtual={estado.progressoMomentoAtual}
@@ -232,6 +250,14 @@ export function NoeWorldRuntime({
         posicaoJogadorRef={posicaoJogadorRef}
         enabled={enabled}
         onCandidatoChange={setMantimentoProximo}
+        onConcluirUnidade={concluirUnidade}
+      />
+      <AbrigoTempestadeNoe
+        estado={estado}
+        posicaoJogadorRef={posicaoJogadorRef}
+        enabled={enabled}
+        reducedMotion={reducedMotion}
+        onCandidatoChange={setAbrigoProximo}
         onConcluirUnidade={concluirUnidade}
       />
       <ColetaveisRegiao

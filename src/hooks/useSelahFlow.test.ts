@@ -1,4 +1,5 @@
 import { act, renderHook, waitFor } from '@testing-library/react'
+import { createElement, StrictMode, type PropsWithChildren } from 'react'
 
 import type { SelahGateway } from '../services/selahGateway'
 import { useGameStore } from '../stores/gameStore'
@@ -59,6 +60,18 @@ describe('useSelahFlow', () => {
       [{ tipo: 'selah_iniciado', historiaId: 'criacao', versaoApp: 'test' }],
       true,
     )
+  })
+
+  it('finishes loading under React StrictMode without duplicating requests', async () => {
+    const gateway = createGateway()
+    useGameStore.getState().abrirSelah({ historiaId: 'criacao', passagemId: versiculo.passagemId })
+    const wrapper = ({ children }: PropsWithChildren) => createElement(StrictMode, null, children)
+
+    renderHook(() => useSelahFlow({ gateway }), { wrapper })
+
+    await waitFor(() => expect(useGameStore.getState().selahAtivo?.fase).toBe('versiculo'))
+    expect(gateway.buscarVersiculo).toHaveBeenCalledOnce()
+    expect(gateway.gerarQuiz).toHaveBeenCalledOnce()
   })
 
   it('does not call the metrics gateway without consent', async () => {

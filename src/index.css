@@ -524,7 +524,15 @@ button:disabled {
   text-align: center;
 }
 
+.lab-page .hud {
+  top: max(6rem, calc(env(safe-area-inset-top) + 6rem));
+}
+
 @media (max-width: 720px) {
+  .lab-page .hud {
+    top: max(17rem, calc(env(safe-area-inset-top) + 17rem));
+  }
+
   .hud {
     align-items: flex-start;
   }

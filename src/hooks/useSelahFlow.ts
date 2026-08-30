@@ -38,7 +38,6 @@ export function useSelahFlow({
     const chave = `${selahAtivo.gatilho.historiaId}:${selahAtivo.gatilho.passagemId}`
     if (carregamentoAtual.current === chave) return
     carregamentoAtual.current = chave
-    let cancelado = false
 
     if (compartilharMetricas) {
       void gateway.enviarMetricas(
@@ -66,7 +65,6 @@ export function useSelahFlow({
       .then(([versiculo, quiz]) => {
         const ativoAtual = useGameStore.getState().selahAtivo
         if (
-          cancelado ||
           ativoAtual?.gatilho.historiaId !== selahAtivo.gatilho.historiaId ||
           ativoAtual.gatilho.passagemId !== selahAtivo.gatilho.passagemId
         ) {
@@ -78,7 +76,6 @@ export function useSelahFlow({
       .catch(() => {
         const ativoAtual = useGameStore.getState().selahAtivo
         if (
-          cancelado ||
           ativoAtual?.gatilho.historiaId !== selahAtivo.gatilho.historiaId ||
           ativoAtual.gatilho.passagemId !== selahAtivo.gatilho.passagemId
         ) {
@@ -89,9 +86,6 @@ export function useSelahFlow({
         )
       })
 
-    return () => {
-      cancelado = true
-    }
   }, [
     appVersion,
     carregarQuiz,

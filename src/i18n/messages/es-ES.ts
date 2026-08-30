@@ -200,8 +200,6 @@ export const esES = {
   'selah.tts.pauseAction': 'Pausar lectura',
   'selah.tts.resumeAria': 'Continuar lectura en voz alta',
   'selah.tts.resumeAction': 'Continuar lectura',
-  'selah.tts.disclosure':
-    'Voz generada por IA; si no está disponible, se usará la voz del dispositivo.',
   'selah.tts.fallbackStatus': 'Usando la voz de este dispositivo.',
   'selah.tts.error': 'No se pudo reproducir este pasaje.',
   'selah.quiz.continueAria': 'Continuar a la pregunta',

@@ -200,8 +200,6 @@ export const enUS = {
   'selah.tts.pauseAction': 'Pause reading',
   'selah.tts.resumeAria': 'Continue reading aloud',
   'selah.tts.resumeAction': 'Continue reading',
-  'selah.tts.disclosure':
-    'AI-generated voice; if unavailable, your device voice will be used.',
   'selah.tts.fallbackStatus': 'Using this device’s voice.',
   'selah.tts.error': 'This passage could not be played.',
   'selah.quiz.continueAria': 'Continue to the question',

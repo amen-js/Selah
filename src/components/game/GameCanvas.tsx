@@ -42,6 +42,7 @@ import {
   type FasePortalTransicao,
   type PortalMapa,
 } from './portals'
+import { RiggedPlayer } from './player'
 import { Arte2DRegiao, Cenario3DRegiao, ColetaveisRegiao } from './region'
 
 const DURACAO_SAIDA_PORTAL_MS = 260
@@ -137,16 +138,7 @@ function Player({
         autoBalance={false}
         enableToggleRun={false}
       >
-        <group position={[0, -0.15, 0]}>
-          <mesh castShadow>
-            <boxGeometry args={[0.72, 1.12, 0.72]} />
-            <meshStandardMaterial color="#e9b949" roughness={0.72} />
-          </mesh>
-          <mesh position={[0, 0.1, -0.37]}>
-            <boxGeometry args={[0.36, 0.12, 0.04]} />
-            <meshStandardMaterial color="#fff3c4" />
-          </mesh>
-        </group>
+        <RiggedPlayer controller={controller} />
       </Ecctrl>
       <SelahCameraRig
         controller={controller}

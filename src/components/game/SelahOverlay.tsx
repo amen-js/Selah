@@ -146,9 +146,6 @@ export function SelahOverlay({ gateway, tts, appVersion }: SelahOverlayProps) {
           <p className="selah-card__attribution">
             {versiculo.versao} · {versiculo.atribuicao}
           </p>
-          {ttsDisponivel && (
-            <p className="muted">{t('selah.tts.disclosure')}</p>
-          )}
           {ttsEstado === 'fallback' && (
             <p className="muted" role="status">
               {t('selah.tts.fallbackStatus')}

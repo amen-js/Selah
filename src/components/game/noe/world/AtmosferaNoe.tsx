@@ -1,6 +1,6 @@
 import { useFrame } from '@react-three/fiber'
-import { useMemo, useRef } from 'react'
-import type { Group } from 'three'
+import { useLayoutEffect, useMemo, useRef } from 'react'
+import { Object3D, type Group, type InstancedMesh } from 'three'
 import type { Ponto3D } from '../../../../mapas/types'
 import type { EstadoProgressaoNoe } from '../progression/types'
 import {
@@ -152,7 +152,22 @@ function VentoSuaveNoe({
 
 function ChuvaExteriorNoe({ reducedMotion }: { reducedMotion: boolean }) {
   const grupoRef = useRef<Group>(null)
+  const gotasRef = useRef<InstancedMesh>(null)
   const gotas = useMemo(() => gerarGotasChuvaExteriorNoe(), [])
+  const transformacao = useMemo(() => new Object3D(), [])
+
+  useLayoutEffect(() => {
+    const malha = gotasRef.current
+    if (!malha) return
+
+    gotas.forEach((posicao, indice) => {
+      transformacao.position.set(...posicao)
+      transformacao.rotation.set(0, 0, -0.08)
+      transformacao.updateMatrix()
+      malha.setMatrixAt(indice, transformacao.matrix)
+    })
+    malha.instanceMatrix.needsUpdate = true
+  }, [gotas, transformacao])
 
   useFrame(({ clock }) => {
     if (!grupoRef.current || reducedMotion) return
@@ -165,21 +180,19 @@ function ChuvaExteriorNoe({ reducedMotion }: { reducedMotion: boolean }) {
       name="chuva-exterior-noe"
       userData={{ somenteExterior: true, semTrovao: true, semPerigo: true }}
     >
-      {gotas.map((posicao, indice) => (
-        <mesh
-          key={indice}
-          position={[...posicao]}
-          rotation={[0, 0, -0.08]}
-        >
-          <cylinderGeometry args={[0.018, 0.018, 0.72, 4]} />
-          <meshBasicMaterial
-            color="#b9d9e5"
-            transparent
-            opacity={0.55}
-            depthWrite={false}
-          />
-        </mesh>
-      ))}
+      <instancedMesh
+        ref={gotasRef}
+        args={[undefined, undefined, gotas.length]}
+        frustumCulled={false}
+      >
+        <cylinderGeometry args={[0.018, 0.018, 0.72, 4]} />
+        <meshBasicMaterial
+          color="#b9d9e5"
+          transparent
+          opacity={0.55}
+          depthWrite={false}
+        />
+      </instancedMesh>
     </group>
   )
 }

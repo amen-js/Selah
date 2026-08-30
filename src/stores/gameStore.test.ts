@@ -281,6 +281,31 @@ describe('gameStore', () => {
     expect(useGameStore.getState().checkpointNoe).toBeNull()
   })
 
+  it('replaces a malformed persisted Noah checkpoint without throwing', async () => {
+    localStorage.setItem(
+      GAME_STORAGE_KEY,
+      JSON.stringify({
+        state: {
+          idioma: 'pt-BR',
+          faixaEtaria: 'geral',
+          ttsAtivo: false,
+          iaAtiva: true,
+          salvarProgresso: true,
+          compartilharMetricas: false,
+          configuracaoInicialConcluida: true,
+          pausaParentalAtiva: false,
+          checkpointNoe: { versao: 1 },
+        },
+        version: 1,
+      }),
+    )
+
+    await useGameStore.persist.rehydrate()
+
+    expect(() => useGameStore.getState().setCheckpointNoe(checkpointNoe)).not.toThrow()
+    expect(useGameStore.getState().checkpointNoe).toEqual(checkpointNoe)
+  })
+
   it('excludes gameplay history while playing without save', () => {
     useGameStore.getState().abrirSelah({ historiaId: 'criacao', passagemId: versiculo.passagemId })
     useGameStore.getState().carregarQuiz(quiz)

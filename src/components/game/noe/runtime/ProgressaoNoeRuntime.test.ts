@@ -112,4 +112,26 @@ describe('useProgressaoNoeRuntime', () => {
       concluida: false,
     })
   })
+
+  it('normaliza checkpoint v1 truncado sem derrubar a região', async () => {
+    useGameStore.setState({
+      checkpointNoe: { versao: 1 } as never,
+    })
+
+    const { result } = renderHook(() => useProgressaoNoeRuntime(true))
+
+    expect(result.current.estado).toMatchObject({
+      momentoAtualId: 'chamado-canteiro',
+      momentosConcluidos: [],
+      progressoMomentoAtual: [],
+      concluida: false,
+    })
+    await waitFor(() =>
+      expect(useGameStore.getState().checkpointNoe).toEqual({
+        versao: 1,
+        momentosConcluidos: [],
+        progressoMomentoAtual: [],
+      }),
+    )
+  })
 })

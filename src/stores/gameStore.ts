@@ -24,12 +24,39 @@ const normalizarIdsUnicos = (ids: readonly string[]): string[] => [
   ...new Set(ids),
 ]
 
+const ehRegistro = (valor: unknown): valor is Record<string, unknown> =>
+  typeof valor === 'object' && valor !== null
+
+const ehCheckpointNoeComparavel = (
+  valor: unknown,
+): valor is CheckpointProgressaoNoe =>
+  ehRegistro(valor) &&
+  valor.versao === 1 &&
+  Array.isArray(valor.momentosConcluidos) &&
+  valor.momentosConcluidos.every((momentoId) => typeof momentoId === 'string') &&
+  Array.isArray(valor.progressoMomentoAtual) &&
+  valor.progressoMomentoAtual.every(
+    (progresso) =>
+      ehRegistro(progresso) &&
+      typeof progresso.acaoId === 'string' &&
+      Array.isArray(progresso.unidadesConcluidas) &&
+      progresso.unidadesConcluidas.every(
+        (unidadeId) => typeof unidadeId === 'string',
+      ),
+  )
+
 const checkpointsNoeIguais = (
-  atual: CheckpointProgressaoNoe | null,
-  proximo: CheckpointProgressaoNoe | null,
+  atual: unknown,
+  proximo: unknown,
 ): boolean => {
   if (atual === proximo) return true
-  if (!atual || !proximo || atual.versao !== proximo.versao) return false
+  if (
+    !ehCheckpointNoeComparavel(atual) ||
+    !ehCheckpointNoeComparavel(proximo) ||
+    atual.versao !== proximo.versao
+  ) {
+    return false
+  }
   if (atual.momentosConcluidos.length !== proximo.momentosConcluidos.length) {
     return false
   }

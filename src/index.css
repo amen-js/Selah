@@ -435,6 +435,22 @@ button:disabled {
   touch-action: none;
 }
 
+@property --hold-progress {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+.hold-button--active {
+  animation: hold-progress 3s linear forwards;
+}
+
+@keyframes hold-progress {
+  to {
+    --hold-progress: 360deg;
+  }
+}
+
 .dashboard-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

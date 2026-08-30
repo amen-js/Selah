@@ -31,7 +31,7 @@ todos:
     status: pending
   - id: regiao-criacao
     content: Dev 1 carrega os .glb e faz gatilho de proximidade; Designer preenche mapas/criacao.ts com o layout
-    status: pending
+    status: completed
   - id: selah
     content: "Momento Selah: Dev 1 faz pausa do Ecctrl, useSpring na câmera e fade de áudio; Dev 3 faz a UI do versículo, quiz A/B/C/D e botão ouvir (TTS)"
     status: pending

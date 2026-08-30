@@ -10,11 +10,17 @@ import {
   processarEventoProgressaoCriacao,
   reconstruirProgressaoCriacao,
 } from './estado'
+import {
+  atualizarInatividadeCriacao,
+  type EstadoInatividadeCriacao,
+} from './inatividade'
 import type {
   EstadoProgressaoCriacao,
   EventoProgressaoCriacao,
   MomentoCriacao,
 } from './types'
+
+const POSICAO_INATIVIDADE_PADRAO: PosicaoJogador = { x: 0, y: 0, z: 0 }
 
 export interface ProgressaoCriacaoRuntimeProps {
   posicaoJogadorRef: RefObject<PosicaoJogador | null>
@@ -23,6 +29,7 @@ export interface ProgressaoCriacaoRuntimeProps {
     momento: MomentoCriacao,
     estado: EstadoProgressaoCriacao,
   ) => void
+  onInatividadeChange?: (inativo: boolean) => void
 }
 
 /** Bridges the pure Creation state machine to R3F movement and the quiz history. */
@@ -30,6 +37,7 @@ export function ProgressaoCriacaoRuntime({
   posicaoJogadorRef,
   enabled,
   onMomentoChange,
+  onInatividadeChange,
 }: ProgressaoCriacaoRuntimeProps) {
   const historico = useGameStore((state) => state.historico)
   const passagensRespondidas = useMemo(
@@ -43,6 +51,12 @@ export function ProgressaoCriacaoRuntime({
   const estadoRef = useRef(estado)
   const posicaoAnteriorRef = useRef<PosicaoJogador | null>(null)
   const distanciaPercorridaRef = useRef(0)
+  const estadoInatividadeRef = useRef<EstadoInatividadeCriacao>({
+    ultimaAtividadeMs: 0,
+    posicaoAnterior: null,
+    inativo: false,
+  })
+  const onInatividadeChangeRef = useRef(onInatividadeChange)
 
   const emitir = (evento: EventoProgressaoCriacao) => {
     const processado = processarEventoProgressaoCriacao(estadoRef.current, evento)
@@ -66,8 +80,40 @@ export function ProgressaoCriacaoRuntime({
     onMomentoChange?.(obterMomentoAtualCriacao(estado), estado)
   }, [estado, onMomentoChange])
 
+  useEffect(() => {
+    onInatividadeChangeRef.current = onInatividadeChange
+  }, [onInatividadeChange])
+
+  useEffect(() => {
+    const resultado = atualizarInatividadeCriacao(
+      estadoInatividadeRef.current,
+      {
+        agoraMs: performance.now(),
+        posicao: posicaoJogadorRef.current ?? POSICAO_INATIVIDADE_PADRAO,
+        enabled: false,
+      },
+    )
+    estadoInatividadeRef.current = resultado.estado
+    if (resultado.mudouPara !== null) {
+      onInatividadeChangeRef.current?.(resultado.mudouPara)
+    }
+  }, [estado.momentoAtualId, posicaoJogadorRef])
+
   useFrame(() => {
     const posicaoAtual = posicaoJogadorRef.current
+    const resultadoInatividade = atualizarInatividadeCriacao(
+      estadoInatividadeRef.current,
+      {
+        agoraMs: performance.now(),
+        posicao: posicaoAtual ?? POSICAO_INATIVIDADE_PADRAO,
+        enabled: enabled && posicaoAtual !== null,
+      },
+    )
+    estadoInatividadeRef.current = resultadoInatividade.estado
+    if (resultadoInatividade.mudouPara !== null) {
+      onInatividadeChangeRef.current?.(resultadoInatividade.mudouPara)
+    }
+
     if (!posicaoAtual) return
 
     if (!enabled) {

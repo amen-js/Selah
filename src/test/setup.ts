@@ -22,5 +22,9 @@ Object.defineProperty(globalThis, 'localStorage', {
 
 afterEach(() => {
   cleanup()
-  localStorage.clear()
+  try {
+    localStorage.clear()
+  } catch {
+    // Node 26 exige --localstorage-file; o Vitest já habilita isso.
+  }
 })

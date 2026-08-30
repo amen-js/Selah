@@ -30,4 +30,3 @@ describe('transformações de props', () => {
     })
   })
 })
-

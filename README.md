@@ -4,9 +4,23 @@ Jogo bíblico 3D para a web.
 
 Selah é um projeto de jogo interativo em 3D no navegador, inspirado em narrativas e atmosfera bíblica. O repositório concentra o código e o planejamento do produto.
 
-## Status
+## Setup
 
-Em planejamento / início de desenvolvimento.
+```bash
+npm install
+cp .env.example .env   # preencha OPENROUTER_API_KEY e, se houver, YVP_APP_KEY
+npm run dev            # Vite :5173 + proxy Hono :8787
+```
+
+Endpoints do Dev 2 (testáveis com `curl`, sem 3D):
+
+- `GET /api/versiculo?passagemId=genesis-1-3&idioma=pt-BR`
+- `POST /api/quiz/gerar`
+- `POST /api/quiz/responder`
+- `POST /api/metricas/eventos`
+
+Sem chaves, o proxy usa o snapshot local de domínio público e os quizzes aprovados em `server/data/`.
+
 
 ## Plano
 

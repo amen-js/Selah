@@ -1,16 +1,12 @@
 import { useEffect, useRef } from 'react'
 
 import { useSelahFlow } from '../../hooks/useSelahFlow'
+import { useTranslation } from '../../i18n'
 import type { SelahGateway } from '../../services/selahGateway'
+import type { TtsController } from '../../services/tts'
 import { useGameStore } from '../../stores/gameStore'
-import type { Idioma } from '../../types/selah'
 
-export interface TtsController {
-  suportado: boolean
-  falar: (texto: string, idioma: Idioma) => void
-  pausar: () => void
-  cancelar: () => void
-}
+export type { TtsController }
 
 interface SelahOverlayProps {
   gateway: SelahGateway
@@ -19,6 +15,7 @@ interface SelahOverlayProps {
 }
 
 export function SelahOverlay({ gateway, tts, appVersion }: SelahOverlayProps) {
+  const { t } = useTranslation()
   const { selahAtivo, mostrarQuiz, responder, concluir, cancelar } = useSelahFlow({
     gateway,
     appVersion,
@@ -70,15 +67,15 @@ export function SelahOverlay({ gateway, tts, appVersion }: SelahOverlayProps) {
     return (
       <div className="modal-backdrop overlay-interactive selah-backdrop">
         <section className="selah-card" role="dialog" aria-modal="true" aria-labelledby="selah-error">
-          <p className="eyebrow">Momento Selah</p>
+          <p className="eyebrow">{t('selah.moment')}</p>
           <h1 id="selah-error" ref={tituloRef} tabIndex={-1}>
-            Vamos pausar por aqui
+            {t('selah.error.title')}
           </h1>
           <p className="feedback feedback--incorrect" role="alert">
             {selahAtivo.erro}
           </p>
           <button className="secondary-button" type="button" onClick={cancelar}>
-            Sair do Momento Selah
+            {t('selah.error.exit')}
           </button>
         </section>
       </div>
@@ -89,12 +86,12 @@ export function SelahOverlay({ gateway, tts, appVersion }: SelahOverlayProps) {
     return (
       <div className="modal-backdrop overlay-interactive selah-backdrop">
         <section className="selah-card" role="dialog" aria-modal="true" aria-labelledby="selah-loading">
-          <p className="eyebrow">Respire devagar</p>
+          <p className="eyebrow">{t('selah.loading.eyebrow')}</p>
           <h1 id="selah-loading" ref={tituloRef} tabIndex={-1}>
-            Preparando este momento…
+            {t('selah.loading.title')}
           </h1>
           <p className="muted" role="status">
-            Buscando a passagem e um desafio seguro.
+            {t('selah.loading.status')}
           </p>
         </section>
       </div>
@@ -108,32 +105,42 @@ export function SelahOverlay({ gateway, tts, appVersion }: SelahOverlayProps) {
     return (
       <div className="modal-backdrop overlay-interactive selah-backdrop">
         <section className="selah-card" role="dialog" aria-modal="true" aria-labelledby="selah-verse">
-          <p className="eyebrow">Momento Selah · {versiculo.referencia}</p>
+          <p className="eyebrow">
+            {t('selah.verse.eyebrow', { reference: versiculo.referencia })}
+          </p>
           <h1 id="selah-verse" ref={tituloRef} tabIndex={-1} className="selah-card__verse">
             {versiculo.texto}
           </h1>
           <p className="selah-card__attribution">
             {versiculo.versao} · {versiculo.atribuicao}
           </p>
+          {!ttsDisponivel && (
+            <p id="selah-tts-unavailable" className="sr-only">
+              {t('selah.tts.unavailable')}
+            </p>
+          )}
           <div className="selah-card__actions">
             <button
               className="secondary-button"
               type="button"
               disabled={!ttsDisponivel}
-              title={ttsDisponivel ? undefined : 'Leitura em voz alta indisponível neste dispositivo.'}
-              aria-label="Ouvir versículo"
+              title={ttsDisponivel ? undefined : t('selah.tts.unavailable')}
+              aria-label={t('selah.tts.listenAria')}
+              aria-describedby={
+                ttsDisponivel ? undefined : 'selah-tts-unavailable'
+              }
               onClick={alternarTts}
             >
-              Ouvir / pausar
+              {t('selah.tts.action')}
             </button>
             <button
               className="primary-button"
               type="button"
               disabled={!quiz}
-              aria-label="Continuar para o quiz"
+              aria-label={t('selah.quiz.continueAria')}
               onClick={mostrarQuiz}
             >
-              Continuar
+              {t('selah.continue')}
             </button>
           </div>
         </section>
@@ -150,8 +157,8 @@ export function SelahOverlay({ gateway, tts, appVersion }: SelahOverlayProps) {
         <section className="selah-card" role="dialog" aria-modal="true" aria-labelledby="selah-question">
           <span className="status-chip">
             {quiz.origem === 'ia'
-              ? 'Quiz criado por IA a partir da passagem aprovada'
-              : 'Quiz local aprovado — IA desativada ou indisponível'}
+              ? t('selah.quiz.aiStatus')
+              : t('selah.quiz.fallbackStatus')}
           </span>
           <h1 id="selah-question" ref={tituloRef} tabIndex={-1}>
             {quiz.pergunta}
@@ -163,7 +170,10 @@ export function SelahOverlay({ gateway, tts, appVersion }: SelahOverlayProps) {
                   className="answer-button"
                   type="button"
                   disabled={enviando}
-                  aria-label={`Alternativa ${alternativa.id}: ${alternativa.texto}`}
+                  aria-label={t('selah.quiz.alternativeAria', {
+                    id: alternativa.id,
+                    text: alternativa.texto,
+                  })}
                   onClick={() => void responder(alternativa.id)}
                 >
                   <span className="answer-button__id">{alternativa.id}</span>
@@ -172,7 +182,7 @@ export function SelahOverlay({ gateway, tts, appVersion }: SelahOverlayProps) {
               </li>
             ))}
           </ol>
-          {enviando && <p role="status">Verificando resposta…</p>}
+          {enviando && <p role="status">{t('selah.quiz.checking')}</p>}
         </section>
       </div>
     )
@@ -186,13 +196,15 @@ export function SelahOverlay({ gateway, tts, appVersion }: SelahOverlayProps) {
         <section className="selah-card" role="dialog" aria-modal="true" aria-labelledby="selah-feedback">
           <p className="eyebrow">{avaliacao.referencia}</p>
           <h1 id="selah-feedback" ref={tituloRef} tabIndex={-1}>
-            {avaliacao.acertou ? 'Você acertou' : 'Vamos aprender juntos'}
+            {avaliacao.acertou
+              ? t('selah.feedback.correct')
+              : t('selah.feedback.incorrect')}
           </h1>
           <p className={`feedback${avaliacao.acertou ? '' : ' feedback--incorrect'}`} role="status">
             {avaliacao.explicacao}
           </p>
           <button className="primary-button" type="button" onClick={concluir}>
-            Iniciar Pausa Selah
+            {t('selah.feedback.startPause')}
           </button>
         </section>
       </div>

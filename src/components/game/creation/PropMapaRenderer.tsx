@@ -80,4 +80,3 @@ export function PropMapaRenderer({ props }: PropMapaRendererProps) {
     </group>
   )
 }
-

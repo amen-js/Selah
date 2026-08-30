@@ -44,10 +44,12 @@ const createGateway = (): SelahGateway => ({
 describe('useSelahFlow', () => {
   beforeEach(() => {
     useGameStore.getState().apagarProgresso()
+    useGameStore.getState().setIdioma('pt-BR')
   })
 
   it('loads verse and quiz once and reports the start with consent', async () => {
     const gateway = createGateway()
+    useGameStore.getState().setIdioma('en-US')
     useGameStore.getState().setCompartilharMetricas(true)
     useGameStore.getState().abrirSelah({ historiaId: 'criacao', passagemId: versiculo.passagemId })
 
@@ -55,7 +57,14 @@ describe('useSelahFlow', () => {
 
     await waitFor(() => expect(useGameStore.getState().selahAtivo?.fase).toBe('versiculo'))
     expect(gateway.buscarVersiculo).toHaveBeenCalledOnce()
+    expect(gateway.buscarVersiculo).toHaveBeenCalledWith(
+      { historiaId: 'criacao', passagemId: versiculo.passagemId },
+      'en-US',
+    )
     expect(gateway.gerarQuiz).toHaveBeenCalledOnce()
+    expect(gateway.gerarQuiz).toHaveBeenCalledWith(
+      expect.objectContaining({ idioma: 'en-US' }),
+    )
     expect(gateway.enviarMetricas).toHaveBeenCalledWith(
       [{ tipo: 'selah_iniciado', historiaId: 'criacao', versaoApp: 'test' }],
       true,
@@ -129,17 +138,41 @@ describe('useSelahFlow', () => {
     )
   })
 
-  it('shows a controlled error when content cannot be loaded', async () => {
+  it.each([
+    [
+      'pt-BR',
+      'Não foi possível carregar este momento. Tente novamente em instantes.',
+    ],
+    ['en-US', 'We could not load this moment. Please try again shortly.'],
+    [
+      'es-ES',
+      'No pudimos cargar este momento. Inténtalo de nuevo en unos instantes.',
+    ],
+  ] as const)('shows a controlled %s error when content cannot be loaded', async (idioma, error) => {
     const gateway = createGateway()
     vi.mocked(gateway.buscarVersiculo).mockRejectedValue(new Error('network details'))
+    useGameStore.getState().setIdioma(idioma)
     useGameStore.getState().abrirSelah({ historiaId: 'criacao', passagemId: versiculo.passagemId })
 
     renderHook(() => useSelahFlow({ gateway }))
 
-    await waitFor(() =>
-      expect(useGameStore.getState().selahAtivo?.erro).toBe(
-        'Não foi possível carregar este Momento Selah. Tente novamente mais tarde.',
-      ),
-    )
+    await waitFor(() => expect(useGameStore.getState().selahAtivo?.erro).toBe(error))
+  })
+
+  it('localizes answer errors and returns to the quiz phase', async () => {
+    const gateway = createGateway()
+    vi.mocked(gateway.responderQuiz).mockRejectedValue(new Error('diagnostic details'))
+    useGameStore.getState().setIdioma('es-ES')
+    useGameStore.getState().abrirSelah({ historiaId: 'criacao', passagemId: versiculo.passagemId })
+    const { result } = renderHook(() => useSelahFlow({ gateway }))
+    await waitFor(() => expect(useGameStore.getState().selahAtivo?.fase).toBe('versiculo'))
+
+    act(() => result.current.mostrarQuiz())
+    await act(async () => result.current.responder('A'))
+
+    expect(useGameStore.getState().selahAtivo).toMatchObject({
+      fase: 'quiz',
+      erro: 'No pudimos verificar tu respuesta. Inténtalo de nuevo.',
+    })
   })
 })

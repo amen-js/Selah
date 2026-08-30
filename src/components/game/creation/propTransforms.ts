@@ -26,4 +26,3 @@ export function obterTransformacaoProp(prop: Pick<PropMapa, 'posicao' | 'rotacao
     scale: normalizarEscala(prop.escala),
   }
 }
-

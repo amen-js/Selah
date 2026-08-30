@@ -5,10 +5,26 @@ import { useGameStore } from './stores/gameStore'
 
 const canvasMock = vi.hoisted(() => ({
   element: null as HTMLCanvasElement | null,
+  shouldThrow: false,
 }))
 
 const selahAudioMock = vi.hoisted(() => ({
   useSelahAudio: vi.fn(),
+}))
+
+const progressMock = vi.hoisted(() => ({
+  state: {
+    active: false,
+    progress: 100,
+    item: '',
+    loaded: 1,
+    total: 1,
+    errors: [] as string[],
+  },
+}))
+
+vi.mock('@react-three/drei', () => ({
+  useProgress: () => progressMock.state,
 }))
 
 vi.mock('./hooks/useSelahAudio', () => ({
@@ -26,6 +42,8 @@ vi.mock('./components/game/GameCanvas', async () => {
       playing: boolean
       onCanvasReady?: (canvas: HTMLCanvasElement) => void
     }) => {
+      if (canvasMock.shouldThrow) throw new Error('webgl-scene-failed')
+
       useEffect(() => {
         if (canvasMock.element) onCanvasReady?.(canvasMock.element)
       }, [onCanvasReady])
@@ -52,6 +70,15 @@ describe('App integration', () => {
     pointerLockElement = null
     requestPointerLock = vi.fn()
     canvasMock.element = document.createElement('canvas')
+    canvasMock.shouldThrow = false
+    progressMock.state = {
+      active: false,
+      progress: 100,
+      item: '',
+      loaded: 1,
+      total: 1,
+      errors: [],
+    }
     Object.defineProperty(canvasMock.element, 'requestPointerLock', {
       configurable: true,
       value: requestPointerLock,
@@ -109,6 +136,85 @@ describe('App integration', () => {
     expect(
       screen.getByRole('dialog', { name: 'Configuração do responsável' }),
     ).toBeInTheDocument()
+  })
+
+  it('keeps the responsible onboarding in front while the scene loads', () => {
+    useGameStore.getState().apagarProgresso()
+    useGameStore.getState().setIdioma('pt-BR')
+    progressMock.state = {
+      active: true,
+      progress: 32,
+      item: '/models/hub.glb',
+      loaded: 0,
+      total: 1,
+      errors: [],
+    }
+
+    render(<App />)
+
+    expect(
+      screen.getByRole('dialog', { name: 'Configuração do responsável' }),
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole('heading', { name: 'O mundo está despertando' }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('blocks entry and overlay controls until the scene is ready', () => {
+    progressMock.state = {
+      active: true,
+      progress: 42,
+      item: '/models/hub.glb',
+      loaded: 0,
+      total: 1,
+      errors: [],
+    }
+
+    render(<App />)
+
+    expect(
+      screen.getByRole('heading', { name: 'O mundo está despertando' }),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '42')
+    expect(screen.queryByRole('button', { name: 'Entrar no mundo' })).not.toBeInTheDocument()
+    expect(screen.queryByTestId('game-overlay')).not.toBeInTheDocument()
+    expect(requestPointerLock).not.toHaveBeenCalled()
+  })
+
+  it('offers a reload when the loading manager reports an asset failure', () => {
+    const reloadPage = vi.fn()
+    progressMock.state = {
+      active: false,
+      progress: 58,
+      item: '/models/broken.glb',
+      loaded: 0,
+      total: 1,
+      errors: ['/models/broken.glb'],
+    }
+
+    render(<App reloadPage={reloadPage} />)
+
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'O jardim precisa de mais um instante',
+    )
+    expect(screen.queryByText('/models/broken.glb')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Tentar novamente' }))
+    expect(reloadPage).toHaveBeenCalledOnce()
+  })
+
+  it('recovers visibly when the scene render tree throws', () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+    const reloadPage = vi.fn()
+    canvasMock.shouldThrow = true
+
+    render(<App reloadPage={reloadPage} />)
+
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'O jardim precisa de mais um instante',
+    )
+    fireEvent.click(screen.getByRole('button', { name: 'Tentar novamente' }))
+    expect(reloadPage).toHaveBeenCalledOnce()
+    consoleError.mockRestore()
   })
 
   it('translates the entry screen and controls immediately', () => {

@@ -8,7 +8,8 @@ const app = createApp({ env })
 
 serve({
   fetch: app.fetch,
+  hostname: env.host,
   port: env.port,
 })
 
-console.log(`Selah API proxy listening on http://localhost:${env.port}`)
+console.log(`Selah API proxy listening on http://${env.host}:${env.port}`)

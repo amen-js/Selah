@@ -1,7 +1,7 @@
 # Creation OpenRouter Narration Tasks
 
 **Design**: `.specs/features/dev3-creation-openrouter-narration/design.md`
-**Status**: Draft
+**Status**: In Progress
 **Baseline**: 274 tests across 58 files; 0 failures and 0 skipped.
 
 ## Execution Plan

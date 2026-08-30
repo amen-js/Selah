@@ -36,7 +36,7 @@ Use the persisted `idioma` preference as the single source of truth for the Sela
 ## Validation record
 
 - `npm run lint`, `npm run test:run`, and `npm run build` passed on 2026-08-30.
-- Vitest passed 75 tests across 17 files; no test was skipped or removed.
+- Vitest passed 87 tests across 21 files after integrating the latest `main`; no test was skipped or removed.
 - Catalog audit found identical, non-empty keys and aligned placeholders in all locales.
 - Literal audit left only the `Selah` brand, keycaps, technical IDs, and upstream data outside the catalogs.
 - Production output contained one application bundle and no laboratory fixture text or IDs.

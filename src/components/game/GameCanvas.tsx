@@ -12,6 +12,13 @@ import {
 import { Ecctrl, type EcctrlHandle } from 'ecctrl'
 import { Suspense, useEffect, useMemo, useRef, type RefObject } from 'react'
 import { Color, Vector3 } from 'three'
+import { mapaCriacao } from '../../mapas/criacao'
+import { useGameStore } from '../../stores/gameStore'
+import {
+  ColetaveisCriacao,
+  PropMapaRenderer,
+  type PosicaoJogador,
+} from './creation'
 
 type GameControl =
   | 'forward'
@@ -104,7 +111,12 @@ function CameraRig({ controller }: { controller: RefObject<EcctrlHandle | null> 
   return null
 }
 
-function Player({ playing }: { playing: boolean }) {
+type PlayerProps = {
+  playing: boolean
+  posicaoJogadorRef: RefObject<PosicaoJogador | null>
+}
+
+function Player({ playing, posicaoJogadorRef }: PlayerProps) {
   const controller = useRef<EcctrlHandle>(null)
   const [, getControls] = useKeyboardControls<GameControl>()
 
@@ -130,7 +142,11 @@ function Player({ playing }: { playing: boolean }) {
   }, [playing])
 
   useFrame(() => {
-    if (playing) controller.current?.setMovement(getControls())
+    const character = controller.current
+    if (!character) return
+
+    posicaoJogadorRef.current = character.currPos
+    if (playing) character.setMovement(getControls())
   }, -1)
 
   return (
@@ -138,7 +154,11 @@ function Player({ playing }: { playing: boolean }) {
       <Ecctrl
         ref={controller}
         enable={playing}
-        position={[0, 2, 2]}
+        position={[
+          mapaCriacao.spawn[0],
+          mapaCriacao.spawn[1],
+          mapaCriacao.spawn[2],
+        ]}
         capsuleHalfHeight={0.28}
         capsuleRadius={0.3}
         floatHeight={0.15}
@@ -174,24 +194,15 @@ function Player({ playing }: { playing: boolean }) {
   )
 }
 
-type LandmarkProps = {
-  position: [number, number, number]
-  scale?: [number, number, number]
-  color: string
-}
-
-function Landmark({ position, scale = [1, 1, 1], color }: LandmarkProps) {
-  return (
-    <RigidBody type="fixed" colliders="cuboid" position={position}>
-      <mesh scale={scale} castShadow receiveShadow>
-        <boxGeometry />
-        <meshStandardMaterial color={color} roughness={0.9} />
-      </mesh>
-    </RigidBody>
-  )
-}
-
 function World({ playing }: { playing: boolean }) {
+  const posicaoJogadorRef = useRef<PosicaoJogador | null>(null)
+  const setRegiao = useGameStore((state) => state.setRegiao)
+  const { meiaLargura, meiaProfundidade } = mapaCriacao.limites
+
+  useEffect(() => {
+    setRegiao('criacao')
+  }, [setRegiao])
+
   return (
     <>
       <color attach="background" args={['#b8d7ca']} />
@@ -202,29 +213,43 @@ function World({ playing }: { playing: boolean }) {
 
       <RigidBody type="fixed" colliders={false}>
         <CuboidCollider
-          args={[16, 0.25, 16]}
+          args={[meiaLargura, 0.25, meiaProfundidade]}
           position={[0, -0.25, 0]}
           friction={1}
         />
         <mesh position={[0, -0.25, 0]} receiveShadow>
-          <boxGeometry args={[32, 0.5, 32]} />
+          <boxGeometry args={[meiaLargura * 2, 0.5, meiaProfundidade * 2]} />
           <meshStandardMaterial color="#6f9369" roughness={1} />
         </mesh>
       </RigidBody>
 
-      <Landmark position={[-4, 0.6, -2]} scale={[2.4, 1.2, 1.2]} color="#70805d" />
-      <Landmark position={[4.5, 0.4, -4]} scale={[1.3, 0.8, 2.2]} color="#8a7658" />
-      <Landmark position={[1.5, 0.25, 5]} scale={[2.2, 0.5, 1]} color="#5d8261" />
-      <Landmark position={[-6, 0.85, 5]} scale={[0.9, 1.7, 0.9]} color="#9b7d54" />
+      <PropMapaRenderer props={mapaCriacao.props} />
+      <ColetaveisCriacao
+        coletaveis={mapaCriacao.coletaveis}
+        posicaoJogadorRef={posicaoJogadorRef}
+        enabled={playing}
+      />
 
       <RigidBody type="fixed" colliders={false}>
-        <CuboidCollider args={[16, 1, 0.25]} position={[0, 0.75, -16]} />
-        <CuboidCollider args={[16, 1, 0.25]} position={[0, 0.75, 16]} />
-        <CuboidCollider args={[0.25, 1, 16]} position={[-16, 0.75, 0]} />
-        <CuboidCollider args={[0.25, 1, 16]} position={[16, 0.75, 0]} />
+        <CuboidCollider
+          args={[meiaLargura, 1, 0.25]}
+          position={[0, 0.75, -meiaProfundidade]}
+        />
+        <CuboidCollider
+          args={[meiaLargura, 1, 0.25]}
+          position={[0, 0.75, meiaProfundidade]}
+        />
+        <CuboidCollider
+          args={[0.25, 1, meiaProfundidade]}
+          position={[-meiaLargura, 0.75, 0]}
+        />
+        <CuboidCollider
+          args={[0.25, 1, meiaProfundidade]}
+          position={[meiaLargura, 0.75, 0]}
+        />
       </RigidBody>
 
-      <Player playing={playing} />
+      <Player playing={playing} posicaoJogadorRef={posicaoJogadorRef} />
     </>
   )
 }

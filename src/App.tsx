@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { GameCanvas } from './components/game/GameCanvas'
 import { GameOverlay } from './components/game/GameOverlay'
 import { useTranslation } from './i18n'
+import { useSelahAudio } from './hooks/useSelahAudio'
 import { selectExploracaoBloqueada, useGameStore } from './stores/gameStore'
 import './App.css'
 
@@ -12,6 +13,10 @@ function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const exploracaoBloqueada = useGameStore(selectExploracaoBloqueada)
   const exploracaoAtiva = playing && !exploracaoBloqueada
+
+  useSelahAudio()
+
+  useSelahAudio()
 
   useEffect(() => {
     const handlePointerLockChange = () => {

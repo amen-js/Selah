@@ -14,15 +14,29 @@ describe('LanguageSelector', () => {
     render(<LanguageSelector />)
 
     expect(screen.getAllByRole('option')).toHaveLength(3)
-    expect(screen.getByRole('combobox', { name: 'Idioma do jogo' })).toHaveValue('pt-BR')
+    expect(screen.getByRole('combobox', { name: 'Idioma da interface' })).toHaveValue(
+      'pt-BR',
+    )
+    expect(screen.getAllByRole('option').map((option) => option.textContent)).toEqual([
+      'Português',
+      'English',
+      'Español',
+    ])
   })
 
-  it('updates the language in the shared store', async () => {
+  it('updates the shared language and its accessible label immediately', async () => {
     const user = userEvent.setup()
     render(<LanguageSelector />)
 
-    await user.selectOptions(screen.getByRole('combobox', { name: 'Idioma do jogo' }), 'en-US')
+    await user.selectOptions(
+      screen.getByRole('combobox', { name: 'Idioma da interface' }),
+      'en-US',
+    )
 
     expect(useGameStore.getState().idioma).toBe('en-US')
+    expect(screen.getByRole('combobox', { name: 'Interface language' })).toHaveValue(
+      'en-US',
+    )
+    expect(localStorage.getItem('selah-game-state')).toContain('en-US')
   })
 })

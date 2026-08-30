@@ -435,6 +435,38 @@ kbd {
   }
 }
 
+@media (max-height: 800px) and (min-width: 561px) {
+  .start-screen__panel {
+    padding-block: 1.25rem;
+  }
+
+  .start-screen__hero {
+    margin-block: 1.4rem 1.25rem;
+  }
+
+  .start-screen h1 {
+    font-size: clamp(4rem, 12vh, 5.5rem);
+  }
+
+  .start-screen__hero p {
+    margin-top: 0.9rem;
+  }
+
+  .start-screen__journey-card {
+    min-height: 6.25rem;
+    padding: 0.85rem;
+  }
+
+  .start-screen__actions,
+  .start-screen__controls {
+    margin-top: 1rem;
+  }
+
+  .start-screen small {
+    margin-top: 0.75rem;
+  }
+}
+
 .portal-prompt {
   position: absolute;
   bottom: clamp(28px, 8vh, 76px);

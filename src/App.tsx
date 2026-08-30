@@ -25,6 +25,7 @@ function App({ reloadPage = reloadCurrentPage }: AppProps) {
   const [progressaoCriacao, setProgressaoCriacao] =
     useState<SnapshotProgressaoCriacao | null>(null)
   const [inatividadeCriacao, setInatividadeCriacao] = useState(false)
+  const [atividadeNoeAtiva, setAtividadeNoeAtiva] = useState(false)
   const [sceneContentReady, setSceneContentReady] = useState(
     () =>
       sceneProgress.total > 0 &&
@@ -48,7 +49,10 @@ function App({ reloadPage = reloadCurrentPage }: AppProps) {
     (hasStarted || !sceneProgress.active)
   const sceneBlocked = configuracaoInicialConcluida && !sceneReady
   const interfaceBloqueada =
-    exploracaoBloqueada || !configuracaoInicialConcluida || sceneBlocked
+    exploracaoBloqueada ||
+    atividadeNoeAtiva ||
+    !configuracaoInicialConcluida ||
+    sceneBlocked
   const exploracaoAtiva = playing && !interfaceBloqueada
 
   useSelahAudio()
@@ -120,6 +124,7 @@ function App({ reloadPage = reloadCurrentPage }: AppProps) {
           onSceneReady={handleSceneReady}
           onProgressaoCriacaoChange={handleProgressaoCriacaoChange}
           onInatividadeCriacaoChange={setInatividadeCriacao}
+          onAtividadeNoeChange={setAtividadeNoeAtiva}
           onCanvasReady={(canvas) => {
             canvasRef.current = canvas
           }}

@@ -340,15 +340,15 @@ Cenário: a Arca repousa sobre o Monte Ararate. A porta se abre para uma terra r
 
 ### Progresso da jornada
 
-- [ ] O Chamado e o Canteiro
-- [ ] A Coleta de Madeira e Betume
-- [ ] O Estoque de Mantimentos
-- [ ] A Condução dos Animais
-- [ ] A Acomodação e o Selah
-- [ ] O Fechamento da Porta
-- [ ] O Refúgio na Tempestade
-- [ ] O Retorno da Pomba
-- [ ] A Nova Terra e o Arco-Íris
+- [x] O Chamado e o Canteiro
+- [x] A Coleta de Madeira e Betume
+- [x] O Estoque de Mantimentos
+- [x] A Condução dos Animais
+- [x] A Acomodação e o Selah
+- [x] O Fechamento da Porta
+- [x] O Refúgio na Tempestade
+- [x] O Retorno da Pomba
+- [x] A Nova Terra e o Arco-Íris
 
 ### Escopo consolidado do Mundo 2
 

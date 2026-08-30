@@ -5,7 +5,7 @@ const MEIA_PROFUNDIDADE_MUNDO = 48
 
 /**
  * Vale navegável de Noé. A arca, a rampa e as tarefas de madeira pertencem ao
- * slice dedicado `noe/world`; mantê-las fora dos props genéricos evita corpos
+ * capítulo dedicado `noe/world`; mantê-las fora dos props genéricos evita corpos
  * sólidos duplicados e placeholders que bloqueiam a entrada da arca.
  */
 export const mapaNoe: MapaRegiao = {
@@ -58,7 +58,7 @@ export const mapaNoe: MapaRegiao = {
       id: 'coletavel-noe-animais',
       historiaId: 'noe',
       passagemId: 'genesis-6-19',
-      posicao: [24, 1, 14],
+      posicao: [0, 4.72, -20],
       raioAtivacao: 1.5,
       cor: '#e0c78d',
     },
@@ -66,7 +66,7 @@ export const mapaNoe: MapaRegiao = {
       id: 'coletavel-noe-entrada',
       historiaId: 'noe',
       passagemId: 'genesis-7-1',
-      posicao: [0, 1, -1],
+      posicao: [0, 1, -6],
       raioAtivacao: 1.5,
       cor: '#f4d77f',
     },
@@ -74,7 +74,7 @@ export const mapaNoe: MapaRegiao = {
       id: 'coletavel-noe-aguas',
       historiaId: 'noe',
       passagemId: 'genesis-8-1',
-      posicao: [-22, 1, -36],
+      posicao: [0, 2.62, -18.5],
       raioAtivacao: 1.5,
       cor: '#80c8dc',
     },
@@ -82,7 +82,7 @@ export const mapaNoe: MapaRegiao = {
       id: 'coletavel-noe-alianca',
       historiaId: 'noe',
       passagemId: 'genesis-9-13',
-      posicao: [22, 1, -36],
+      posicao: [0, 1, 39],
       raioAtivacao: 1.5,
       cor: '#e59c75',
     },

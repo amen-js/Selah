@@ -33,6 +33,39 @@ describe('contratos de renderização do canteiro de Noé', () => {
     expect(fonte).not.toMatch(
       /trimesh|convexHull|colliders=["'{](?:hull|cuboid)/i,
     )
+    expect(fonte).toContain("if (!reparada) return <RampaQuebrada />")
+    expect(fonte).toContain('name="rampa-arca-reparada"')
+    expect(fonte).toContain('name="selos-betume-persistentes"')
+  })
+
+  it('troca os andaimes pelo acabamento concluído depois de M2', () => {
+    const fonte = ler('ArcaCanteiroNoe.tsx')
+
+    expect(fonte).toContain('obterEstadoAcabamentoArcaNoe(momentoAtualId)')
+    expect(fonte).toContain(
+      "indiceMomentoNoe(momentoAtualId) > indiceMomentoNoe('coleta-vedacao')",
+    )
+    expect(fonte).toContain("acabamento === 'em-construcao'")
+    expect(fonte).toContain('<AndaimesArcaEmConstrucao />')
+    expect(fonte).toContain('<AcabamentoArcaConcluida />')
+    expect(fonte).toContain('name="acabamento-arca-concluida"')
+  })
+
+  it('usa família procedural apropriada e bosque CC0 sem colisão automática', () => {
+    const familia = ler('FamiliaNoe.tsx')
+    const bosque = ler('BosqueGoferNoe.tsx')
+    const cenografia = ler('cenografia.ts')
+
+    expect(cenografia).toContain("{ id: 'noe'")
+    expect(cenografia).toContain("{ id: 'sem'")
+    expect(cenografia).toContain("{ id: 'jafe'")
+    expect(familia).toContain('export function FamiliaNoe')
+    expect(familia).not.toMatch(/RigidBody|Collider/)
+    expect(bosque).toContain(
+      '/models/creation/shared/kenney/tree_default.glb',
+    )
+    expect(bosque).toContain("colisor: 'nenhum'")
+    expect(bosque).not.toMatch(/RigidBody|Collider/)
   })
 
   it('detecta proximidade sem capturar teclado, store ou progressão', () => {

@@ -5,11 +5,16 @@ import {
   reconstruirProgressaoNoe,
   VERSAO_CHECKPOINT_NOE,
 } from './checkpoint'
-import { criarEstadoProgressaoNoe, processarEventoProgressaoNoe } from './estado'
+import {
+  criarEstadoProgressaoNoe,
+  processarEventoProgressaoNoe,
+} from './estado'
 
 describe('checkpoint da jornada de Noé', () => {
   it('rejeita checkpoints ausentes ou de outra versão', () => {
-    expect(reconstruirProgressaoNoe(undefined)).toEqual(criarEstadoProgressaoNoe())
+    expect(reconstruirProgressaoNoe(undefined)).toEqual(
+      criarEstadoProgressaoNoe(),
+    )
     expect(
       reconstruirProgressaoNoe({
         versao: 0,
@@ -159,7 +164,11 @@ describe('checkpoint da jornada de Noé', () => {
         },
         {
           acaoId: 'noe.betume.aplicado',
-          unidadesConcluidas: ['fenda-casco-1', 'fenda-casco-2', 'fenda-casco-3'],
+          unidadesConcluidas: [
+            'fenda-casco-1',
+            'fenda-casco-2',
+            'fenda-casco-3',
+          ],
         },
       ],
     })
@@ -167,6 +176,156 @@ describe('checkpoint da jornada de Noé', () => {
     expect(reconstruido.momentoAtualId).toBe('coleta-vedacao')
     expect(reconstruido.momentosConcluidos).toEqual(['chamado-canteiro'])
     expect(reconstruido.progressoMomentoAtual).toHaveLength(3)
+  })
+
+  it.each([
+    {
+      momentoId: 'estoque-mantimentos',
+      acaoId: 'noe.estoque.organizado',
+      unidadeId: 'estoque-principal',
+      momentoEsperado: 'conducao-animais',
+      acoesRestauradas: [],
+    },
+    {
+      momentoId: 'conducao-animais',
+      acaoId: 'noe.familias.guiadas',
+      unidadeId: 'familias-do-campo',
+      momentoEsperado: 'acomodacao-animais',
+      acoesRestauradas: [],
+    },
+    {
+      momentoId: 'acomodacao-animais',
+      acaoId: 'noe.habitats.organizados',
+      unidadeId: 'habitats-da-arca',
+      momentoEsperado: 'acomodacao-animais',
+      acoesRestauradas: [
+        'noe.habitat.grandes-animais-preparado',
+        'noe.habitat.pequenos-mamiferos-preparado',
+        'noe.habitat.aves-preparado',
+        'noe.habitat.familia-noe-preparado',
+      ],
+    },
+    {
+      momentoId: 'fechamento-porta',
+      acaoId: 'noe.porta.atravessada',
+      unidadeId: 'entrada-segura',
+      momentoEsperado: 'fechamento-porta',
+      acoesRestauradas: [
+        'noe.abrigo.chamado-ouvido',
+        'noe.abrigo.entrada-concluida',
+        'noe.porta.fechada',
+      ],
+    },
+    {
+      momentoId: 'refugio-tempestade',
+      acaoId: 'noe.filhotes.cuidados',
+      unidadeId: 'cuidado-dos-filhotes',
+      momentoEsperado: 'refugio-tempestade',
+      acoesRestauradas: [
+        'noe.cuidado.filhotes-aves',
+        'noe.cuidado.filhotes-herbivoros',
+        'noe.cuidado.filhotes-mamiferos',
+      ],
+    },
+    {
+      momentoId: 'retorno-pomba',
+      acaoId: 'noe.pomba.retornou',
+      unidadeId: 'retorno-com-oliveira',
+      momentoEsperado: 'nova-terra-arco-iris',
+      acoesRestauradas: [],
+    },
+  ] as const)(
+    'migra checkpoint v1 detalhado de $momentoId sem perder progresso',
+    ({ momentoId, acaoId, unidadeId, momentoEsperado, acoesRestauradas }) => {
+      const indiceMomento = momentosNoe.findIndex(({ id }) => id === momentoId)
+      const reconstruido = reconstruirProgressaoNoe({
+        versao: VERSAO_CHECKPOINT_NOE,
+        momentosConcluidos: momentosNoe
+          .slice(0, indiceMomento)
+          .map(({ id }) => id),
+        progressoMomentoAtual: [
+          {
+            acaoId,
+            unidadesConcluidas: [unidadeId],
+          },
+        ],
+      })
+
+      expect(reconstruido.momentoAtualId).toBe(momentoEsperado)
+      expect(
+        reconstruido.progressoMomentoAtual.map(({ acaoId: id }) => id),
+      ).toEqual(acoesRestauradas)
+      expect(
+        reconstruirProgressaoNoe(criarCheckpointProgressaoNoe(reconstruido)),
+      ).toEqual(reconstruido)
+    },
+  )
+
+  it('serializa tarefas paralelas em ordem canônica e permanece idempotente', () => {
+    let estado = reconstruirProgressaoNoe({
+      versao: VERSAO_CHECKPOINT_NOE,
+      momentosConcluidos: ['chamado-canteiro', 'coleta-vedacao'],
+      progressoMomentoAtual: [],
+    })
+    estado = processarEventoProgressaoNoe(estado, {
+      tipo: 'unidade-acao-concluida',
+      acaoId: 'noe.mantimento.frutas-armazenadas',
+      unidadeId: 'frutas-despensa-central',
+    })
+    estado = processarEventoProgressaoNoe(estado, {
+      tipo: 'unidade-acao-concluida',
+      acaoId: 'noe.mantimento.feno-armazenado',
+      unidadeId: 'feno-estabulos-inferiores',
+    })
+
+    const checkpoint = criarCheckpointProgressaoNoe(estado)
+    expect(checkpoint.progressoMomentoAtual).toEqual([
+      {
+        acaoId: 'noe.mantimento.feno-armazenado',
+        unidadesConcluidas: ['feno-estabulos-inferiores'],
+      },
+      {
+        acaoId: 'noe.mantimento.frutas-armazenadas',
+        unidadesConcluidas: ['frutas-despensa-central'],
+      },
+    ])
+
+    const restaurado = reconstruirProgressaoNoe(checkpoint)
+    expect(criarCheckpointProgressaoNoe(restaurado)).toEqual(checkpoint)
+  })
+
+  it('migra M9 v1 completo para aguardar somente o Selah final', () => {
+    const indiceMomento = momentosNoe.findIndex(
+      ({ id }) => id === 'nova-terra-arco-iris',
+    )
+    const reconstruido = reconstruirProgressaoNoe({
+      versao: VERSAO_CHECKPOINT_NOE,
+      momentosConcluidos: momentosNoe
+        .slice(0, indiceMomento)
+        .map(({ id }) => id),
+      progressoMomentoAtual: [
+        {
+          acaoId: 'noe.animais.desembarcados',
+          unidadesConcluidas: ['desembarque-seguro'],
+        },
+        {
+          acaoId: 'noe.arco-iris.contemplado',
+          unidadesConcluidas: ['contemplacao-da-alianca'],
+        },
+      ],
+    })
+
+    expect(reconstruido.momentoAtualId).toBe('nova-terra-arco-iris')
+    expect(
+      reconstruido.progressoMomentoAtual.map(({ acaoId }) => acaoId),
+    ).toEqual([
+      'noe.desembarque.aves',
+      'noe.desembarque.herbivoros',
+      'noe.desembarque.mamiferos',
+      'noe.altar.construido',
+      'noe.arco-iris.contemplado',
+    ])
+    expect(reconstruido.concluida).toBe(false)
   })
 
   it('reconstrói o final canônico sem progresso parcial', () => {

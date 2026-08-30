@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type RefObject } from 'react'
+import { useCallback, useEffect, useMemo, useState, type RefObject } from 'react'
 import type { ColetavelMapa } from '../../../../mapas/types'
 import type { PortalMapa } from '../../portals'
 import { PortaisRegiao } from '../../portals'
@@ -7,8 +7,22 @@ import type { PosicaoJogador } from '../../creation/proximidade'
 import { useGameStore } from '../../../../stores/gameStore'
 import { obterRequisitosPendentesNoe } from '../progression'
 import {
+  AbrigoTempestadeNoe,
+  AmbienciaSonoraNoe,
+  AtmosferaNoe,
+  CampoAnimaisNoe,
   CanteiroNoe,
+  type CandidatoAbrigoTempestadeNoe,
+  type CandidatoCampoAnimaisNoe,
+  type CandidatoHabitatNoe,
+  type CandidatoNovaTerraNoe,
+  type CandidatoPombaEsperancaNoe,
   type CandidatoTarefaNoe as CandidatoTarefaCanteiroNoe,
+  HabitatsArcaNoe,
+  MantimentosArcaNoe,
+  type CandidatoMantimentoNoe,
+  NovaTerraNoe,
+  PombaEsperancaNoe,
 } from '../world'
 import {
   obterRequisitoSelahFinalNoe,
@@ -21,6 +35,16 @@ import {
 import { InteracaoNoeRuntime } from './InteracaoNoeRuntime'
 import type { TipoInteracaoNoe } from './NoeInteractionPrompt'
 import { useProgressaoNoeRuntime } from './ProgressaoNoeRuntime'
+import type { EstadoProgressaoNoe } from '../progression'
+
+export interface SolicitacaoVedacaoNoe {
+  unidadeId: string
+  concluir: () => void
+}
+
+export interface SolicitacaoDialogoNoe {
+  concluir: () => void
+}
 
 export interface NoeWorldRuntimeProps {
   coletaveis: readonly ColetavelMapa[]
@@ -31,7 +55,9 @@ export interface NoeWorldRuntimeProps {
   onPortalProximo: (portal: PortalMapa | null) => void
   onPortalAcionado: (portal: PortalMapa) => void
   onInteracaoProxima: (tipo: TipoInteracaoNoe | null) => void
-  onBlocoConcluido: (concluido: boolean) => void
+  onProgressaoChange?: (estado: EstadoProgressaoNoe) => void
+  onVedacaoSolicitada?: (solicitacao: SolicitacaoVedacaoNoe) => void
+  onDialogoSolicitado?: (solicitacao: SolicitacaoDialogoNoe) => void
 }
 
 /**
@@ -47,12 +73,26 @@ export function NoeWorldRuntime({
   onPortalProximo,
   onPortalAcionado,
   onInteracaoProxima,
-  onBlocoConcluido,
+  onProgressaoChange,
+  onVedacaoSolicitada,
+  onDialogoSolicitado,
 }: NoeWorldRuntimeProps) {
   const { estado, emitir } = useProgressaoNoeRuntime(enabled)
   const selahsConcluidos = useGameStore((state) => state.selahsConcluidos)
   const [tarefaProxima, setTarefaProxima] =
     useState<CandidatoTarefaCanteiroNoe | null>(null)
+  const [mantimentoProximo, setMantimentoProximo] =
+    useState<CandidatoMantimentoNoe | null>(null)
+  const [grupoAnimalProximo, setGrupoAnimalProximo] =
+    useState<CandidatoCampoAnimaisNoe | null>(null)
+  const [habitatProximo, setHabitatProximo] =
+    useState<CandidatoHabitatNoe | null>(null)
+  const [abrigoProximo, setAbrigoProximo] =
+    useState<CandidatoAbrigoTempestadeNoe | null>(null)
+  const [pombaProxima, setPombaProxima] =
+    useState<CandidatoPombaEsperancaNoe | null>(null)
+  const [novaTerraProxima, setNovaTerraProxima] =
+    useState<CandidatoNovaTerraNoe | null>(null)
   const [coletavelProximo, setColetavelProximo] =
     useState<ColetavelMapa | null>(null)
   const [portalAcionavel, setPortalAcionavel] = useState<PortalMapa | null>(null)
@@ -85,14 +125,102 @@ export function NoeWorldRuntime({
         unidadeId: tarefaProxima.unidadeId,
         // Each detector already publishes only its nearest candidate.
         distancia: 0,
-        acionar: () =>
-          emitir({
+        acionar: () => {
+          const evento = {
             tipo: 'unidade-acao-concluida',
             acaoId: tarefaProxima.acaoId,
             unidadeId: tarefaProxima.unidadeId,
-          }),
+          } as const
+
+          if (
+            tarefaProxima.acaoId === 'noe.betume.aplicado' &&
+            onVedacaoSolicitada
+          ) {
+            onVedacaoSolicitada({
+              unidadeId: tarefaProxima.unidadeId,
+              concluir: () => emitir(evento),
+            })
+            return
+          }
+
+          if (
+            tarefaProxima.acaoId === 'noe.chamado.confirmado' &&
+            onDialogoSolicitado
+          ) {
+            onDialogoSolicitado({ concluir: () => emitir(evento) })
+            return
+          }
+
+          emitir(evento)
+        },
       }
       proximos.push(candidato)
+    }
+
+    if (mantimentoProximo) {
+      proximos.push({
+        tipo: 'tarefa',
+        id: mantimentoProximo.id,
+        acaoId: mantimentoProximo.acaoId,
+        unidadeId: mantimentoProximo.unidadeId,
+        distancia: 0,
+        acionar: mantimentoProximo.acionar,
+      })
+    }
+
+    if (grupoAnimalProximo) {
+      proximos.push({
+        tipo: 'tarefa',
+        id: grupoAnimalProximo.id,
+        acaoId: grupoAnimalProximo.acaoId,
+        unidadeId: grupoAnimalProximo.unidadeId,
+        distancia: grupoAnimalProximo.distancia,
+        acionar: grupoAnimalProximo.acionar,
+      })
+    }
+
+    if (habitatProximo) {
+      proximos.push({
+        tipo: 'tarefa',
+        id: habitatProximo.id,
+        acaoId: habitatProximo.acaoId,
+        unidadeId: habitatProximo.unidadeId,
+        distancia: habitatProximo.distancia,
+        acionar: habitatProximo.acionar,
+      })
+    }
+
+    if (abrigoProximo) {
+      proximos.push({
+        tipo: 'tarefa',
+        id: abrigoProximo.id,
+        acaoId: abrigoProximo.acaoId,
+        unidadeId: abrigoProximo.unidadeId,
+        distancia: abrigoProximo.distancia,
+        acionar: abrigoProximo.acionar,
+      })
+    }
+
+    if (pombaProxima) {
+      proximos.push({
+        tipo: 'tarefa',
+        id: pombaProxima.id,
+        acaoId: pombaProxima.acaoId,
+        unidadeId: pombaProxima.unidadeId,
+        distancia: pombaProxima.distancia,
+        acionar: pombaProxima.acionar,
+      })
+    }
+
+    if (novaTerraProxima) {
+      proximos.push({
+        tipo: 'tarefa',
+        id: novaTerraProxima.id,
+        acaoId: novaTerraProxima.acaoId,
+        unidadeId: novaTerraProxima.unidadeId,
+        distancia: novaTerraProxima.distancia,
+        acionar: novaTerraProxima.acionar,
+      })
     }
 
     if (
@@ -126,10 +254,18 @@ export function NoeWorldRuntime({
 
     return proximos
   }, [
+    abrigoProximo,
     coletavelProximo,
     emitir,
+    grupoAnimalProximo,
+    habitatProximo,
+    mantimentoProximo,
+    novaTerraProxima,
     onPortalAcionado,
+    onDialogoSolicitado,
+    onVedacaoSolicitada,
     portalAcionavel,
+    pombaProxima,
     requisitoSelah,
     selahsConcluidos,
     tarefaProxima,
@@ -143,9 +279,6 @@ export function NoeWorldRuntime({
     candidatoSelecionado?.tipo === 'selah'
       ? candidatoSelecionado.tipo
       : null
-  const blocoConcluido =
-    estado.momentoAtualId === 'estoque-mantimentos' && !estado.concluida
-
   useEffect(() => {
     onInteracaoProxima(tipoInteracao)
   }, [onInteracaoProxima, tipoInteracao])
@@ -156,22 +289,74 @@ export function NoeWorldRuntime({
   )
 
   useEffect(() => {
-    onBlocoConcluido(blocoConcluido)
-  }, [blocoConcluido, onBlocoConcluido])
+    onProgressaoChange?.(estado)
+  }, [estado, onProgressaoChange])
 
-  useEffect(
-    () => () => onBlocoConcluido(false),
-    [onBlocoConcluido],
+  const concluirUnidade = useCallback(
+    (acaoId: CandidatoTarefaNoe['acaoId'], unidadeId: string) => {
+      emitir({ tipo: 'unidade-acao-concluida', acaoId, unidadeId })
+    },
+    [emitir],
   )
 
   return (
     <>
+      <AtmosferaNoe estado={estado} reducedMotion={reducedMotion} />
+      <AmbienciaSonoraNoe estado={estado} enabled={enabled} />
       <CanteiroNoe
         momentoAtualId={estado.momentoAtualId}
         progressoMomentoAtual={estado.progressoMomentoAtual}
         posicaoJogadorRef={posicaoJogadorRef}
         enabled={enabled}
         onCandidatoChange={setTarefaProxima}
+      />
+      <MantimentosArcaNoe
+        momentoAtualId={estado.momentoAtualId}
+        progressoMomentoAtual={estado.progressoMomentoAtual}
+        posicaoJogadorRef={posicaoJogadorRef}
+        enabled={enabled}
+        onCandidatoChange={setMantimentoProximo}
+        onConcluirUnidade={concluirUnidade}
+      />
+      <CampoAnimaisNoe
+        momentoAtualId={estado.momentoAtualId}
+        progressoMomentoAtual={estado.progressoMomentoAtual}
+        playerRef={posicaoJogadorRef}
+        enabled={enabled}
+        onCandidatoChange={setGrupoAnimalProximo}
+        onConcluirUnidade={concluirUnidade}
+      />
+      <HabitatsArcaNoe
+        momentoAtualId={estado.momentoAtualId}
+        progressoMomentoAtual={estado.progressoMomentoAtual}
+        playerRef={posicaoJogadorRef}
+        enabled={enabled}
+        onCandidatoChange={setHabitatProximo}
+        onConcluirUnidade={concluirUnidade}
+      />
+      <AbrigoTempestadeNoe
+        estado={estado}
+        posicaoJogadorRef={posicaoJogadorRef}
+        enabled={enabled}
+        reducedMotion={reducedMotion}
+        onCandidatoChange={setAbrigoProximo}
+        onConcluirUnidade={concluirUnidade}
+      />
+      <PombaEsperancaNoe
+        estado={estado}
+        playerRef={posicaoJogadorRef}
+        enabled={enabled}
+        reducedMotion={reducedMotion}
+        onCandidatoChange={setPombaProxima}
+        onConcluirUnidade={concluirUnidade}
+      />
+      <NovaTerraNoe
+        estado={estado}
+        playerRef={posicaoJogadorRef}
+        enabled={enabled}
+        reducedMotion={reducedMotion}
+        onCandidatoChange={setNovaTerraProxima}
+        onConcluirUnidade={concluirUnidade}
       />
       <ColetaveisRegiao
         coletaveis={coletaveisDisponiveis}

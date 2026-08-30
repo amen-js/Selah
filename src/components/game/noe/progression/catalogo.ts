@@ -40,7 +40,11 @@ export const momentosNoe: readonly MomentoNoe[] = [
         },
         {
           acaoId: 'noe.betume.aplicado',
-          unidadesNecessarias: ['fenda-casco-1', 'fenda-casco-2', 'fenda-casco-3'],
+          unidadesNecessarias: [
+            'fenda-casco-1',
+            'fenda-casco-2',
+            'fenda-casco-3',
+          ],
         },
       ],
       selahFinal: 'genesis-6-14',
@@ -56,8 +60,24 @@ export const momentosNoe: readonly MomentoNoe[] = [
       tipo: 'tarefas-locais-e-selah-opcional',
       tarefas: [
         {
-          acaoId: 'noe.estoque.organizado',
-          unidadesNecessarias: ['estoque-principal'],
+          acaoId: 'noe.mantimento.feno-armazenado',
+          unidadesNecessarias: ['feno-estabulos-inferiores'],
+          etapa: 1,
+        },
+        {
+          acaoId: 'noe.mantimento.graos-armazenados',
+          unidadesNecessarias: ['graos-poleiros-superiores'],
+          etapa: 1,
+        },
+        {
+          acaoId: 'noe.mantimento.agua-armazenada',
+          unidadesNecessarias: ['agua-reserva-central'],
+          etapa: 1,
+        },
+        {
+          acaoId: 'noe.mantimento.frutas-armazenadas',
+          unidadesNecessarias: ['frutas-despensa-central'],
+          etapa: 1,
         },
       ],
     },
@@ -72,8 +92,19 @@ export const momentosNoe: readonly MomentoNoe[] = [
       tipo: 'tarefas-locais-e-selah-opcional',
       tarefas: [
         {
-          acaoId: 'noe.familias.guiadas',
-          unidadesNecessarias: ['familias-do-campo'],
+          acaoId: 'noe.animais.aves-guiadas',
+          unidadesNecessarias: ['aves-trilha-sementes'],
+          etapa: 1,
+        },
+        {
+          acaoId: 'noe.animais.herbivoros-guiados',
+          unidadesNecessarias: ['grandes-herbivoros-ponte-alinhada'],
+          etapa: 1,
+        },
+        {
+          acaoId: 'noe.animais.mamiferos-guiados',
+          unidadesNecessarias: ['pequenos-mamiferos-cestos'],
+          etapa: 1,
         },
       ],
     },
@@ -88,8 +119,30 @@ export const momentosNoe: readonly MomentoNoe[] = [
       tipo: 'tarefas-locais-e-selah-opcional',
       tarefas: [
         {
-          acaoId: 'noe.habitats.organizados',
-          unidadesNecessarias: ['habitats-da-arca'],
+          acaoId: 'noe.habitat.grandes-animais-preparado',
+          unidadesNecessarias: [
+            'nivel-inferior-elefantes',
+            'nivel-inferior-girafas',
+            'nivel-inferior-leoes',
+            'nivel-inferior-ovelhas',
+            'nivel-inferior-zebras',
+          ],
+          etapa: 1,
+        },
+        {
+          acaoId: 'noe.habitat.pequenos-mamiferos-preparado',
+          unidadesNecessarias: ['nivel-medio-coelhos'],
+          etapa: 1,
+        },
+        {
+          acaoId: 'noe.habitat.aves-preparado',
+          unidadesNecessarias: ['nivel-superior-aves'],
+          etapa: 1,
+        },
+        {
+          acaoId: 'noe.habitat.familia-noe-preparado',
+          unidadesNecessarias: ['nivel-superior-familia-noe'],
+          etapa: 1,
         },
       ],
       selahFinal: 'genesis-6-19',
@@ -105,8 +158,19 @@ export const momentosNoe: readonly MomentoNoe[] = [
       tipo: 'tarefas-locais-e-selah-opcional',
       tarefas: [
         {
-          acaoId: 'noe.porta.atravessada',
-          unidadesNecessarias: ['entrada-segura'],
+          acaoId: 'noe.abrigo.chamado-ouvido',
+          unidadesNecessarias: ['chamado-final-noe'],
+          etapa: 1,
+        },
+        {
+          acaoId: 'noe.abrigo.entrada-concluida',
+          unidadesNecessarias: ['entrada-segura-na-arca'],
+          etapa: 2,
+        },
+        {
+          acaoId: 'noe.porta.fechada',
+          unidadesNecessarias: ['porta-da-arca-fechada'],
+          etapa: 3,
         },
       ],
       selahFinal: 'genesis-7-1',
@@ -122,8 +186,19 @@ export const momentosNoe: readonly MomentoNoe[] = [
       tipo: 'tarefas-locais-e-selah-opcional',
       tarefas: [
         {
-          acaoId: 'noe.filhotes.cuidados',
-          unidadesNecessarias: ['cuidado-dos-filhotes'],
+          acaoId: 'noe.cuidado.filhotes-aves',
+          unidadesNecessarias: ['filhotes-aves-alimentados'],
+          etapa: 1,
+        },
+        {
+          acaoId: 'noe.cuidado.filhotes-herbivoros',
+          unidadesNecessarias: ['filhotes-herbivoros-alimentados'],
+          etapa: 1,
+        },
+        {
+          acaoId: 'noe.cuidado.filhotes-mamiferos',
+          unidadesNecessarias: ['filhotes-mamiferos-alimentados'],
+          etapa: 1,
         },
       ],
       selahFinal: 'genesis-8-1',
@@ -139,8 +214,14 @@ export const momentosNoe: readonly MomentoNoe[] = [
       tipo: 'tarefas-locais-e-selah-opcional',
       tarefas: [
         {
+          acaoId: 'noe.pomba.enviada',
+          unidadesNecessarias: ['envio-janela-superior'],
+          etapa: 1,
+        },
+        {
           acaoId: 'noe.pomba.retornou',
           unidadesNecessarias: ['retorno-com-oliveira'],
+          etapa: 2,
         },
       ],
     },
@@ -155,12 +236,29 @@ export const momentosNoe: readonly MomentoNoe[] = [
       tipo: 'tarefas-locais-e-selah-opcional',
       tarefas: [
         {
-          acaoId: 'noe.animais.desembarcados',
-          unidadesNecessarias: ['desembarque-seguro'],
+          acaoId: 'noe.desembarque.aves',
+          unidadesNecessarias: ['aves-desembarcadas-em-grupo'],
+          etapa: 1,
+        },
+        {
+          acaoId: 'noe.desembarque.herbivoros',
+          unidadesNecessarias: ['herbivoros-desembarcados-em-grupo'],
+          etapa: 1,
+        },
+        {
+          acaoId: 'noe.desembarque.mamiferos',
+          unidadesNecessarias: ['mamiferos-desembarcados-em-grupo'],
+          etapa: 1,
+        },
+        {
+          acaoId: 'noe.altar.construido',
+          unidadesNecessarias: ['altar-de-gratidao'],
+          etapa: 2,
         },
         {
           acaoId: 'noe.arco-iris.contemplado',
           unidadesNecessarias: ['contemplacao-da-alianca'],
+          etapa: 3,
         },
       ],
       selahFinal: 'genesis-9-13',

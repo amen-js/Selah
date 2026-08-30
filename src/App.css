@@ -963,6 +963,395 @@ kbd {
   font-size: clamp(1.1rem, 3vw, 1.5rem);
 }
 
+.noe-sealing {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: clamp(16px, 4vw, 48px);
+  color: #fff8e8;
+  background:
+    radial-gradient(circle at 50% 42%, rgb(238 184 87 / 17%), transparent 42%),
+    rgb(10 20 16 / 94%);
+  pointer-events: auto;
+}
+
+.noe-sealing__panel {
+  display: grid;
+  gap: 22px;
+  width: min(760px, 100%);
+  max-height: calc(100vh - 32px);
+  padding: clamp(22px, 4vw, 38px);
+  overflow: auto;
+  background: linear-gradient(145deg, rgb(41 55 42 / 98%), rgb(19 32 26 / 98%));
+  border: 1px solid rgb(244 201 93 / 38%);
+  border-radius: 24px;
+  box-shadow: 0 28px 80px rgb(0 0 0 / 48%);
+}
+
+.noe-sealing__header span {
+  color: #f4c95d;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.noe-sealing__header h2 {
+  margin: 8px 0 6px;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(1.7rem, 4vw, 2.6rem);
+  font-weight: 500;
+}
+
+.noe-sealing__header p {
+  max-width: 62ch;
+  margin: 0;
+  color: rgb(255 248 232 / 76%);
+  line-height: 1.55;
+}
+
+.noe-sealing__workbench {
+  display: grid;
+  gap: 16px;
+}
+
+.noe-sealing__crack {
+  position: relative;
+  height: min(38vh, 310px);
+  min-height: 230px;
+  overflow: hidden;
+  touch-action: none;
+  background:
+    linear-gradient(90deg, transparent 48%, rgb(19 12 8 / 68%) 49% 51%, transparent 52%),
+    repeating-linear-gradient(2deg, #765039 0 8px, #66442f 9px 18px);
+  border: 8px solid #4b3021;
+  border-radius: 18px;
+  box-shadow: inset 0 0 42px rgb(22 10 3 / 55%);
+}
+
+.noe-sealing__wood-grain {
+  position: absolute;
+  inset: 12% 8%;
+  border: 2px solid rgb(238 184 87 / 15%);
+  border-right-color: transparent;
+  border-left-color: transparent;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.noe-sealing__segment {
+  --segment-index: 0;
+  --segment-turn: 0deg;
+  position: absolute;
+  top: calc(8% + var(--segment-index) * 8.3%);
+  left: 50%;
+  width: clamp(44px, 10vw, 78px);
+  height: clamp(20px, 3.5vw, 30px);
+  padding: 0;
+  background: #e7bb65;
+  border: 2px solid rgb(255 238 184 / 72%);
+  border-radius: 999px;
+  box-shadow: 0 0 16px rgb(244 201 93 / 62%);
+  cursor: crosshair;
+  transform: translate(-50%, -50%) rotate(var(--segment-turn));
+  transition: background 140ms ease, box-shadow 140ms ease, transform 140ms ease;
+}
+
+.noe-sealing__segment:nth-of-type(3n + 1) {
+  left: 43%;
+}
+
+.noe-sealing__segment:nth-of-type(3n + 2) {
+  left: 54%;
+}
+
+.noe-sealing__segment:nth-of-type(3n) {
+  left: 48%;
+}
+
+.noe-sealing__segment:hover,
+.noe-sealing__segment:focus-visible {
+  outline: 3px solid #fff8e8;
+  outline-offset: 3px;
+  transform: translate(-50%, -50%) rotate(var(--segment-turn)) scale(1.08);
+}
+
+.noe-sealing__segment.is-filled {
+  background: #211711;
+  border-color: #4b3425;
+  box-shadow: 0 0 12px rgb(24 14 9 / 72%);
+}
+
+.noe-sealing__progress {
+  display: grid;
+  gap: 8px;
+}
+
+.noe-sealing__progress div {
+  display: flex;
+  justify-content: space-between;
+  color: rgb(255 248 232 / 78%);
+  font-size: 0.82rem;
+}
+
+.noe-sealing__progress progress {
+  width: 100%;
+  height: 10px;
+  overflow: hidden;
+  accent-color: #f4c95d;
+  background: rgb(255 255 255 / 10%);
+  border: 0;
+  border-radius: 999px;
+}
+
+.noe-sealing__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.noe-sealing__actions button {
+  min-height: 44px;
+  padding: 10px 18px;
+  font: inherit;
+  font-weight: 750;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.noe-sealing__cancel {
+  color: #fff8e8;
+  background: transparent;
+  border: 1px solid rgb(255 248 232 / 28%);
+}
+
+.noe-sealing__complete {
+  color: #173c2d;
+  background: #f4c95d;
+  border: 1px solid #ffe6a0;
+}
+
+.noe-sealing__complete:disabled {
+  color: rgb(255 248 232 / 48%);
+  background: rgb(255 255 255 / 9%);
+  border-color: transparent;
+  cursor: not-allowed;
+}
+
+.noe-mission-dialog {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: end center;
+  padding: clamp(18px, 5vw, 56px);
+  color: #fff8e8;
+  background: linear-gradient(180deg, transparent 24%, rgb(8 20 15 / 72%));
+  pointer-events: auto;
+}
+
+.noe-mission-dialog__panel {
+  display: grid;
+  grid-template-columns: minmax(96px, 0.28fr) minmax(0, 1fr);
+  gap: clamp(18px, 4vw, 34px);
+  width: min(820px, 100%);
+  padding: clamp(20px, 4vw, 34px);
+  background: linear-gradient(145deg, rgb(39 57 43 / 98%), rgb(16 32 25 / 98%));
+  border: 1px solid rgb(244 201 93 / 38%);
+  border-radius: 24px;
+  box-shadow: 0 24px 70px rgb(0 0 0 / 44%);
+}
+
+.noe-mission-dialog__portrait {
+  position: relative;
+  align-self: center;
+  aspect-ratio: 0.8;
+  min-height: 170px;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 28%, #e2aa78 0 20%, transparent 21%);
+  border-radius: 18px;
+}
+
+.noe-mission-dialog__head,
+.noe-mission-dialog__beard,
+.noe-mission-dialog__robe {
+  position: absolute;
+  left: 50%;
+  display: block;
+  transform: translateX(-50%);
+}
+
+.noe-mission-dialog__head {
+  top: 15%;
+  width: 45%;
+  aspect-ratio: 0.82;
+  background: #dca16e;
+  border-radius: 48% 48% 45% 45%;
+}
+
+.noe-mission-dialog__beard {
+  top: 35%;
+  z-index: 2;
+  width: 48%;
+  height: 32%;
+  background: #ddd0b8;
+  border-radius: 24% 24% 55% 55%;
+  clip-path: polygon(0 0, 100% 0, 82% 100%, 50% 84%, 18% 100%);
+}
+
+.noe-mission-dialog__robe {
+  bottom: -15%;
+  width: 86%;
+  height: 62%;
+  background: linear-gradient(90deg, #7e5a41, #a67b57 50%, #755039);
+  border-radius: 48% 48% 0 0;
+}
+
+.noe-mission-dialog__content {
+  display: grid;
+  align-content: center;
+  gap: 10px;
+}
+
+.noe-mission-dialog__eyebrow {
+  color: #f4c95d;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.noe-mission-dialog h2 {
+  margin: 0;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(1.45rem, 3.5vw, 2.2rem);
+  font-weight: 500;
+}
+
+.noe-mission-dialog p {
+  min-height: 3.2em;
+  margin: 0;
+  color: rgb(255 248 232 / 86%);
+  font-size: clamp(1rem, 2.3vw, 1.18rem);
+  line-height: 1.55;
+}
+
+.noe-mission-dialog__steps {
+  display: flex;
+  gap: 7px;
+  margin-block: 4px;
+}
+
+.noe-mission-dialog__steps span {
+  width: 22px;
+  height: 4px;
+  background: rgb(255 248 232 / 18%);
+  border-radius: 999px;
+}
+
+.noe-mission-dialog__steps .is-active {
+  background: #f4c95d;
+}
+
+.noe-mission-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.noe-mission-dialog__actions button {
+  min-height: 44px;
+  padding: 10px 16px;
+  color: #fff8e8;
+  font: inherit;
+  font-weight: 750;
+  background: transparent;
+  border: 1px solid rgb(255 248 232 / 26%);
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.noe-mission-dialog__actions .is-primary {
+  color: #173c2d;
+  background: #f4c95d;
+  border-color: #ffe6a0;
+}
+
+.noe-objective-guide {
+  position: absolute;
+  top: clamp(74px, 10vh, 104px);
+  left: clamp(14px, 3vw, 36px);
+  z-index: 4;
+  display: grid;
+  gap: 7px;
+  width: min(330px, calc(100vw - 28px));
+  padding: 15px 17px;
+  color: #173c2d;
+  background: rgb(255 248 232 / 91%);
+  border: 1px solid rgb(255 255 255 / 68%);
+  border-left: 4px solid #d9a52e;
+  border-radius: 6px 16px 16px 6px;
+  box-shadow: 0 14px 34px rgb(5 20 14 / 20%);
+  pointer-events: none;
+}
+
+.noe-objective-guide__heading {
+  display: flex;
+  justify-content: space-between;
+  color: rgb(23 60 45 / 65%);
+  font-size: 0.67rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.noe-objective-guide h2 {
+  margin: 0;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.noe-objective-guide p {
+  margin: 0;
+  color: rgb(23 60 45 / 78%);
+  font-size: 0.82rem;
+  line-height: 1.42;
+}
+
+.noe-objective-guide progress {
+  width: 100%;
+  height: 5px;
+  overflow: hidden;
+  accent-color: #d9a52e;
+  border: 0;
+  border-radius: 999px;
+}
+
+@media (max-width: 560px) {
+  .noe-sealing__actions {
+    flex-direction: column-reverse;
+  }
+
+  .noe-sealing__actions button {
+    width: 100%;
+  }
+
+  .noe-mission-dialog__panel {
+    grid-template-columns: 1fr;
+  }
+
+  .noe-mission-dialog__portrait {
+    display: none;
+  }
+
+  .noe-mission-dialog__actions {
+    flex-direction: column-reverse;
+  }
+}
+
 @keyframes portal-transition-in {
   from {
     opacity: 0;
@@ -1004,7 +1393,8 @@ kbd {
   .start-screen,
   .start-screen__primary,
   .portal-transition-overlay,
-  .portal-transition-overlay__mark {
+  .portal-transition-overlay__mark,
+  .noe-sealing__segment {
     animation: none;
     transition: none;
   }

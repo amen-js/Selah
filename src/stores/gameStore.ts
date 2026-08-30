@@ -27,6 +27,40 @@ const normalizarIdsUnicos = (ids: readonly string[]): string[] => [
 const ehRegistro = (valor: unknown): valor is Record<string, unknown> =>
   typeof valor === 'object' && valor !== null
 
+const normalizarListaIdsPersistida = (
+  valor: unknown,
+  padrao: readonly string[],
+): string[] =>
+  Array.isArray(valor)
+    ? normalizarIdsUnicos(
+        valor.filter((item): item is string => typeof item === 'string'),
+      )
+    : [...padrao]
+
+const ehAlternativaId = (valor: unknown): valor is AlternativaId =>
+  valor === 'A' || valor === 'B' || valor === 'C' || valor === 'D'
+
+const ehResultadoQuizLocal = (valor: unknown): valor is ResultadoQuizLocal =>
+  ehRegistro(valor) &&
+  typeof valor.quizId === 'string' &&
+  typeof valor.passagemId === 'string' &&
+  ehAlternativaId(valor.alternativaId) &&
+  typeof valor.acertou === 'boolean'
+
+const normalizarHistoricoPersistido = (
+  valor: unknown,
+  padrao: readonly ResultadoQuizLocal[],
+): ResultadoQuizLocal[] => {
+  if (!Array.isArray(valor)) return [...padrao]
+
+  const quizIds = new Set<string>()
+  return valor.filter((item): item is ResultadoQuizLocal => {
+    if (!ehResultadoQuizLocal(item) || quizIds.has(item.quizId)) return false
+    quizIds.add(item.quizId)
+    return true
+  })
+}
+
 const ehCheckpointNoeComparavel = (
   valor: unknown,
 ): valor is CheckpointProgressaoNoe =>
@@ -376,10 +410,28 @@ export const useGameStore = create<EstadoJogo>()(
       storage: createJSONStorage<EstadoPersistido>(() => localStorage),
       partialize: projetarEstadoPersistido,
       merge: (persistedState, currentState) => {
-        const persisted = persistedState as EstadoPersistido
+        const persisted = ehRegistro(persistedState)
+          ? (persistedState as Partial<EstadoPersistido>)
+          : {}
         return {
           ...currentState,
           ...persisted,
+          versiculosColetados: normalizarListaIdsPersistida(
+            persisted.versiculosColetados,
+            currentState.versiculosColetados,
+          ),
+          selahsConcluidos: normalizarListaIdsPersistida(
+            persisted.selahsConcluidos,
+            currentState.selahsConcluidos,
+          ),
+          momentosCriacaoConcluidos: normalizarListaIdsPersistida(
+            persisted.momentosCriacaoConcluidos,
+            currentState.momentosCriacaoConcluidos,
+          ),
+          historico: normalizarHistoricoPersistido(
+            persisted.historico,
+            currentState.historico,
+          ),
           checkpointNoe: persisted.checkpointNoe ?? null,
           selahAtivo: null,
           dialogoAberto: false,

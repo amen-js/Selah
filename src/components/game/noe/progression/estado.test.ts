@@ -6,7 +6,12 @@ import {
   obterRequisitosPendentesNoe,
   processarEventoProgressaoNoe,
 } from './estado'
-import type { EstadoProgressaoNoe, EventoProgressaoNoe } from './types'
+import type {
+  AcaoNoeId,
+  EstadoProgressaoNoe,
+  EventoProgressaoNoe,
+  MomentoNoeId,
+} from './types'
 
 function concluirTarefasMomentoAtual(
   estado: EstadoProgressaoNoe,
@@ -29,7 +34,9 @@ function concluirTarefasMomentoAtual(
   )
 }
 
-function concluirMomentoAtual(estado: EstadoProgressaoNoe): EstadoProgressaoNoe {
+function concluirMomentoAtual(
+  estado: EstadoProgressaoNoe,
+): EstadoProgressaoNoe {
   const momento = momentosNoe.find(({ id }) => id === estado.momentoAtualId)
   if (!momento) return estado
 
@@ -96,9 +103,9 @@ describe('estado da jornada de Noé', () => {
       primeiraTabua,
     )
 
-    expect(
-      processarEventoProgressaoNoe(comPrimeiraTabua, primeiraTabua),
-    ).toBe(comPrimeiraTabua)
+    expect(processarEventoProgressaoNoe(comPrimeiraTabua, primeiraTabua)).toBe(
+      comPrimeiraTabua,
+    )
     expect(obterRequisitosPendentesNoe(comPrimeiraTabua)[0]).toMatchObject({
       acaoId: 'noe.madeira.coletada',
       quantidadeConcluida: 1,
@@ -126,7 +133,12 @@ describe('estado da jornada de Noé', () => {
       progressoMomentoAtual: [
         {
           acaoId: 'noe.madeira.coletada',
-          unidadesConcluidas: ['inventada-1', 'inventada-2', 'tabua-1', 'tabua-1'],
+          unidadesConcluidas: [
+            'inventada-1',
+            'inventada-2',
+            'tabua-1',
+            'tabua-1',
+          ],
         },
       ],
     }
@@ -161,6 +173,137 @@ describe('estado da jornada de Noé', () => {
     ).toBe(ultimoMomento)
   })
 
+  it('aceita ações cooperativas do mesmo estágio em qualquer ordem', () => {
+    const casos: readonly {
+      momentoId: MomentoNoeId
+      acaoId: AcaoNoeId
+      unidadeId: string
+    }[] = [
+      {
+        momentoId: 'estoque-mantimentos',
+        acaoId: 'noe.mantimento.frutas-armazenadas',
+        unidadeId: 'frutas-despensa-central',
+      },
+      {
+        momentoId: 'conducao-animais',
+        acaoId: 'noe.animais.mamiferos-guiados',
+        unidadeId: 'pequenos-mamiferos-cestos',
+      },
+      {
+        momentoId: 'acomodacao-animais',
+        acaoId: 'noe.habitat.familia-noe-preparado',
+        unidadeId: 'nivel-superior-familia-noe',
+      },
+      {
+        momentoId: 'refugio-tempestade',
+        acaoId: 'noe.cuidado.filhotes-mamiferos',
+        unidadeId: 'filhotes-mamiferos-alimentados',
+      },
+      {
+        momentoId: 'nova-terra-arco-iris',
+        acaoId: 'noe.desembarque.mamiferos',
+        unidadeId: 'mamiferos-desembarcados-em-grupo',
+      },
+    ]
+
+    for (const caso of casos) {
+      const estado = concluirAte(criarEstadoProgressaoNoe(), caso.momentoId)
+      const atualizado = processarEventoProgressaoNoe(estado, {
+        tipo: 'unidade-acao-concluida',
+        acaoId: caso.acaoId,
+        unidadeId: caso.unidadeId,
+      })
+
+      expect(atualizado).not.toBe(estado)
+      expect(atualizado.progressoMomentoAtual).toContainEqual({
+        acaoId: caso.acaoId,
+        unidadesConcluidas: [caso.unidadeId],
+      })
+    }
+  })
+
+  it('bloqueia etapas narrativas futuras até concluir a anterior', () => {
+    const casos: readonly {
+      momentoId: MomentoNoeId
+      acaoId: AcaoNoeId
+      unidadeId: string
+    }[] = [
+      {
+        momentoId: 'fechamento-porta',
+        acaoId: 'noe.abrigo.entrada-concluida',
+        unidadeId: 'entrada-segura-na-arca',
+      },
+      {
+        momentoId: 'retorno-pomba',
+        acaoId: 'noe.pomba.retornou',
+        unidadeId: 'retorno-com-oliveira',
+      },
+      {
+        momentoId: 'nova-terra-arco-iris',
+        acaoId: 'noe.altar.construido',
+        unidadeId: 'altar-de-gratidao',
+      },
+    ]
+
+    for (const caso of casos) {
+      const estado = concluirAte(criarEstadoProgressaoNoe(), caso.momentoId)
+      expect(
+        processarEventoProgressaoNoe(estado, {
+          tipo: 'unidade-acao-concluida',
+          acaoId: caso.acaoId,
+          unidadeId: caso.unidadeId,
+        }),
+      ).toBe(estado)
+    }
+  })
+
+  it('expõe somente o estágio acionável nos requisitos pendentes', () => {
+    let estado = concluirAte(criarEstadoProgressaoNoe(), 'fechamento-porta')
+    expect(obterRequisitosPendentesNoe(estado)).toEqual([
+      {
+        tipo: 'tarefa-local',
+        acaoId: 'noe.abrigo.chamado-ouvido',
+        quantidadeConcluida: 0,
+        quantidadeNecessaria: 1,
+      },
+    ])
+
+    estado = processarEventoProgressaoNoe(estado, {
+      tipo: 'unidade-acao-concluida',
+      acaoId: 'noe.abrigo.chamado-ouvido',
+      unidadeId: 'chamado-final-noe',
+    })
+    expect(obterRequisitosPendentesNoe(estado)).toEqual([
+      {
+        tipo: 'tarefa-local',
+        acaoId: 'noe.abrigo.entrada-concluida',
+        quantidadeConcluida: 0,
+        quantidadeNecessaria: 1,
+      },
+    ])
+  })
+
+  it('expande evento v1 em etapas canônicas uma única vez', () => {
+    const noFechamento = concluirAte(
+      criarEstadoProgressaoNoe(),
+      'fechamento-porta',
+    )
+    const eventoLegado: EventoProgressaoNoe = {
+      tipo: 'unidade-acao-concluida',
+      acaoId: 'noe.porta.atravessada',
+      unidadeId: 'entrada-segura',
+    }
+    const migrado = processarEventoProgressaoNoe(noFechamento, eventoLegado)
+
+    expect(migrado.progressoMomentoAtual.map(({ acaoId }) => acaoId)).toEqual([
+      'noe.abrigo.chamado-ouvido',
+      'noe.abrigo.entrada-concluida',
+      'noe.porta.fechada',
+    ])
+    expect(processarEventoProgressaoNoe(migrado, eventoLegado)).toBe(migrado)
+    expect(obterClimaNoe(migrado).chuvaAtiva).toBe(true)
+  })
+
   it('ignora cada Selah final quando recebido antes das tarefas locais', () => {
     let estado = criarEstadoProgressaoNoe()
 
@@ -193,47 +336,60 @@ describe('estado da jornada de Noé', () => {
     ).toBe(estado)
   })
 
-  it('projeta o clima 0/33/66/100, com chuva somente após M6 e luz após M8', () => {
-    let estado = criarEstadoProgressaoNoe()
-    expect(obterClimaNoe(estado)).toEqual({
-      percentualPreparacao: 0,
-      fase: 'calmo',
-      chuvaAtiva: false,
-    })
+  it.each([
+    ['chamado-canteiro', 0, 'calmo', false],
+    ['coleta-vedacao', 0, 'calmo', false],
+    ['estoque-mantimentos', 33, 'nuvens-leves', false],
+    ['conducao-animais', 33, 'nuvens-leves', false],
+    ['acomodacao-animais', 66, 'vento-suave', false],
+    ['fechamento-porta', 100, 'abrigo-pronto', false],
+    ['refugio-tempestade', 100, 'chuva-segura', true],
+    ['retorno-pomba', 100, 'luz-retornando', false],
+    ['nova-terra-arco-iris', 100, 'nova-terra', false],
+  ] as const)(
+    'projeta clima canônico ao iniciar %s',
+    (momentoId, percentualPreparacao, fase, chuvaAtiva) => {
+      const estado = concluirAte(criarEstadoProgressaoNoe(), momentoId)
 
-    estado = concluirAte(estado, 'estoque-mantimentos')
-    expect(obterClimaNoe(estado)).toEqual({
-      percentualPreparacao: 33,
-      fase: 'nuvens-leves',
-      chuvaAtiva: false,
-    })
+      expect(obterClimaNoe(estado)).toEqual({
+        percentualPreparacao,
+        fase,
+        chuvaAtiva,
+      })
+    },
+  )
 
-    estado = concluirAte(estado, 'acomodacao-animais')
-    expect(obterClimaNoe(estado)).toEqual({
-      percentualPreparacao: 66,
-      fase: 'vento-suave',
-      chuvaAtiva: false,
-    })
+  it('só inicia a chuva em M6 depois do chamado, entrada e porta segura', () => {
+    let estado = concluirAte(criarEstadoProgressaoNoe(), 'fechamento-porta')
+    const eventos: readonly EventoProgressaoNoe[] = [
+      {
+        tipo: 'unidade-acao-concluida',
+        acaoId: 'noe.abrigo.chamado-ouvido',
+        unidadeId: 'chamado-final-noe',
+      },
+      {
+        tipo: 'unidade-acao-concluida',
+        acaoId: 'noe.abrigo.entrada-concluida',
+        unidadeId: 'entrada-segura-na-arca',
+      },
+      {
+        tipo: 'unidade-acao-concluida',
+        acaoId: 'noe.porta.fechada',
+        unidadeId: 'porta-da-arca-fechada',
+      },
+    ]
 
-    estado = concluirAte(estado, 'fechamento-porta')
-    expect(obterClimaNoe(estado)).toEqual({
-      percentualPreparacao: 100,
-      fase: 'abrigo-pronto',
-      chuvaAtiva: false,
-    })
+    for (const evento of eventos.slice(0, -1)) {
+      estado = processarEventoProgressaoNoe(estado, evento)
+      expect(obterClimaNoe(estado).chuvaAtiva).toBe(false)
+    }
 
-    estado = concluirAte(estado, 'refugio-tempestade')
+    estado = processarEventoProgressaoNoe(estado, eventos[2])
+    expect(estado.momentoAtualId).toBe('fechamento-porta')
     expect(obterClimaNoe(estado)).toEqual({
       percentualPreparacao: 100,
       fase: 'chuva-segura',
       chuvaAtiva: true,
-    })
-
-    estado = concluirAte(estado, 'nova-terra-arco-iris')
-    expect(obterClimaNoe(estado)).toEqual({
-      percentualPreparacao: 100,
-      fase: 'luz-retornando',
-      chuvaAtiva: false,
     })
   })
 })

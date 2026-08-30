@@ -1,7 +1,12 @@
 import { useMemo } from 'react'
 import { ArcaCanteiroNoe } from './ArcaCanteiroNoe'
 import { AssetCanteiroNoe } from './AssetCanteiroNoe'
-import { selecionarInstanciasAssetsCanteiroNoe } from './canteiro'
+import { BosqueGoferNoe } from './BosqueGoferNoe'
+import {
+  obterEstadoVisualCanteiroNoe,
+  selecionarInstanciasAssetsCanteiroNoe,
+} from './canteiro'
+import { FamiliaNoe } from './FamiliaNoe'
 import { TarefasCanteiroNoe } from './TarefasCanteiroNoe'
 import type { CanteiroNoeProps, ChunkCanteiroNoeId } from './types'
 
@@ -20,10 +25,23 @@ export function CanteiroNoe(props: CanteiroNoeProps) {
       ),
     [props.momentoAtualId, props.progressoMomentoAtual],
   )
+  const estadoVisual = useMemo(
+    () =>
+      obterEstadoVisualCanteiroNoe(
+        props.momentoAtualId,
+        props.progressoMomentoAtual,
+      ),
+    [props.momentoAtualId, props.progressoMomentoAtual],
+  )
 
   return (
     <group name="canteiro-noe-m1-m2">
-      <ArcaCanteiroNoe />
+      <ArcaCanteiroNoe
+        momentoAtualId={props.momentoAtualId}
+        progressoMomentoAtual={props.progressoMomentoAtual}
+      />
+      <BosqueGoferNoe />
+      {estadoVisual.familiaNoCanteiro && <FamiliaNoe />}
       <group name="chunks-assets-canteiro-noe">
         {chunksCanteiro.map((chunkId) => {
           const instanciasChunk = instancias.filter(

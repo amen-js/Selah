@@ -38,15 +38,18 @@ vi.mock('./components/game/GameCanvas', async () => {
     GameCanvas: ({
       playing,
       onCanvasReady,
+      onSceneReady,
     }: {
       playing: boolean
       onCanvasReady?: (canvas: HTMLCanvasElement) => void
+      onSceneReady?: () => void
     }) => {
       if (canvasMock.shouldThrow) throw new Error('webgl-scene-failed')
 
       useEffect(() => {
         if (canvasMock.element) onCanvasReady?.(canvasMock.element)
-      }, [onCanvasReady])
+        onSceneReady?.()
+      }, [onCanvasReady, onSceneReady])
 
       return <div data-testid="game-canvas" data-playing={String(playing)} />
     },
@@ -179,6 +182,24 @@ describe('App integration', () => {
     expect(screen.queryByRole('button', { name: 'Entrar no mundo' })).not.toBeInTheDocument()
     expect(screen.queryByTestId('game-overlay')).not.toBeInTheDocument()
     expect(requestPointerLock).not.toHaveBeenCalled()
+  })
+
+  it('accepts the resolved scene signal when the loading manager has no totals', () => {
+    progressMock.state = {
+      active: false,
+      progress: 0,
+      item: '',
+      loaded: 0,
+      total: 0,
+      errors: [],
+    }
+
+    render(<App />)
+
+    expect(screen.getByRole('button', { name: 'Entrar no mundo' })).toBeInTheDocument()
+    expect(
+      screen.queryByRole('heading', { name: 'O mundo está despertando' }),
+    ).not.toBeInTheDocument()
   })
 
   it('offers a reload when the loading manager reports an asset failure', () => {

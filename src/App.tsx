@@ -1,5 +1,5 @@
 import { useProgress } from '@react-three/drei'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { GameCanvas } from './components/game/GameCanvas'
 import { GameOverlay } from './components/game/GameOverlay'
 import { ResponsibleOnboarding } from './components/game/ResponsibleOnboarding'
@@ -18,11 +18,17 @@ const reloadCurrentPage = () => window.location.reload()
 
 function App({ reloadPage = reloadCurrentPage }: AppProps) {
   const { t } = useTranslation()
+  const sceneProgress = useProgress()
   const [playing, setPlaying] = useState(false)
   const [hasStarted, setHasStarted] = useState(false)
+  const [sceneContentReady, setSceneContentReady] = useState(
+    () =>
+      sceneProgress.total > 0 &&
+      !sceneProgress.active &&
+      sceneProgress.loaded >= sceneProgress.total,
+  )
   const [sceneRenderFailed, setSceneRenderFailed] = useState(false)
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const sceneProgress = useProgress()
   const exploracaoBloqueada = useGameStore(selectExploracaoBloqueada)
   const configuracaoInicialConcluida = useGameStore(
     (state) => state.configuracaoInicialConcluida,
@@ -30,15 +36,18 @@ function App({ reloadPage = reloadCurrentPage }: AppProps) {
   const sceneLoadFailed = sceneProgress.errors.length > 0 || sceneRenderFailed
   const sceneReady =
     !sceneLoadFailed &&
-    sceneProgress.total > 0 &&
     !sceneProgress.active &&
-    sceneProgress.loaded >= sceneProgress.total
+    sceneContentReady
   const sceneBlocked = configuracaoInicialConcluida && !sceneReady
   const interfaceBloqueada =
     exploracaoBloqueada || !configuracaoInicialConcluida || sceneBlocked
   const exploracaoAtiva = playing && !interfaceBloqueada
 
   useSelahAudio()
+
+  const handleSceneReady = useCallback(() => {
+    setSceneContentReady(true)
+  }, [])
 
   useEffect(() => {
     const handlePointerLockChange = () => {
@@ -92,6 +101,7 @@ function App({ reloadPage = reloadCurrentPage }: AppProps) {
       <SceneErrorBoundary onError={() => setSceneRenderFailed(true)}>
         <GameCanvas
           playing={exploracaoAtiva}
+          onSceneReady={handleSceneReady}
           onCanvasReady={(canvas) => {
             canvasRef.current = canvas
           }}

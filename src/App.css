@@ -57,7 +57,6 @@
     linear-gradient(145deg, rgba(5, 15, 13, 0.96), rgba(9, 29, 23, 0.9)),
     radial-gradient(circle at 50% 42%, rgba(217, 230, 167, 0.18), transparent 34rem),
     var(--selah-bg);
-  animation: scene-loading-arrive 600ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .scene-loading::before,
@@ -340,12 +339,6 @@
   color: var(--selah-danger);
   border-color: rgba(255, 176, 169, 0.5);
   box-shadow: 0 0 2rem rgba(255, 176, 169, 0.16);
-}
-
-@keyframes scene-loading-arrive {
-  from {
-    opacity: 0;
-  }
 }
 
 @keyframes scene-loading-spin {

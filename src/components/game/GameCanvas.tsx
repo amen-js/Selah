@@ -270,9 +270,14 @@ function RegionFallback() {
 type GameCanvasProps = {
   playing: boolean
   onCanvasReady?: (canvas: HTMLCanvasElement) => void
+  onSceneReady?: () => void
 }
 
-export function GameCanvas({ playing, onCanvasReady }: GameCanvasProps) {
+export function GameCanvas({
+  playing,
+  onCanvasReady,
+  onSceneReady,
+}: GameCanvasProps) {
   const regiao = useGameStore((state) => state.regiao)
   const setRegiao = useGameStore((state) => state.setRegiao)
   const mapa = obterMapaRegiao(regiao)
@@ -357,10 +362,11 @@ export function GameCanvas({ playing, onCanvasReady }: GameCanvasProps) {
         onCreated={({ gl, scene }) => {
           scene.background = new Color('#b8d7ca')
           onCanvasReady?.(gl.domElement)
+          onSceneReady?.()
         }}
       >
         <Suspense fallback={<PhysicsFallback />}>
-          <Physics key={regiao} gravity={[0, -9.81, 0]}>
+          <Physics key={`physics-${regiao}`} gravity={[0, -9.81, 0]}>
             {mapa ? (
               <World
                 key={regiao}

@@ -1,7 +1,7 @@
 # Quick Task 002: Animate Selah text and modal entrance
 
 **Date:** 2026-08-30
-**Status:** In Progress
+**Status:** Done
 
 ## Description
 
@@ -19,13 +19,13 @@ passage effect with narration state, and soften the Selah modal entrance.
 
 ## Verification
 
-- [ ] The Selah card fades and scales into view without appearing abruptly.
-- [ ] Passage text reveals progressively and pauses with paused narration.
-- [ ] Quiz question and alternatives reveal in a readable sequence.
-- [ ] Full text remains immediately available to assistive technology.
-- [ ] Reduced-motion users see the complete copy without the typing effect.
-- [ ] Lint, tests, production build and browser UAT pass.
+- [x] The Selah card fades and scales into view without appearing abruptly.
+- [x] Passage text reveals progressively and pauses with paused narration.
+- [x] Quiz question and alternatives reveal in a readable sequence.
+- [x] Full text remains immediately available to assistive technology.
+- [x] Reduced-motion users see the complete copy without the typing effect.
+- [x] Lint, tests, production build and browser UAT pass.
 
 ## Commit
 
-Pending.
+`b1fca94` — `feat(ui): animate Selah text and modal entrance`

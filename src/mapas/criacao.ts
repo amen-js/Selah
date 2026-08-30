@@ -59,6 +59,45 @@ export const mapaCriacao: MapaRegiao = {
       fallback: { forma: 'caixa', cor: '#a3c96b' },
     },
   ],
+  artes2D: [
+    {
+      id: 'arte-criacao-caminho-luz',
+      arquivo: '/art/creation/light/light-path-unlocked.svg',
+      posicao: [5.5, 0.015, 7],
+      escala: [10, 3.2],
+      modo: 'chao',
+      rotacao: -0.2,
+      opacidade: 0.78,
+    },
+    {
+      id: 'arte-criacao-primeiro-brilho',
+      arquivo: '/art/creation/light/first-glow.svg',
+      posicao: [7.5, 3.8, -13.8],
+      escala: [12, 5.2],
+      opacidade: 0.72,
+    },
+    {
+      id: 'arte-criacao-nucleo-luz',
+      arquivo: '/art/creation/light/divine-light-core.svg',
+      posicao: [10, 2.15, -10.35],
+      escala: [3.8, 3.8],
+      opacidade: 0.86,
+    },
+    {
+      id: 'arte-criacao-rochas-iluminadas',
+      arquivo: '/art/creation/light/illuminated-rocks.svg',
+      posicao: [-7, 1.15, -6.4],
+      escala: [5.4, 2.3],
+      opacidade: 0.9,
+    },
+    {
+      id: 'arte-criacao-particulas-luz',
+      arquivo: '/art/creation/light/light-particles.svg',
+      posicao: [9.2, 3.1, -9.8],
+      escala: [5, 3.9],
+      opacidade: 0.62,
+    },
+  ],
   // IDs públicos aprovados pelo proxy; a referência USFM permanece no backend.
   coletaveis: [
     {

@@ -24,7 +24,7 @@ demand.
 
 | Group | Assets | Notes |
 | --- | --- | --- |
-| Voice Guide | Initial, support and transition lines for all nine moments | Prefer recorded PT-BR first; EN/ES follow approved localized scripts |
+| Voice Guide | Initial, support and transition lines for all nine moments | OpenRouter neural TTS over approved PT-BR/EN-US/ES-ES scripts; compatible local device voice as fallback |
 | Ambience | void silence bed, wind, river, forest, birds, animals, Eden ambience | Loop points and loudness normalized |
 | Reveals | light, water, vegetation, celestial, animal and Eden stingers | Short layers that can fade independently through Howler |
 | Animal audio | lion, giraffe ambience/foley and sheep | Child-friendly, no startling peaks |

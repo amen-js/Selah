@@ -19,7 +19,7 @@ next.
 
 | Feature | Reason |
 | --- | --- |
-| Recorded Voice Guide audio | The GDD still leaves full narration scope open. |
+| Full Voice Guide narration | Deferred to the dedicated OpenRouter narration slice after the neural TTS decision. |
 | Full initial/support/conclusion narrative sequence | It needs editorial pagination, approved translations and an inactivity signal. |
 | Biome discovery state | The merged runtime models moments, not the four biome milestones. |
 | Final World 1 completion screen | This slice validates the beginning of the journey first. |

@@ -84,7 +84,9 @@ A progressão deve ser marcada por contraste: vazio e preenchimento, escuridão 
 ### Voz do narrador / Guia da Criação
 
 - **Tom:** calmo, pausado, poético e acolhedor, como quem conta uma história de embalar
-- **Exibição:** balões de fala com no máximo duas linhas, locução em áudio (dublagem integral) e destaques em cores quentes nas palavras de ação
+- **Exibição:** balões de fala com no máximo duas linhas, locução em áudio por TTS neural do OpenRouter e destaques em cores quentes nas palavras de ação
+- **Cobertura da locução:** falas iniciais, de apoio e de transição dos nove momentos; a preferência de leitura em voz alta e a faixa etária continuam controlando a reprodução automática
+- **Segurança e fallback:** o cliente solicita somente IDs de falas previamente aprovadas e localizadas; texto livre não é sintetizado. Se o OpenRouter estiver indisponível, a mesma fala usa a voz local compatível do dispositivo
 - **Feedback:** nunca punitivo; redireciona com convite, não com correção
 
 | Ação do jogador | O que o guia não diz | O que o guia diz (estilo Selah) |
@@ -213,7 +215,13 @@ Cenário: a Árvore do Conhecimento do Bem e do Mal. A criança **não controla 
 ### Questões abertas
 
 - Quais passagens bíblicas oficiais entram em cada momento?
-- A locução da Voz Guia é integral desde o vertical slice ou só nos Momentos Selah?
+
+### Decisão de locução
+
+A Voz Guia terá locução ao longo de toda a jornada da Criação, não apenas nos
+Momentos Selah. A síntese neural usará o TTS do OpenRouter já adotado pelo
+projeto, com roteiro localizado e previamente aprovado, voz local como fallback
+e cancelamento imediato quando a exploração for bloqueada ou o momento mudar.
 
 ## Mundo 2 — Noé e a Arca: a grande missão
 

@@ -1,7 +1,7 @@
 # Dev 1 Hub, Portals, and Noah Region Specification
 
 **Date:** 2026-08-30
-**Status:** In progress
+**Status:** Verified
 
 ## Goal
 
@@ -57,3 +57,12 @@ Passages:
 - `npm run test:run`, `npm run lint`, and `npm run build` pass.
 - Manual browser test validates movement, camera, prompt, fade, pointer lock,
   pause, and anti-loop behavior.
+
+## Validation result
+
+- Manual UAT approved the Hub, portal transitions, and playable regions.
+- The feature branch was updated through `origin/main` commit `c74e123`,
+  preserving the responsible onboarding and OpenRouter quiz integration.
+- 40 test files and 174 tests passed; lint and production build passed.
+- No backend, Selah store, external asset, credential, or deployment behavior
+  was changed by this feature.

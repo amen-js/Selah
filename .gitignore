@@ -1,35 +1,24 @@
-# Dependencies
-node_modules/
-.pnp
-.pnp.js
-
-# Environment / secrets
-.env
-.env.*
-!.env.example
-
-# Build / output
-dist/
-build/
-out/
-.next/
-.turbo/
-.cache/
-coverage/
-
-# Logs / OS
+# Logs
+logs
 *.log
 npm-debug.log*
-.DS_Store
-Thumbs.db
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-# Editor / IDE
-.cursor/
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# Misc
+node_modules
+dist
+dist-ssr
 *.local
-.vercel
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

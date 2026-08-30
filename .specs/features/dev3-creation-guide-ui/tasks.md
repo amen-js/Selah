@@ -1,7 +1,7 @@
 # Creation Guide UI Tasks
 
 **Design**: `.specs/features/dev3-creation-guide-ui/design.md`
-**Status**: In Progress
+**Status**: Done
 **Baseline**: 237 tests across 52 files; 0 failures and 0 skipped.
 
 ## Execution Plan
@@ -176,6 +176,7 @@ mounting Canvas.
 
 ### T8: Validate the complete vertical slice
 
+**Status**: Complete
 **What**: Run the build gate, desktop/mobile UAT and update traceability.
 **Where**: `.specs/features/dev3-creation-guide-ui/spec.md`,
 `.specs/features/dev3-creation-guide-ui/tasks.md`
@@ -188,10 +189,17 @@ mounting Canvas.
 
 **Done when**:
 
-- [ ] `npm run lint && npm run test:run && npm run build` passes with at least 250 tests.
-- [ ] Desktop 1440x900 and mobile 390x844 show no overlap or clipped controls.
-- [ ] Pointer lock and overlay priority remain correct.
-- [ ] All eight requirements are marked Verified.
+- [x] `npm run lint && npm run test:run && npm run build` passes with 258 tests.
+- [x] Desktop 1440x900 and mobile 390x844 show no overlap or clipped controls.
+- [x] Pointer lock and overlay priority remain correct.
+- [x] All eight requirements are marked Verified.
+
+**UAT evidence**:
+
+- Production `GameOverlay` simulated in `/lab` at moments 1, 2 and 9.
+- pt-BR, en-US and es-ES copy updated immediately with the interface language.
+- Voice Guide disappeared behind dialogue and Selah, then returned to exploration.
+- Browser console reported no errors or warnings.
 
 **Commit**: `docs(spec): verify Creation Guide UI`
 

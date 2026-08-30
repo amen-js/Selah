@@ -11,9 +11,9 @@ next.
 
 - [x] Expose the transient Creation progression to the DOM without duplicating
       persistence or progression rules.
-- [ ] Show the active moment, journey progress and a short localized Voice Guide objective while
+- [x] Show the active moment, journey progress and a short localized Voice Guide objective while
       exploration remains interactive.
-- [ ] Make the first two moments testable without a Canvas in `/lab`.
+- [x] Make the first two moments testable without a Canvas in `/lab`.
 
 ## Out of Scope
 
@@ -96,20 +96,20 @@ language.
 
 | Requirement ID | Story | Status |
 | --- | --- | --- |
-| CGUI-01 | P1: transient Canvas-to-DOM snapshot | Implemented |
-| CGUI-02 | P1: moment order and title in HUD | Implemented |
-| CGUI-03 | P1: non-blocking localized Voice Guide objective | Implemented |
-| CGUI-04 | P1: clear snapshot outside Creation | Implemented |
-| CGUI-05 | P1: preserve overlay priority | Implemented |
-| CGUI-06 | P1: no new persisted progress | Implemented |
-| CGUI-07 | P2: `/lab` moment simulation | Implemented |
-| CGUI-08 | P2: translated moment titles, objectives and UI labels | Implemented |
+| CGUI-01 | P1: transient Canvas-to-DOM snapshot | Verified |
+| CGUI-02 | P1: moment order and title in HUD | Verified |
+| CGUI-03 | P1: non-blocking localized Voice Guide objective | Verified |
+| CGUI-04 | P1: clear snapshot outside Creation | Verified |
+| CGUI-05 | P1: preserve overlay priority | Verified |
+| CGUI-06 | P1: no new persisted progress | Verified |
+| CGUI-07 | P2: `/lab` moment simulation | Verified |
+| CGUI-08 | P2: translated moment titles, objectives and UI labels | Verified |
 
 **Coverage**: 8 total, 8 mapped to tasks, 0 unmapped.
 
 ## Success Criteria
 
-- [ ] Moments 1 and 2 can be demonstrated end-to-end with the production
+- [x] Moments 1 and 2 can be demonstrated end-to-end with the production
       overlay.
-- [ ] Existing progression, store, Selah and pointer-lock behavior remains green.
-- [ ] Lint, all tests, production build and desktop/mobile browser UAT pass.
+- [x] Existing progression, store, Selah and pointer-lock behavior remains green.
+- [x] Lint, all tests, production build and desktop/mobile browser UAT pass.

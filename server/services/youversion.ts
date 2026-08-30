@@ -31,6 +31,37 @@ interface YouVersionPassage {
   id?: string
 }
 
+const METADADOS_BIBLIA: Record<number, { versao: string; atribuicao: string }> = {
+  3254: {
+    versao: 'Bíblia Livre Para Todos',
+    atribuicao:
+      'Dr. Jonathan Gallagher. Creative Commons Atribuição-CompartilhaIgual 4.0. Texto obtido via YouVersion Platform.',
+  },
+  3034: {
+    versao: 'Berean Standard Bible',
+    atribuicao: 'Berean Standard Bible. Public Domain. Texto obtido via YouVersion Platform.',
+  },
+  3291: {
+    versao: 'Versión Biblia Libre',
+    atribuicao: 'Versión Biblia Libre. Texto obtido via YouVersion Platform.',
+  },
+  147: {
+    versao: 'Reina-Valera Antigua',
+    atribuicao: 'Reina-Valera Antigua. Texto obtido via YouVersion Platform.',
+  },
+}
+
+const metadadosBiblia = (bibleId: number, copyright?: string) => {
+  const conhecido = METADADOS_BIBLIA[bibleId]
+  return {
+    versao: conhecido?.versao ?? `YouVersion ${bibleId}`,
+    atribuicao:
+      copyright?.trim() ||
+      conhecido?.atribuicao ||
+      'Texto obtido via YouVersion Platform. Exibido sob a licença da versão. Sem cache em disco.',
+  }
+}
+
 const chaveSessao = (passagemId: string, idioma: Idioma, bibleId: number): string =>
   `${bibleId}:${passagemId}:${idioma}`
 
@@ -78,15 +109,14 @@ export const createYouVersionClient = ({
     const texto = typeof payload.content === 'string' ? limparTexto(payload.content) : ''
     if (!texto) return undefined
 
+    const meta = metadadosBiblia(bibleId, payload.copyright)
     const resolvido: VersiculoResolvido = {
       passagemId,
       idioma,
       texto,
       referencia: payload.reference?.trim() || usfm,
-      versao: `YouVersion ${bibleId}`,
-      atribuicao:
-        payload.copyright?.trim() ||
-        'Texto obtido via YouVersion Platform. Exibido sob a licença da versão. Sem cache em disco.',
+      versao: meta.versao,
+      atribuicao: meta.atribuicao,
       origem: 'youversion',
     }
     sessao.set(memoKey, resolvido)

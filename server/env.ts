@@ -46,14 +46,15 @@ export const loadEnv = (): Env => ({
   port: Number(process.env.PORT) || 8787,
   openRouterApiKey: process.env.OPENROUTER_API_KEY ?? '',
   openRouterModels: parseCsv(process.env.OPENROUTER_MODELS, [
-    'google/gemini-2.5-flash',
     'openai/gpt-4o-mini',
+    'google/gemini-2.5-flash',
   ]),
   youVersionAppKey: process.env.YVP_APP_KEY ?? '',
   youVersionBibleIds: {
-    'pt-BR': parseBibleId(process.env.YOUVERSION_BIBLE_PT, 129),
+    // IDs licenciados nesta app key (NVI 129/128 retornam 403).
+    'pt-BR': parseBibleId(process.env.YOUVERSION_BIBLE_PT, 3254),
     'en-US': parseBibleId(process.env.YOUVERSION_BIBLE_EN, 3034),
-    'es-ES': parseBibleId(process.env.YOUVERSION_BIBLE_ES, 128),
+    'es-ES': parseBibleId(process.env.YOUVERSION_BIBLE_ES, 3291),
   },
   corsOrigins: parseCsv(process.env.CORS_ORIGINS, [
     'http://localhost:5173',

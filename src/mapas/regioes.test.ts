@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { mapaCriacao } from './criacao'
+import { mapaHub } from './hub'
+import { mapaNoe } from './noe'
 import {
   catalogoRegioes,
   obterDefinicaoRegiao,
@@ -21,7 +23,7 @@ describe('catálogo de regiões', () => {
       id: 'hub',
       tipo: 'hub',
       disponivel: true,
-      mapa: null,
+      mapa: mapaHub,
     })
   })
 
@@ -34,15 +36,21 @@ describe('catálogo de regiões', () => {
     expect(obterMapaRegiao('criacao')).toBe(mapaCriacao)
   })
 
-  it('mantém Noé e José explicitamente indisponíveis até seus mapas existirem', () => {
-    for (const regiao of ['noe', 'jose'] as const) {
-      expect(obterDefinicaoRegiao(regiao)).toMatchObject({
-        id: regiao,
-        tipo: 'mundo',
-        disponivel: false,
-        mapa: null,
-      })
-      expect(obterMapaRegiao(regiao)).toBeNull()
-    }
+  it('expõe Noé como mundo disponível e José como expansão futura', () => {
+    expect(obterDefinicaoRegiao('noe')).toMatchObject({
+      id: 'noe',
+      tipo: 'mundo',
+      disponivel: true,
+      mapa: mapaNoe,
+    })
+    expect(obterMapaRegiao('noe')).toBe(mapaNoe)
+
+    expect(obterDefinicaoRegiao('jose')).toMatchObject({
+      id: 'jose',
+      tipo: 'mundo',
+      disponivel: false,
+      mapa: null,
+    })
+    expect(obterMapaRegiao('jose')).toBeNull()
   })
 })

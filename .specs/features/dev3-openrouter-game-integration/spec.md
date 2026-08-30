@@ -1,7 +1,7 @@
 # OpenRouter Game Integration Specification
 
 **Date:** 2026-08-30
-**Status:** In progress
+**Status:** Verified
 
 ## Problem
 
@@ -50,10 +50,23 @@ inside the game exactly like reviewed fallback questions.
 
 | Requirement | Verification | Status |
 | --- | --- | --- |
-| ORI-01 | `src/hooks/useSelahFlow.test.ts` | Pending |
-| ORI-02 | `server/frontend-integration.test.ts` | Pending |
-| ORI-03 | `server/frontend-integration.test.ts` | Pending |
-| ORI-04 | `server/services/openrouter.test.ts` | Pending |
+| ORI-01 | `src/hooks/useSelahFlow.test.ts` | Verified |
+| ORI-02 | `server/frontend-integration.test.ts` | Verified |
+| ORI-03 | `server/frontend-integration.test.ts` | Verified |
+| ORI-04 | `server/services/openrouter.test.ts` | Verified |
+
+## Validation result
+
+- The game hook forwards the exact player language, age group, derived
+  difficulty, and AI preference for both general and child profiles.
+- A real Creation collectible completed quiz generation and evaluation through
+  the public frontend gateway and Hono app with an injected OpenRouter client.
+- The public AI quiz contained four alternatives and no answer key or
+  pre-answer explanation.
+- The OpenRouter client preserved ZDR/privacy controls while retrying from JSON
+  Schema to JSON Object and parsed fenced JSON without external network access.
+- Final gate: 30 test files and 125 tests passed; lint and production build
+  passed; no tests were removed or skipped.
 
 ## Operational prerequisite
 

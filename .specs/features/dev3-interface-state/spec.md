@@ -1,6 +1,6 @@
 # Dev 3 Interface and State Specification
 
-**Status:** Approved
+**Status:** Verified for the functional UI milestone
 
 ## Goal
 
@@ -26,3 +26,10 @@ Deliver the React DOM interface and privacy-safe local state for the Selah demo 
 - The `/lab` flow works without a Canvas and exercises success, fallback, failure, and parental-pause states.
 - `npm run lint`, `npm run test:run`, and `npm run build` pass.
 - Browser UAT confirms the full Selah flow and privacy controls.
+
+## Verification Result
+
+- UI-01 through UI-04, STATE-01, STATE-02, API-01, and A11Y-01 are implemented and verified.
+- Automated gate: 15 test files and 50 passing tests, with lint and production build passing.
+- Browser UAT: success, fallback, controlled error, settings, visible persistence, parental-pause early release, 1440×900, and 390×844 passed.
+- The final Figma token pass remains waiting for designer assets and does not block the functional milestone.

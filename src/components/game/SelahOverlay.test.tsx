@@ -69,6 +69,7 @@ describe('SelahOverlay', () => {
     render(<SelahOverlay gateway={pendingGateway} tts={tts} />)
 
     expect(screen.getByText(/preparando este momento/i)).toBeInTheDocument()
+    expect(screen.getByRole('dialog').parentElement).toHaveClass('selah-backdrop')
   })
 
   it('shows the verse and exposes the injected TTS control', async () => {

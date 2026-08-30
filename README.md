@@ -16,8 +16,9 @@ O documento de design do jogo está em [`docs/GDD.md`](docs/GDD.md).
 
 Os resumos de execução por função estão em:
 
-- [`docs/handoffs/PO.md`](docs/handoffs/PO.md) — decisões, curadoria, aceite e pitch da P.O.
-- [`docs/handoffs/DESIGNER.md`](docs/handoffs/DESIGNER.md) — identidade, assets e level design do Designer
+- [`docs/handoffs/PO.md`](docs/handoffs/PO.md) — decisões, curadoria e aceite da P.O.
+- [`docs/handoffs/DESIGNER.md`](docs/handoffs/DESIGNER.md) — identidade, SVGs, assets e level design do Designer
+- [`docs/handoffs/PITCH.md`](docs/handoffs/PITCH.md) — espaço reservado para as ideias de pitch da P.O.
 
 ## Equipe
 

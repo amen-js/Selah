@@ -57,4 +57,16 @@ describe('mapa da criação', () => {
     expect(mapaCriacao.coletaveis.every(({ historiaId }) => historiaId === 'criacao')).toBe(true)
     expect(mapaCriacao.coletaveis.map(({ passagemId }) => passagemId)).toEqual(referenciasEsperadas)
   })
+
+  it('usa peças nomeadas e colliders simples nos modelos interativos', () => {
+    const propsModelados = mapaCriacao.props.filter(({ modelo }) => modelo)
+    const propsComColisor = mapaCriacao.props.filter(({ colisor }) => colisor)
+
+    expect(propsModelados.every(({ modeloNo }) => Boolean(modeloNo))).toBe(true)
+    expect(propsComColisor.length).toBeGreaterThan(0)
+    for (const { colisor } of propsComColisor) {
+      expect(colisor?.forma).toBe('cuboid')
+      expect(colisor?.meiaExtensao.every((valor) => valor > 0)).toBe(true)
+    }
+  })
 })

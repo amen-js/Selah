@@ -7,8 +7,11 @@ describe('mapa do hub', () => {
     expect(mapaHub.coletaveis).toEqual([])
   })
 
-  it('usa somente props geométricos fallback', () => {
-    expect(mapaHub.props.every(({ modelo }) => modelo === undefined)).toBe(true)
+  it('seleciona peças nomeadas nos props que usam packs GLB', () => {
+    const propsModelados = mapaHub.props.filter(({ modelo }) => modelo)
+
+    expect(propsModelados.length).toBeGreaterThan(0)
+    expect(propsModelados.every(({ modeloNo }) => Boolean(modeloNo))).toBe(true)
   })
 
   it('mantém IDs e posições válidos dentro dos limites', () => {

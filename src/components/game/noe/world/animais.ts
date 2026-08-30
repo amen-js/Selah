@@ -196,7 +196,11 @@ export function descreverEstadoCampoAnimaisNoe(
 export function campoAnimaisNoeVisivel(
   momentoAtualId: MomentoNoeId,
 ): boolean {
-  return momentoAtualId === 'conducao-animais'
+  const indiceAtual = indiceMomentoNoe(momentoAtualId)
+  return (
+    indiceAtual >= indiceMomentoNoe('conducao-animais') &&
+    indiceAtual <= indiceMomentoNoe('acomodacao-animais')
+  )
 }
 
 /** Samples a multi-segment authored route without mutating its points. */

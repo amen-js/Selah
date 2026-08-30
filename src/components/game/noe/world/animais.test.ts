@@ -53,7 +53,7 @@ describe('condução de famílias de animais em M4', () => {
     expect(interpolarCaminhoGrupoAnimaisNoe(caminho, 0.5)).toEqual(caminho[2])
   })
 
-  it('abre o campo e os candidatos somente durante M4', () => {
+  it('mantém a chegada visível em M5, mas candidatos somente durante M4', () => {
     const aves = gruposConducaoAnimaisNoe[0]
     const jogador = {
       x: aves.posicaoInteracao[0],
@@ -63,7 +63,8 @@ describe('condução de famílias de animais em M4', () => {
 
     expect(campoAnimaisNoeVisivel('estoque-mantimentos')).toBe(false)
     expect(campoAnimaisNoeVisivel('conducao-animais')).toBe(true)
-    expect(campoAnimaisNoeVisivel('acomodacao-animais')).toBe(false)
+    expect(campoAnimaisNoeVisivel('acomodacao-animais')).toBe(true)
+    expect(campoAnimaisNoeVisivel('fechamento-porta')).toBe(false)
     expect(
       resolverCandidatoCampoAnimaisNoe(
         jogador,

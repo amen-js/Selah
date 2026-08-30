@@ -3,7 +3,7 @@ name: Selah Jogo Bíblico
 overview: "Selah — jogo 3D de mundo aberto no navegador onde crianças exploram regiões bíblicas com NPCs virtuais que apresentam quizzes gerados por IA e ancorados no texto real via YouVersion (multilíngue). A mecânica central é o Momento Selah. Plano de 7 horas com divisão de tarefas para 3 devs (1 com experiência em jogos), 1 designer e 1 P.O."
 todos:
   - id: contrato
-    content: "Dev 3: escrever e publicar o contrato do store zustand, incluindo faixa etária, TTS, quiz ativo e histórico local anônimo, nos primeiros 20 minutos"
+    content: "Dev 3: escrever e publicar o contrato do store zustand, incluindo faixa etária, TTS, quiz ativo, histórico local e consentimento de métricas, nos primeiros 20 minutos"
     status: pending
   - id: setup
     content: "Dev 1: scaffold Vite + React 19 + TS com todas as deps e repo no GitHub"
@@ -39,7 +39,7 @@ todos:
     content: "Dev 2: endpoint /api/quiz/responder corrige quizId + alternativaId sem receber ou persistir dados pessoais"
     status: pending
   - id: metricas
-    content: "Dev 3: dashboard e histórico exclusivamente local com Selahs, versículos e resultados; incluir Jogar sem salvar e Apagar progresso"
+    content: "Dev 2 + Dev 3: dashboard local e telemetria agregada de Selahs iniciados/concluídos e resultado de quiz; incluir consentimento do responsável, Jogar sem salvar e Apagar progresso"
     status: pending
   - id: privacidade-infantil
     content: "Dev 2 + Dev 3: OpenRouter com ZDR e sem prompt logging; aviso infantil de IA, tela para responsáveis, controle para desativar IA e fallback local"
@@ -125,7 +125,11 @@ Tecnicamente é barato: pausar o `<Ecctrl>`, um `useSpring` na câmera, `howler`
 - **Prioridade:** depois da geração e validação do quiz. Se o tempo apertar, vira stretch — mas a ideia fica no pitch como acessibilidade explícita
 - **Não confundir** com input por voz: não há resposta aberta; TTS aqui é somente *output* (máquina lê o texto)
 
-**Contador de Selahs** é a métrica principal do dashboard. Tempo de tela é métrica de vício; Selah é métrica de encontro. A pausa não fica apenas dentro da narrativa: ela interrompe o ciclo de jogo e leva a proposta para a vida real, ajudando a reduzir o tempo contínuo de tela.
+### Métrica clara de engajamento
+
+A métrica oficial do hackathon é a **Taxa de Conclusão do Momento Selah**: `Selahs concluídos / Selahs iniciados × 100`. Um Selah é iniciado ao abrir a reflexão e concluído após responder ao quiz e entrar na Pausa Selah. O dashboard local mostra iniciados, concluídos, taxa de conclusão e acertos de quiz; o painel do projeto recebe apenas os mesmos totais agregados por dia, história e versão.
+
+O contador de Selahs prioriza encontro em vez de tempo de tela. A pausa não fica apenas dentro da narrativa: ela interrompe o ciclo de jogo e leva a proposta para a vida real, ajudando a reduzir o tempo contínuo de tela.
 
 O bloqueio vale somente para a exploração dentro do Selah — nunca bloqueia o navegador, o aparelho ou a possibilidade de fechar o jogo. A tela de pausa não usa contagem regressiva, culpa, urgência ou recompensa por permanecer conectado. A liberação do responsável acontece no próprio dispositivo e não envia PIN, horário ou qualquer outro dado ao backend.
 
@@ -164,22 +168,26 @@ type Estado = {
   faixaEtaria: "crianca" | "geral";   // ativa TTS automático no Selah quando "crianca"
   ttsAtivo: boolean;                  // toggle manual de fala do texto
   versiculosColetados: string[];      // ["Ex 14:14", ...]
+  selahsIniciados: number;
   selahsCompletados: number;
   selahAtivo: null | { ref: string; texto: string };
   quizAtivo: null | Quiz;
   historico: ResultadoQuiz[];
   salvarProgresso: boolean;
+  compartilharMetricas: boolean;     // consentimento local do responsável
   pausaParentalAtiva: boolean;
   dialogoAberto: boolean;
   setIdioma: (idioma: string) => void;
   setFaixaEtaria: (faixa: "crianca" | "geral") => void;
   setTtsAtivo: (ativo: boolean) => void;
-  abrirSelah: (ref: string) => void;
+  abrirSelah: (ref: string) => void; // incrementa selahsIniciados
   fecharSelah: () => void;
 };
 ```
 
-O store usa `zustand/persist` sobre `localStorage`, sem conta ou identificador remoto. Salva somente IDs de passagens, Selahs e resultados A/B/C/D. Não salva prompts, respostas completas da LLM, texto bíblico integral sem permissão da licença, localização, escola, igreja ou qualquer inferência religiosa. O usuário pode jogar sem salvar e apagar todo o progresso; nenhum histórico é sincronizado com o backend ou enviado ao OpenRouter.
+O store usa `zustand/persist` sobre `localStorage`, sem conta ou identificador remoto. Salva somente IDs de passagens, Selahs e resultados A/B/C/D. Não salva prompts, respostas completas da LLM, texto bíblico integral sem permissão da licença, localização, escola, igreja ou qualquer inferência religiosa. O usuário pode jogar sem salvar e apagar todo o progresso; o histórico individual nunca é sincronizado com o backend nem enviado ao OpenRouter.
+
+Quando o responsável consentir, o cliente envia ao Hono apenas eventos mínimos de produto — `selah_iniciado`, `selah_concluido` e `quiz_respondido` com `historiaId`, versão do app e se acertou — para compor contadores agregados. Não envia histórico, identificador persistente, cookie analítico ou fingerprint. O IP é registrado somente em log de segurança segregado, para rate limiting e diagnóstico, com acesso restrito e expiração automática em até 7 dias; ele não entra nas tabelas analíticas nem permite montar uma jornada individual.
 
 Dev 1 só chama `abrirSelah()`. Dev 3 só lê `selahAtivo` para renderizar. Nenhum dos dois precisa do código do outro para trabalhar.
 
@@ -314,10 +322,12 @@ Se a saída for inválida, inadequada ou não sustentada pela passagem, ela é d
 - Antes do jogo, responsáveis recebem explicação simples sobre IA, dados locais e faixa etária; podem desativar IA e usar somente quizzes em cache
 - Responsáveis configuram localmente a liberação da Pausa Selah e podem encerrar a pausa por uma área protegida; nenhum PIN ou configuração parental sai do dispositivo
 - Na primeira interação, o NPC informa à criança que é um personagem virtual automatizado que usa IA para criar desafios
-- Sem cadastro infantil, publicidade, analytics comportamental, fingerprinting ou coleta deliberada de identificadores
+- Sem cadastro infantil, publicidade, analytics comportamental, fingerprinting ou identificadores persistentes para rastreamento
+- A telemetria de produto é opcional e explicada ao responsável antes do primeiro envio: registra somente eventos mínimos agregáveis para medir conclusão de Selahs e acerto de quiz, sem criar perfil persistente
+- O endereço IP é dado pessoal e fica restrito a log operacional separado para rate limiting e diagnóstico; acesso restrito, sem uso analítico e retenção máxima de 7 dias
 - OpenRouter com Zero Data Retention obrigatório por requisição, `data_collection: "deny"` e prompt logging desativado
-- O proxy não registra corpo de requisições ou respostas; mantém apenas métricas técnicas sem conteúdo
-- Progresso e histórico ficam somente no navegador, com opções **Jogar sem salvar** e **Apagar progresso**
+- O proxy não registra conteúdo de quiz, prompts ou respostas da criança; armazena apenas contadores agregados de produto e métricas técnicas sem conteúdo
+- Progresso e histórico individual ficam somente no navegador, com opções **Jogar sem salvar** e **Apagar progresso**
 - Sem loot boxes, streaks, urgência artificial ou recompensas por permanecer conectado; durante a Pausa Selah, ficar com a tela aberta não acelera nem concede vantagem
 - Antes de lançamento público, realizar revisão jurídica e avaliação formal de impacto à privacidade, segurança e saúde infantil
 
@@ -326,6 +336,7 @@ Se a saída for inválida, inadequada ou não sustentada pela passagem, ela é d
 - `POST /api/quiz/gerar` — `{ historiaId, passagemId, idioma, faixaEtaria, dificuldade }` → quiz validado ou fallback; não recebe histórico da criança
 - `POST /api/quiz/responder` — `{ quizId, alternativaId }` → `{ acertou, explicacao, referencia }`; não persiste a resposta
 - `GET /api/versiculo` — `{ passagemId, idioma }` → texto autorizado via YouVersion, atribuição e cache permitido pela licença
+- `POST /api/metricas/eventos` — recebe lote validado de eventos mínimos (`selah_iniciado`, `selah_concluido`, `quiz_respondido`) somente após consentimento; aplica rate limit por IP, grava IP em log operacional segregado e incrementa somente contadores agregados por dia, história e versão
 
 ### Modelos
 

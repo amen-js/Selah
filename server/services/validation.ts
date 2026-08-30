@@ -160,8 +160,10 @@ export const validarQuiz = (
   const correta = quiz.alternativas.find((item) => item.id === quiz.respostaCorretaId)
   if (!correta) return { ok: false, motivo: 'resposta-ausente' }
 
-  const conjunto = `${quiz.pergunta} ${quiz.explicacao} ${quiz.alternativas.map((item) => item.texto).join(' ')}`
-  const inadequado = TERMOS_INADEQUADOS_CRIANCA.some((termo) => normalizar(conjunto).includes(termo))
+  const ancorado = `${quiz.pergunta} ${quiz.explicacao} ${correta.texto}`
+  const inadequado = TERMOS_INADEQUADOS_CRIANCA.some((termo) =>
+    normalizar(`${ancorado} ${quiz.alternativas.map((item) => item.texto).join(' ')}`).includes(termo),
+  )
   if (inadequado) return { ok: false, motivo: 'conteudo-inadequado' }
 
   if (faixaEtaria === 'crianca') {
@@ -181,7 +183,7 @@ export const validarQuiz = (
   }
 
   const fora = NOMES_FORA_DE_CONTEXTO.filter(
-    (nome) => contemPalavra(conjunto, nome) && !contemPalavra(passagem, nome),
+    (nome) => contemPalavra(ancorado, nome) && !contemPalavra(passagem, nome),
   )
   if (fora.length > 0) {
     return { ok: false, motivo: 'conhecimento-externo' }

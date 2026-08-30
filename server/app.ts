@@ -130,6 +130,7 @@ export const createApp = (deps: AppDeps = {}) => {
     context.json({
       status: 'ok',
       ia: Boolean(env.openRouterApiKey),
+      modelo: env.openRouterModels[0] ?? null,
       youversion: Boolean(env.youVersionAppKey),
     }),
   )
@@ -158,6 +159,7 @@ export const createApp = (deps: AppDeps = {}) => {
       idioma: versiculo.idioma,
       versao: versiculo.versao,
       atribuicao: versiculo.atribuicao,
+      origem: versiculo.origem,
     })
   })
 

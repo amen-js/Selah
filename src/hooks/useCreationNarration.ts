@@ -134,6 +134,8 @@ export function useCreationNarration({
       return
     }
 
+    const momentoAtivo = snapshot.momento.id
+
     if (idiomaMudou) {
       const atualId = linha?.narracaoId
       const ids = atualId ? [atualId, ...filaRef.current] : []
@@ -141,22 +143,22 @@ export function useCreationNarration({
       else setLinha(criarObjetivo(snapshot, idioma))
     } else if (ficouAtivo || momentoAnterior === undefined) {
       apoioConsumidoRef.current = false
-      iniciarSequencia([idNarracao(momentoAtual, 'inicial')])
+      iniciarSequencia([idNarracao(momentoAtivo, 'inicial')])
     } else if (momentoAnterior !== momentoAtual) {
       apoioConsumidoRef.current = false
       iniciarSequencia([
         idNarracao(momentoAnterior, 'transicao'),
-        idNarracao(momentoAtual, 'inicial'),
+        idNarracao(momentoAtivo, 'inicial'),
       ])
     } else if (
       snapshot.estado.concluida &&
       !concluidaAnteriorRef.current
     ) {
-      iniciarSequencia([idNarracao(momentoAtual, 'transicao')])
+      iniciarSequencia([idNarracao(momentoAtivo, 'transicao')])
     } else if (inatividade && !inatividadeAnteriorRef.current) {
       if (!apoioConsumidoRef.current) {
         apoioConsumidoRef.current = true
-        const apoioId = idNarracao(momentoAtual, 'apoio')
+        const apoioId = idNarracao(momentoAtivo, 'apoio')
         if (linha?.narracaoId) filaRef.current.push(apoioId)
         else iniciarSequencia([apoioId])
       }

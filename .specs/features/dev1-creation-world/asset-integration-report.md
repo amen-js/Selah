@@ -1,6 +1,6 @@
 # Creation world asset integration report
 
-Data da auditoria: 2026-08-30  
+Data da auditoria: 2026-08-30
 Escopo: inventário, proveniência, preparação física e manifesto dos assets da
 Criação, incluindo os chunks ambientais, a ovelha e o par humano.
 

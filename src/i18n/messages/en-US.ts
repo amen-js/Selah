@@ -93,6 +93,7 @@ export const enUS = {
   'hud.settings.open': 'Open parental settings',
   'hud.settings.label': 'Parents',
 
+  'creation.guide.label': 'Voice Guide',
   'creation.journey.vazio.title': 'The void',
   'creation.journey.vazio.objective':
     'Take a few steps and discover the first path.',

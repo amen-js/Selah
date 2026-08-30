@@ -91,6 +91,7 @@ export const ptBR = {
   'hud.settings.open': 'Abrir configurações parentais',
   'hud.settings.label': 'Pais',
 
+  'creation.guide.label': 'Voz Guia',
   'creation.journey.vazio.title': 'O vazio',
   'creation.journey.vazio.objective':
     'Dê alguns passos e descubra o primeiro caminho.',

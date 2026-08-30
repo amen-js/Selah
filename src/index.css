@@ -473,6 +473,45 @@ button:disabled {
   line-height: 1.65;
 }
 
+.creation-guide {
+  position: absolute;
+  right: max(1rem, env(safe-area-inset-right));
+  bottom: max(10.5rem, calc(env(safe-area-inset-bottom) + 10.5rem));
+  left: max(1rem, env(safe-area-inset-left));
+  width: min(36rem, calc(100% - 2rem));
+  margin-inline: auto;
+  padding: 1rem 1.25rem;
+  pointer-events: none;
+  border: 1px solid var(--selah-border);
+  border-radius: var(--selah-radius);
+  background: var(--selah-surface);
+  box-shadow: 0 14px 38px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(14px);
+}
+
+.creation-guide__label {
+  display: block;
+  color: var(--selah-accent-strong);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.creation-guide__title {
+  display: block;
+  margin-top: 0.25rem;
+  font-family: var(--selah-font-display);
+  font-size: clamp(1.1rem, 3vw, 1.35rem);
+  font-weight: 500;
+}
+
+.creation-guide p {
+  margin: 0.35rem 0 0;
+  color: var(--selah-text-muted);
+  line-height: 1.5;
+}
+
 .selah-card {
   padding: clamp(1.5rem, 5vw, 3rem);
   text-align: center;
@@ -709,6 +748,13 @@ button:disabled {
   .hud__region,
   .icon-button__label {
     display: none;
+  }
+
+  .creation-guide {
+    right: max(0.75rem, env(safe-area-inset-right));
+    left: max(0.75rem, env(safe-area-inset-left));
+    width: auto;
+    padding: 0.875rem 1rem;
   }
 
   .panel__header,

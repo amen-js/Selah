@@ -93,6 +93,7 @@ export const esES = {
   'hud.settings.open': 'Abrir configuración parental',
   'hud.settings.label': 'Familia',
 
+  'creation.guide.label': 'Voz Guía',
   'creation.journey.vazio.title': 'El vacío',
   'creation.journey.vazio.objective':
     'Da unos pasos y descubre el primer camino.',

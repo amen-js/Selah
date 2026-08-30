@@ -62,6 +62,7 @@ keys, with a pure coverage test.
 
 ### T3: Create the non-blocking Voice Guide
 
+**Status**: Implemented
 **What**: Create `CreationGuide` with translated labels, current objective,
 responsive styling and component tests.
 **Where**: `src/components/game/CreationGuide.tsx`,
@@ -75,10 +76,10 @@ responsive styling and component tests.
 
 **Done when**:
 
-- [ ] Guide is a polite live region with no focusable or interactive control.
-- [ ] It displays the localized moment title and concise objective.
-- [ ] It renders nothing when exploration is inactive.
-- [ ] `npm run test:run -- src/components/game/CreationGuide.test.tsx` passes 3 tests.
+- [x] Guide is a polite live region with no focusable or interactive control.
+- [x] It displays the localized moment title and concise objective.
+- [x] It renders nothing when exploration is inactive.
+- [x] `npm run test:run -- src/components/game/CreationGuide.test.tsx` passes 3 tests.
 
 **Commit**: `feat(ui): add Creation Voice Guide`
 

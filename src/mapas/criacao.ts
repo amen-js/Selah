@@ -10,7 +10,7 @@ const MEIA_PROFUNDIDADE_MUNDO = 16
  * exploração continue navegável mesmo quando os fallbacks forem renderizados.
  */
 export const mapaCriacao: MapaRegiao = {
-  spawn: [0, 0, 12],
+  spawn: [0, 2, 12],
   limites: {
     meiaLargura: MEIA_LARGURA_MUNDO,
     meiaProfundidade: MEIA_PROFUNDIDADE_MUNDO,

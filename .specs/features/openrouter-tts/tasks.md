@@ -38,9 +38,9 @@ documented status codes and headers are covered.
 
 ### T3: Replace the browser-only TTS controller
 
-**Status:** Pending
+**Status:** Complete
 **What:** Implement neural playback, observable state, cleanup, and local voice fallback.
-**Where:** `src/services/tts.ts`, `src/services/tts.test.ts`.
+**Where:** `src/services/tts.ts`, its tests, and the mechanical overlay contract migration.
 **Depends on:** T2
 **Requirement:** TTS-02, TTS-03, TTS-04, TTS-05
 **Tests:** Unit

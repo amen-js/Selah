@@ -37,7 +37,7 @@ export function SelahOverlay({ gateway, tts, appVersion }: SelahOverlayProps) {
       tts?.suportado &&
       (faixaEtaria === 'crianca' || ttsAtivo)
     ) {
-      tts.falar(versiculo.texto, versiculo.idioma)
+      void tts.falar(versiculo)
       falandoRef.current = true
     }
 
@@ -59,7 +59,7 @@ export function SelahOverlay({ gateway, tts, appVersion }: SelahOverlayProps) {
       return
     }
 
-    tts.falar(versiculo.texto, versiculo.idioma)
+    void tts.falar(versiculo)
     falandoRef.current = true
   }
 

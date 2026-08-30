@@ -41,8 +41,11 @@ const gateway: SelahGateway = {
 
 const tts: TtsController = {
   suportado: true,
+  estado: () => 'idle',
+  assinar: vi.fn(() => () => undefined),
   falar: vi.fn(),
   pausar: vi.fn(),
+  retomar: vi.fn(),
   cancelar: vi.fn(),
 }
 
@@ -80,7 +83,7 @@ describe('SelahOverlay', () => {
 
     expect(screen.getByText('Haja luz.')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Ouvir passagem em voz alta' }))
-    expect(tts.falar).toHaveBeenCalledWith(versiculo.texto, 'pt-BR')
+    expect(tts.falar).toHaveBeenCalledWith(versiculo)
 
     await user.click(screen.getByRole('button', { name: 'Continuar para a pergunta' }))
     expect(useGameStore.getState().selahAtivo?.fase).toBe('quiz')

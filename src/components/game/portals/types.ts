@@ -9,6 +9,8 @@ export type PortalMapa = Readonly<{
   raioAtivacao: number
   /** Portais indisponíveis podem continuar visíveis como conteúdo futuro. */
   disponivel?: boolean
+  /** Cor opcional do brilho do portal, sem carregar texto de apresentação. */
+  cor?: string
   /** Menor valor vence empates de distância; a ordem do array não é usada. */
   prioridade?: number
 }>

@@ -44,6 +44,15 @@ export const ptBR = {
   'hud.settings.open': 'Abrir configurações parentais',
   'hud.settings.label': 'Pais',
 
+  'portal.prompt.aria': 'Portal para {region}',
+  'portal.prompt.eyebrow': 'Portal',
+  'portal.prompt.enter': 'Pressione E ou Enter para entrar',
+  'portal.prompt.soon': 'Em breve',
+  'portal.transition.aria': 'Transição de região',
+  'portal.transition.exiting': 'Preparando sua passagem…',
+  'portal.transition.switching': 'Entrando em {region}…',
+  'portal.transition.entering': 'Bem-vindo a {region}',
+
   'dialog.aria': 'Diálogo com {character}',
   'dialog.disclosure': 'Personagem virtual automatizado',
   'dialog.continueAria': 'Continuar diálogo',

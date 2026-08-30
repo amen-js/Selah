@@ -46,6 +46,15 @@ export const enUS = {
   'hud.settings.open': 'Open parental settings',
   'hud.settings.label': 'Parents',
 
+  'portal.prompt.aria': 'Portal to {region}',
+  'portal.prompt.eyebrow': 'Portal',
+  'portal.prompt.enter': 'Press E or Enter to enter',
+  'portal.prompt.soon': 'Coming soon',
+  'portal.transition.aria': 'Region transition',
+  'portal.transition.exiting': 'Preparing your passage…',
+  'portal.transition.switching': 'Entering {region}…',
+  'portal.transition.entering': 'Welcome to {region}',
+
   'dialog.aria': 'Dialogue with {character}',
   'dialog.disclosure': 'Automated virtual character',
   'dialog.continueAria': 'Continue dialogue',

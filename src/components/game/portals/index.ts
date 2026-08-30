@@ -8,6 +8,7 @@ export {
   DURACAO_COOLDOWN_PORTAL_MS,
   MARGEM_REARME_PORTAL,
 } from './cooldown'
+export { resolverDestinoPortal } from './destino'
 export {
   distanciaXZ,
   estaNoRaioXZ,

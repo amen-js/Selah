@@ -10,8 +10,17 @@ import {
   RigidBody,
 } from '@react-three/rapier'
 import { Ecctrl, type EcctrlHandle } from 'ecctrl'
-import { Suspense, useEffect, useMemo, useRef, type RefObject } from 'react'
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type RefObject,
+} from 'react'
 import { Color } from 'three'
+import { portaisPorRegiao } from '../../mapas/portais'
 import { obterMapaRegiao } from '../../mapas/regioes'
 import type { MapaRegiao } from '../../mapas/types'
 import { useGameStore } from '../../stores/gameStore'
@@ -22,7 +31,22 @@ import {
   PropMapaRenderer,
   type PosicaoJogador,
 } from './creation'
+import {
+  criarEstadoCooldownPortal,
+  iniciarCooldownPortal,
+  podeAcionarPortalComCooldown,
+  PortaisRegiao,
+  PortalPrompt,
+  PortalTransitionOverlay,
+  resolverDestinoPortal,
+  type FasePortalTransicao,
+  type PortalMapa,
+} from './portals'
 import { ColetaveisRegiao } from './region'
+
+const DURACAO_SAIDA_PORTAL_MS = 260
+const DURACAO_TROCA_PORTAL_MS = 90
+const DURACAO_ENTRADA_PORTAL_MS = 360
 
 type GameControl =
   | 'forward'
@@ -136,9 +160,18 @@ function Player({
 type WorldProps = {
   playing: boolean
   mapa: MapaRegiao
+  portais: readonly PortalMapa[]
+  onPortalProximo: (portal: PortalMapa | null) => void
+  onPortalAcionado: (portal: PortalMapa) => void
 }
 
-function World({ playing, mapa }: WorldProps) {
+function World({
+  playing,
+  mapa,
+  portais,
+  onPortalProximo,
+  onPortalAcionado,
+}: WorldProps) {
   const posicaoJogadorRef = useRef<PosicaoJogador | null>(null)
   const gatilhoSelah = useGameStore((state) => state.selahAtivo?.gatilho ?? null)
   const pausaParentalAtiva = useGameStore((state) => state.pausaParentalAtiva)
@@ -173,6 +206,13 @@ function World({ playing, mapa }: WorldProps) {
         coletaveis={mapa.coletaveis}
         posicaoJogadorRef={posicaoJogadorRef}
         enabled={playing}
+      />
+      <PortaisRegiao
+        portais={portais}
+        playerRef={posicaoJogadorRef}
+        enabled={playing}
+        onPortalProximo={onPortalProximo}
+        onPortalAcionado={onPortalAcionado}
       />
 
       <RigidBody type="fixed" colliders={false}>
@@ -226,7 +266,78 @@ type GameCanvasProps = {
 
 export function GameCanvas({ playing, onCanvasReady }: GameCanvasProps) {
   const regiao = useGameStore((state) => state.regiao)
+  const setRegiao = useGameStore((state) => state.setRegiao)
   const mapa = obterMapaRegiao(regiao)
+  const [portalProximo, setPortalProximo] = useState<PortalMapa | null>(null)
+  const [faseTransicao, setFaseTransicao] =
+    useState<FasePortalTransicao>('inativo')
+  const [destinoTransicao, setDestinoTransicao] =
+    useState<PortalMapa['destino'] | null>(null)
+  const transicaoAtivaRef = useRef(false)
+  const cooldownPortalRef = useRef(criarEstadoCooldownPortal())
+  const temporizadoresRef = useRef<number[]>([])
+  const mundoAtivo = playing && faseTransicao === 'inativo'
+
+  const limparTemporizadores = useCallback(() => {
+    for (const temporizador of temporizadoresRef.current) {
+      window.clearTimeout(temporizador)
+    }
+    temporizadoresRef.current = []
+  }, [])
+
+  useEffect(() => limparTemporizadores, [limparTemporizadores])
+
+  useEffect(() => {
+    if (!mapa) setRegiao('hub')
+  }, [mapa, setRegiao])
+
+  const acionarPortal = useCallback((portal: PortalMapa) => {
+    const destino = resolverDestinoPortal(portal)
+    const agora = Date.now()
+
+    if (
+      !playing ||
+      transicaoAtivaRef.current ||
+      !destino ||
+      !podeAcionarPortalComCooldown(cooldownPortalRef.current, agora)
+    ) {
+      return
+    }
+
+    transicaoAtivaRef.current = true
+    cooldownPortalRef.current = iniciarCooldownPortal(
+      cooldownPortalRef.current,
+      agora,
+    )
+    setPortalProximo(null)
+    setDestinoTransicao(destino)
+    setFaseTransicao('saindo')
+
+    const trocarRegiao = window.setTimeout(() => {
+      setFaseTransicao('trocando')
+      setRegiao(destino)
+
+      const iniciarEntrada = window.setTimeout(() => {
+        setFaseTransicao('entrando')
+
+        const concluirEntrada = window.setTimeout(() => {
+          cooldownPortalRef.current = {
+            ...cooldownPortalRef.current,
+            armado: true,
+          }
+          transicaoAtivaRef.current = false
+          setFaseTransicao('inativo')
+          setDestinoTransicao(null)
+        }, DURACAO_ENTRADA_PORTAL_MS)
+
+        temporizadoresRef.current.push(concluirEntrada)
+      }, DURACAO_TROCA_PORTAL_MS)
+
+      temporizadoresRef.current.push(iniciarEntrada)
+    }, DURACAO_SAIDA_PORTAL_MS)
+
+    temporizadoresRef.current.push(trocarRegiao)
+  }, [playing, setRegiao])
 
   return (
     <KeyboardControls map={keyboardMap}>
@@ -243,13 +354,27 @@ export function GameCanvas({ playing, onCanvasReady }: GameCanvasProps) {
         <Suspense fallback={<PhysicsFallback />}>
           <Physics key={regiao} gravity={[0, -9.81, 0]}>
             {mapa ? (
-              <World key={regiao} playing={playing} mapa={mapa} />
+              <World
+                key={regiao}
+                playing={mundoAtivo}
+                mapa={mapa}
+                portais={portaisPorRegiao[regiao]}
+                onPortalProximo={setPortalProximo}
+                onPortalAcionado={acionarPortal}
+              />
             ) : (
               <RegionFallback />
             )}
           </Physics>
         </Suspense>
       </Canvas>
+      <PortalPrompt
+        portal={mundoAtivo ? portalProximo : null}
+      />
+      <PortalTransitionOverlay
+        fase={faseTransicao}
+        destino={destinoTransicao}
+      />
     </KeyboardControls>
   )
 }

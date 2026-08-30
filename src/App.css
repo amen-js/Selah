@@ -214,7 +214,18 @@ kbd {
     radial-gradient(circle at 50% 42%, rgb(255 240 190 / 16%), transparent 34%),
     rgb(8 27 20 / 94%);
   pointer-events: none;
-  animation: portal-transition-in 220ms ease-out both;
+}
+
+.portal-transition-overlay--saindo {
+  animation: portal-transition-in 260ms ease-out both;
+}
+
+.portal-transition-overlay--trocando {
+  opacity: 1;
+}
+
+.portal-transition-overlay--entrando {
+  animation: portal-transition-out 360ms ease-in both;
 }
 
 .portal-transition-overlay__mark {
@@ -236,6 +247,15 @@ kbd {
   }
   to {
     opacity: 1;
+  }
+}
+
+@keyframes portal-transition-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
   }
 }
 

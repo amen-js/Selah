@@ -9,7 +9,7 @@ Selah é um projeto de jogo interativo em 3D no navegador, inspirado em narrativ
 ```bash
 npm install
 cp .env.example .env   # preencha OPENROUTER_API_KEY e, se houver, YVP_APP_KEY
-npm run dev            # Vite :5173 + proxy Hono :8787
+npm run dev            # Vite 0.0.0.0:5173 + proxy Hono :8787
 ```
 
 Endpoints do Dev 2 (testáveis com `curl`, sem 3D):

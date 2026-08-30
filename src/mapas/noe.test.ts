@@ -142,4 +142,30 @@ describe('mapa de Noé', () => {
     expect(mapaNoe.coletaveis.every(({ historiaId }) => historiaId === 'noe')).toBe(true)
     expect(mapaNoe.coletaveis.map(({ passagemId }) => passagemId)).toEqual(referenciasEsperadas)
   })
+
+  it('posiciona os Selahs de cuidado dentro da Arca e o final na nova terra', () => {
+    const porPassagem = new Map(
+      mapaNoe.coletaveis.map((coletavel) => [coletavel.passagemId, coletavel]),
+    )
+    const dentroDaArca = ['genesis-6-19', 'genesis-7-1', 'genesis-8-1']
+
+    for (const passagemId of dentroDaArca) {
+      const coletavel = porPassagem.get(passagemId)
+      expect(coletavel).toBeDefined()
+      if (!coletavel) continue
+      expect(Math.abs(coletavel.posicao[0])).toBeLessThan(
+        estruturaArcaCanteiroNoe.largura / 2,
+      )
+      expect(coletavel.posicao[2]).toBeGreaterThan(
+        estruturaArcaCanteiroNoe.posicao[2] -
+          estruturaArcaCanteiroNoe.comprimento / 2,
+      )
+      expect(coletavel.posicao[2]).toBeLessThan(
+        estruturaArcaCanteiroNoe.posicao[2] +
+          estruturaArcaCanteiroNoe.comprimento / 2,
+      )
+    }
+
+    expect(porPassagem.get('genesis-9-13')?.posicao[2]).toBeLessThan(-30)
+  })
 })

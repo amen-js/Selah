@@ -55,7 +55,8 @@
   transition: opacity 160ms ease, visibility 160ms ease;
 }
 
-.is-playing .start-screen {
+.is-playing .start-screen,
+.is-overlay-active .start-screen {
   visibility: hidden;
   opacity: 0;
   pointer-events: none;

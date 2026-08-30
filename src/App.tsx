@@ -1,11 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
 import { GameCanvas } from './components/game/GameCanvas'
+import { GameOverlay } from './components/game/GameOverlay'
+import { selectExploracaoBloqueada, useGameStore } from './stores/gameStore'
 import './App.css'
 
 function App() {
   const [playing, setPlaying] = useState(false)
   const [hasStarted, setHasStarted] = useState(false)
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const exploracaoBloqueada = useGameStore(selectExploracaoBloqueada)
+  const exploracaoAtiva = playing && !exploracaoBloqueada
 
   useEffect(() => {
     const handlePointerLockChange = () => {
@@ -39,24 +43,35 @@ function App() {
     }
   }, [playing])
 
+  useEffect(() => {
+    if (exploracaoBloqueada && document.pointerLockElement === canvasRef.current) {
+      document.exitPointerLock()
+    }
+  }, [exploracaoBloqueada])
+
   const enterWorld = () => {
     void canvasRef.current?.requestPointerLock()
   }
 
   return (
-    <main className={`game-shell${playing ? ' is-playing' : ''}`}>
+    <main
+      className={`game-shell${exploracaoAtiva ? ' is-playing' : ''}${
+        exploracaoBloqueada ? ' is-overlay-active' : ''
+      }`}
+    >
       <GameCanvas
-        playing={playing}
+        playing={exploracaoAtiva}
         onCanvasReady={(canvas) => {
           canvasRef.current = canvas
         }}
       />
       <span className="camera-reticle" aria-hidden="true" />
+      <GameOverlay />
 
       <section
         className="start-screen"
         aria-label={hasStarted ? 'Jogo pausado' : 'Iniciar jogo'}
-        aria-hidden={playing}
+        aria-hidden={playing || exploracaoBloqueada}
       >
         <div className="start-screen__panel">
           <span className="start-screen__eyebrow">

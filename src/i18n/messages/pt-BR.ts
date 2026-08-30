@@ -1,0 +1,171 @@
+export const ptBR = {
+  'meta.title': 'Selah — Jornada bíblica 3D',
+  'meta.description':
+    'Selah — uma jornada bíblica 3D de exploração e reflexão.',
+  'root.loadingLab': 'Carregando laboratório…',
+
+  'language.selector.label': 'Idioma da interface',
+  'language.ptBR': 'Português',
+  'language.enUS': 'English',
+  'language.esES': 'Español',
+
+  'app.start.aria': 'Iniciar jornada Selah',
+  'app.paused.aria': 'Jornada Selah pausada',
+  'app.start.eyebrow': 'Uma jornada de reflexão',
+  'app.paused.eyebrow': 'Exploração pausada',
+  'app.start.description': 'Pausa no ruído. Entre na jornada.',
+  'app.paused.description':
+    'Respire. Quando estiver pronto, volte ao jardim.',
+  'app.enter': 'Entrar no mundo',
+  'app.resume': 'Continuar jornada',
+  'app.controls.aria': 'Controles do jogo',
+  'app.controls.move': 'Mover',
+  'app.controls.space': 'Espaço',
+  'app.controls.jump': 'Pular',
+  'app.controls.shift': 'Shift',
+  'app.controls.run': 'Correr',
+  'app.controls.mouse': 'Mouse',
+  'app.controls.camera': 'Câmera',
+  'app.controls.pause': 'Pausar',
+  'app.controls.pauseHint': 'Pressione P a qualquer momento para pausar.',
+
+  'hud.aria': 'Informações e ações da exploração',
+  'hud.region.hub': 'Vale Central',
+  'hud.region.criacao': 'A Criação',
+  'hud.region.noe': 'Noé e a Arca',
+  'hud.region.jose': 'José, o Sonhador',
+  'hud.passages.one': '{count} passagem',
+  'hud.passages.other': '{count} passagens',
+  'hud.actions.aria': 'Ações do jogo',
+  'hud.journal.open': 'Abrir diário',
+  'hud.journal.label': 'Diário',
+  'hud.metrics.open': 'Abrir métricas locais',
+  'hud.metrics.label': 'Métricas',
+  'hud.settings.open': 'Abrir configurações parentais',
+  'hud.settings.label': 'Pais',
+
+  'dialog.aria': 'Diálogo com {character}',
+  'dialog.disclosure': 'Conversa',
+  'dialog.continueAria': 'Continuar diálogo',
+  'dialog.continue': 'Continuar',
+  'dialog.default.message':
+    'A criação guarda pequenos sinais. Explore com calma e observe o que floresce pelo caminho.',
+
+  'common.close': 'Fechar',
+
+  'journal.eyebrow': 'Memórias da jornada',
+  'journal.title': 'Diário',
+  'journal.closeAria': 'Fechar diário',
+  'journal.empty': 'Sua jornada ainda está começando.',
+  'journal.passages.title': 'Passagens encontradas',
+  'journal.passages.none': 'Nenhuma passagem coletada ainda.',
+  'journal.passage.label': 'Passagem {passageId}',
+  'journal.quizzes.title': 'Reflexões respondidas',
+  'journal.quizzes.none': 'Nenhuma reflexão respondida ainda.',
+  'journal.result': 'Resposta {answer} · {result}',
+  'journal.result.correct': 'acertou',
+  'journal.result.tryAgain': 'para refletir de novo',
+
+  'dashboard.eyebrow': 'Somente neste dispositivo',
+  'dashboard.title': 'Métricas locais',
+  'dashboard.closeAria': 'Fechar métricas locais',
+  'dashboard.started': 'Selahs iniciados',
+  'dashboard.completed': 'Selahs concluídos',
+  'dashboard.completionRate': 'Taxa de conclusão',
+  'dashboard.accuracy.one': 'Acerto em {count} quiz',
+  'dashboard.accuracy.other': 'Acertos em {count} quizzes',
+  'dashboard.note':
+    'Esses números ficam neste navegador e não identificam quem está jogando.',
+
+  'settings.eyebrow': 'Área dos responsáveis',
+  'settings.title': 'Configurações',
+  'settings.closeAria': 'Fechar configurações parentais',
+  'settings.privacy.title': 'Privacidade primeiro',
+  'settings.privacy.description':
+    'Preferências ficam neste dispositivo. Métricas só são enviadas com seu consentimento.',
+  'settings.language.title': 'Idioma',
+  'settings.language.description':
+    'Altera a interface, os versículos e as reflexões.',
+  'settings.age.title': 'Faixa etária',
+  'settings.age.description': 'Ajusta a linguagem das reflexões.',
+  'settings.age.label': 'Selecionar faixa etária',
+  'settings.age.general': 'Geral',
+  'settings.age.child': 'Criança',
+  'settings.tts.label': 'Leitura em voz alta',
+  'settings.tts.description': 'Permite ouvir o versículo quando houver suporte.',
+  'settings.ai.label': 'Reflexões com IA',
+  'settings.ai.description': 'Quando desligado, usa perguntas bíblicas revisadas.',
+  'settings.save.label': 'Salvar progresso',
+  'settings.save.description':
+    'Guarda passagens e resultados mínimos neste navegador.',
+  'settings.metrics.label': 'Compartilhar métricas anônimas',
+  'settings.metrics.description':
+    'Envia apenas eventos mínimos, sem histórico ou identificação.',
+  'settings.delete.title': 'Apagar progresso local',
+  'settings.delete.description':
+    'Remove passagens, resultados e preferências salvas neste navegador.',
+  'settings.delete.cancel': 'Cancelar',
+  'settings.delete.confirmAria': 'Confirmar exclusão do progresso local',
+  'settings.delete.confirm': 'Confirmar exclusão',
+  'settings.delete.aria': 'Apagar todo o progresso local',
+  'settings.delete.action': 'Apagar progresso',
+
+  'pause.eyebrow': 'Pausa Selah',
+  'pause.title': 'Um momento com quem cuida de você',
+  'pause.description':
+    'Converse sobre a passagem antes de continuar a exploração.',
+  'pause.instruction':
+    'Um responsável pode manter o botão pressionado para liberar a jornada.',
+  'pause.holdAria':
+    'Manter pressionado para um responsável liberar a exploração',
+  'pause.holdAction': 'Manter pressionado',
+  'pause.statusHolding': 'Continue segurando…',
+  'pause.statusIdle': 'Aguardando um responsável',
+
+  'selah.moment': 'Momento Selah',
+  'selah.error.title': 'Não foi possível abrir este momento.',
+  'selah.error.exit': 'Sair do momento',
+  'selah.loading.eyebrow': 'Respire fundo',
+  'selah.loading.title': 'Preparando sua reflexão…',
+  'selah.loading.status': 'Carregando versículo e pergunta',
+  'selah.verse.eyebrow': 'Passagem · {reference}',
+  'selah.tts.unavailable':
+    'Leitura em voz alta indisponível neste navegador. O texto permanece disponível para leitura.',
+  'selah.tts.listenAria': 'Ouvir passagem em voz alta',
+  'selah.tts.action': 'Ouvir passagem',
+  'selah.quiz.continueAria': 'Continuar para a pergunta',
+  'selah.continue': 'Continuar',
+  'selah.quiz.aiStatus': 'Pergunta criada para esta reflexão',
+  'selah.quiz.fallbackStatus': 'Pergunta bíblica revisada',
+  'selah.quiz.alternativeAria': 'Alternativa {id}: {text}',
+  'selah.quiz.checking': 'Verificando resposta…',
+  'selah.feedback.correct': 'Você acertou',
+  'selah.feedback.incorrect': 'Vamos refletir mais um pouco',
+  'selah.feedback.startPause': 'Começar pausa em família',
+
+  'flow.loadError':
+    'Não foi possível carregar este momento. Tente novamente em instantes.',
+  'flow.answerError':
+    'Não foi possível verificar sua resposta. Tente novamente.',
+
+  'lab.controls.aria': 'Controles do laboratório da interface',
+  'lab.title': 'Laboratório Selah',
+  'lab.scenario.label': 'Cenário',
+  'lab.scenario.success': 'Sucesso',
+  'lab.scenario.fallback': 'Fallback',
+  'lab.scenario.error': 'Erro',
+  'lab.startSelah': 'Abrir Selah',
+  'lab.showDialog': 'Mostrar diálogo',
+  'lab.activatePause': 'Ativar pausa',
+  'lab.resetAria': 'Restaurar estado do laboratório',
+  'lab.reset': 'Restaurar',
+  'lab.areaAria': 'Área de simulação do laboratório',
+  'lab.routeEyebrow': 'Ambiente isolado',
+  'lab.placeholder.title': 'Interface sem Canvas',
+  'lab.placeholder.description':
+    'Use os controles acima para simular cada etapa da jornada.',
+  'lab.dialog.message':
+    'A criação guarda sinais para quem observa com calma. Que detalhe você percebeu primeiro?',
+} as const
+
+export type TranslationKey = keyof typeof ptBR

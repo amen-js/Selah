@@ -31,6 +31,21 @@ export const esES = {
   'app.controls.pause': 'Pausar',
   'app.controls.pauseHint': 'Presiona P en cualquier momento para pausar.',
 
+  'onboarding.eyebrow': 'Antes del primer viaje',
+  'onboarding.title': 'Configuración del responsable',
+  'onboarding.description':
+    'Elige cómo funcionará este viaje para el niño. Todo se puede cambiar después en el área para padres y responsables.',
+  'onboarding.pause.title': 'Pausa en familia',
+  'onboarding.pause.description':
+    'Después de cada reflexión, la exploración se pausa hasta que un responsable libere el viaje.',
+  'onboarding.privacy.title': 'Privacidad por defecto',
+  'onboarding.privacy.description':
+    'No hay cuenta ni identificación. Guardar el progreso y compartir métricas comienzan desactivados.',
+  'onboarding.footer':
+    'Al continuar, confirmas que revisaste estas opciones para el primer viaje.',
+  'onboarding.action.withoutSave': 'Jugar sin guardar',
+  'onboarding.action.save': 'Guardar y continuar',
+
   'hud.aria': 'Información y acciones de la exploración',
   'hud.region.hub': 'Valle Central',
   'hud.region.criacao': 'La Creación',

@@ -48,6 +48,7 @@ describe('App integration', () => {
     selahAudioMock.useSelahAudio.mockClear()
     useGameStore.getState().apagarProgresso()
     useGameStore.getState().setIdioma('pt-BR')
+    useGameStore.getState().concluirConfiguracaoInicial()
     pointerLockElement = null
     requestPointerLock = vi.fn()
     canvasMock.element = document.createElement('canvas')
@@ -78,6 +79,33 @@ describe('App integration', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Entrar no mundo' }))
     expect(requestPointerLock).toHaveBeenCalledOnce()
+  })
+
+  it('requires responsible setup before requesting pointer lock', () => {
+    useGameStore.getState().apagarProgresso()
+    useGameStore.getState().setIdioma('pt-BR')
+    render(<App />)
+
+    expect(
+      screen.getByRole('dialog', { name: 'Configuração do responsável' }),
+    ).toBeInTheDocument()
+    expect(screen.queryByTestId('game-overlay')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Entrar no mundo' })).not.toBeInTheDocument()
+    expect(requestPointerLock).not.toHaveBeenCalled()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Jogar sem salvar' }))
+
+    expect(
+      screen.queryByRole('dialog', { name: 'Configuração do responsável' }),
+    ).not.toBeInTheDocument()
+    expect(screen.getByTestId('game-overlay')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Entrar no mundo' }))
+    expect(requestPointerLock).toHaveBeenCalledOnce()
+
+    act(() => useGameStore.getState().apagarProgresso())
+    expect(
+      screen.getByRole('dialog', { name: 'Configuração do responsável' }),
+    ).toBeInTheDocument()
   })
 
   it('translates the entry screen and controls immediately', () => {

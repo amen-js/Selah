@@ -1,6 +1,6 @@
 # Interface Internationalization Specification
 
-**Status:** Approved
+**Status:** Verified
 
 ## Goal
 
@@ -33,3 +33,13 @@ Use the persisted `idioma` preference as the single source of truth for the Sela
 - `npm run lint`, `npm run test:run`, and `npm run build` pass.
 - Browser UAT passes for all three locales on desktop and mobile.
 
+## Validation record
+
+- `npm run lint`, `npm run test:run`, and `npm run build` passed on 2026-08-30.
+- Vitest passed 75 tests across 17 files; no test was skipped or removed.
+- Catalog audit found identical, non-empty keys and aligned placeholders in all locales.
+- Literal audit left only the `Selah` brand, keycaps, technical IDs, and upstream data outside the catalogs.
+- Production output contained one application bundle and no laboratory fixture text or IDs.
+- Browser UAT passed in `pt-BR`, `en-US`, and `es-ES` at 1440x900 and 390x844 with synchronized metadata, no horizontal overflow, localized focus targets, scrollable panels, four quiz alternatives, feedback, and parental pause.
+- Mobile UAT found and verified a lab-only modal overlap fix; modal content now starts below the laboratory controls and remains internally scrollable.
+- English and Spanish copy remains queued for the planned editorial review; this does not block the demo-ready implementation.

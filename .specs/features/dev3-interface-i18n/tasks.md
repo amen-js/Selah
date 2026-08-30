@@ -1,7 +1,7 @@
 # Interface Internationalization Tasks
 
 **Design:** `.specs/features/dev3-interface-i18n/design.md`
-**Status:** In Progress
+**Status:** Complete
 
 ## Execution
 
@@ -17,6 +17,6 @@ T1 -> T2 -> T3 -> T4 -> T5 -> T6 -> T7
 | T4 | Journal, dashboard, parental settings | T3 | RTL / full | Complete | `feat(ui): translate local panels` |
 | T5 | Selah flow errors, overlay states, TTS, parental pause | T4 | Unit + RTL / full | Complete | `feat(selah): translate reflection flow` |
 | T6 | Development `/lab` structural controls and copy | T5 | Integration / full | Complete | `feat(lab): translate UI laboratory` |
-| T7 | Literal audit, full gates, three-locale desktop/mobile UAT | T6 | Build + browser | Pending | `docs(spec): record interface i18n validation` |
+| T7 | Literal audit, full gates, three-locale desktop/mobile UAT | T6 | Build + browser | Complete | `docs(spec): record interface i18n validation` |
 
 Each task updates its own tests; no test-only deferral, deletion, or skip is allowed. Execution is sequential because the same catalog and component test expectations are shared across tasks.

@@ -173,6 +173,7 @@ type WorldProps = {
   onProgressaoCriacaoChange?: (
     snapshot: SnapshotProgressaoCriacao | null,
   ) => void
+  onInatividadeCriacaoChange?: (inativo: boolean) => void
 }
 
 function World({
@@ -183,6 +184,7 @@ function World({
   onPortalProximo,
   onPortalAcionado,
   onProgressaoCriacaoChange,
+  onInatividadeCriacaoChange,
 }: WorldProps) {
   const posicaoJogadorRef = useRef<PosicaoJogador | null>(null)
   const gatilhoSelah = useGameStore((state) => state.selahAtivo?.gatilho ?? null)
@@ -288,6 +290,7 @@ function World({
             posicaoJogadorRef={posicaoJogadorRef}
             enabled={playing}
             onMomentoChange={atualizarMomentoCriacao}
+            onInatividadeChange={onInatividadeCriacaoChange}
           />
         </>
       )}
@@ -350,6 +353,7 @@ type GameCanvasProps = {
   onProgressaoCriacaoChange?: (
     snapshot: SnapshotProgressaoCriacao | null,
   ) => void
+  onInatividadeCriacaoChange?: (inativo: boolean) => void
 }
 
 export function GameCanvas({
@@ -357,6 +361,7 @@ export function GameCanvas({
   onCanvasReady,
   onSceneReady,
   onProgressaoCriacaoChange,
+  onInatividadeCriacaoChange,
 }: GameCanvasProps) {
   const regiao = useGameStore((state) => state.regiao)
   const setRegiao = useGameStore((state) => state.setRegiao)
@@ -385,8 +390,10 @@ export function GameCanvas({
   }, [mapa, setRegiao])
 
   useEffect(() => {
-    if (regiao !== 'criacao') onProgressaoCriacaoChange?.(null)
-  }, [onProgressaoCriacaoChange, regiao])
+    if (regiao === 'criacao') return
+    onProgressaoCriacaoChange?.(null)
+    onInatividadeCriacaoChange?.(false)
+  }, [onInatividadeCriacaoChange, onProgressaoCriacaoChange, regiao])
 
   const acionarPortal = useCallback((portal: PortalMapa) => {
     const destino = resolverDestinoPortal(portal)
@@ -461,6 +468,7 @@ export function GameCanvas({
                 onPortalProximo={setPortalProximo}
                 onPortalAcionado={acionarPortal}
                 onProgressaoCriacaoChange={onProgressaoCriacaoChange}
+                onInatividadeCriacaoChange={onInatividadeCriacaoChange}
               />
             ) : (
               <RegionFallback />

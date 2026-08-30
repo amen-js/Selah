@@ -3,8 +3,10 @@ import { portaisPorRegiao } from './portais'
 import {
   estruturaArcaCanteiroNoe,
   estruturaRampaCanteiroNoe,
+  instanciasRelevoValeNoe,
   tarefasCanteiroNoe,
 } from '../components/game/noe/world/canteiro'
+import { obterAssetNoe } from '../components/game/noe/world/assets'
 
 const referenciasEsperadas = [
   'genesis-6-14',
@@ -113,6 +115,26 @@ describe('mapa de Noé', () => {
 
       expect(distanciaPortalTarefa).toBeGreaterThan(tarefa.raio + 5)
       expect(distanciaSpawnTarefa).toBeGreaterThan(tarefa.raio + 5)
+    }
+
+    const morro = obterAssetNoe('vale-pedra-morro')
+    if (!morro) throw new Error('morro obrigatório ausente')
+    for (const instancia of instanciasRelevoValeNoe) {
+      const raioVisual =
+        (Math.max(
+          morro.fallback.dimensoes[0],
+          morro.fallback.dimensoes[2],
+        ) /
+          2) *
+        (instancia.escala ?? 1)
+      const distanciaPortalMorro = Math.hypot(
+        portal.posicao[0] - instancia.posicao[0],
+        portal.posicao[2] - instancia.posicao[2],
+      )
+
+      expect(distanciaPortalMorro).toBeGreaterThan(
+        raioVisual + portal.raioAtivacao + 2,
+      )
     }
   })
 

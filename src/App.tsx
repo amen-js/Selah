@@ -135,7 +135,7 @@ function App() {
                     <p>{t('app.journey.creation.description')}</p>
                   </div>
                 </article>
-                <article className="start-screen__journey-card is-future">
+                <article className="start-screen__journey-card is-available">
                   <span className="start-screen__journey-index" aria-hidden="true">
                     02
                   </span>
@@ -143,7 +143,7 @@ function App() {
                     <div className="start-screen__journey-card-heading">
                       <h3>{t('app.journey.noe.title')}</h3>
                       <span className="start-screen__journey-badge">
-                        {t('app.journey.future')}
+                        {t('app.journey.available')}
                       </span>
                     </div>
                     <p>{t('app.journey.noe.description')}</p>

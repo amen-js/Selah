@@ -549,8 +549,11 @@ kbd {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .start-screen,
+  .start-screen__primary,
   .portal-transition-overlay,
   .portal-transition-overlay__mark {
     animation: none;
+    transition: none;
   }
 }

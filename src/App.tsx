@@ -100,7 +100,7 @@ function App({ reloadPage = reloadCurrentPage }: AppProps) {
       <span className="camera-reticle" aria-hidden="true" />
       {configuracaoInicialConcluida && sceneReady && <GameOverlay />}
 
-      {configuracaoInicialConcluida ? (
+      {configuracaoInicialConcluida && sceneReady ? (
         <section
           className="start-screen"
           aria-label={hasStarted ? t('app.paused.aria') : t('app.start.aria')}
@@ -227,9 +227,9 @@ function App({ reloadPage = reloadCurrentPage }: AppProps) {
             <small>{t('app.controls.pauseHint')}</small>
           </div>
         </section>
-      ) : (
+      ) : !configuracaoInicialConcluida ? (
         <ResponsibleOnboarding />
-      )}
+      ) : null}
 
       {configuracaoInicialConcluida && !sceneReady && (
         <SceneLoadingOverlay

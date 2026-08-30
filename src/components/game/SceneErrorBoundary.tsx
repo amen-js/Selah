@@ -1,4 +1,4 @@
-import { Component, type ErrorInfo, type ReactNode } from 'react'
+import { Component, type ReactNode } from 'react'
 
 interface SceneErrorBoundaryProps {
   children: ReactNode
@@ -19,7 +19,7 @@ export class SceneErrorBoundary extends Component<
     return { failed: true }
   }
 
-  componentDidCatch(error: Error, _info: ErrorInfo) {
+  componentDidCatch(error: Error) {
     this.props.onError(error)
   }
 
@@ -27,4 +27,3 @@ export class SceneErrorBoundary extends Component<
     return this.state.failed ? null : this.props.children
   }
 }
-

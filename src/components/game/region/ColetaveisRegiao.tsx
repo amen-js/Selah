@@ -20,6 +20,11 @@ export type ColetaveisRegiaoProps = {
   /** Mantém proximidade automática por padrão; quando true exige E ou Enter. */
   interacaoExplicita?: boolean
   /**
+   * Delega a confirmação para um árbitro externo sem desativar a detecção nem
+   * os visuais. Esse modo nunca abre o Selah ou consome E/Enter internamente.
+   */
+  confirmacaoExterna?: boolean
+  /**
    * Compatibilidade das regiões existentes: por padrão, uma resposta no
    * histórico já bloqueia o cristal. Creation desliga isto porque resposta e
    * conclusão de Selah são marcos distintos no seu roteiro.
@@ -27,6 +32,8 @@ export type ColetaveisRegiaoProps = {
   bloquearPassagensRespondidas?: boolean
   /** Notifica somente o coletável acionável mais próximo para um prompt externo. */
   onColetavelProximo?: (coletavel: ColetavelMapa | null) => void
+  /** Substitui a abertura padrão do Selah quando o componente aciona o item. */
+  onAcionarColetavel?: (coletavel: ColetavelMapa) => void
   reducedMotion?: boolean
 }
 
@@ -94,8 +101,10 @@ export function ColetaveisRegiao({
   posicaoJogadorRef,
   enabled,
   interacaoExplicita = false,
+  confirmacaoExterna = false,
   bloquearPassagensRespondidas = true,
   onColetavelProximo,
+  onAcionarColetavel,
   reducedMotion = false,
 }: ColetaveisRegiaoProps) {
   const coletaveisAcionadosRef = useRef<Set<string>>(new Set())
@@ -147,18 +156,27 @@ export function ColetaveisRegiao({
     posicaoJogadorRef,
   ])
 
-  const acionarColetavel = useCallback((coletavel: ColetavelMapa) => {
-    coletaveisAcionadosRef.current.add(coletavel.id)
-    useGameStore.getState().abrirSelah({
-      historiaId: coletavel.historiaId,
-      passagemId: coletavel.passagemId,
-    })
-  }, [])
+  const acionarColetavel = useCallback(
+    (coletavel: ColetavelMapa) => {
+      coletaveisAcionadosRef.current.add(coletavel.id)
+
+      if (onAcionarColetavel) {
+        onAcionarColetavel(coletavel)
+        return
+      }
+
+      useGameStore.getState().abrirSelah({
+        historiaId: coletavel.historiaId,
+        passagemId: coletavel.passagemId,
+      })
+    },
+    [onAcionarColetavel],
+  )
 
   useFrame(() => {
     const proximo = obterProximoAcionavel()
 
-    if (interacaoExplicita) {
+    if (interacaoExplicita || confirmacaoExterna) {
       notificarColetavelProximo(proximo)
       return
     }
@@ -168,7 +186,7 @@ export function ColetaveisRegiao({
   })
 
   useEffect(() => {
-    if (!interacaoExplicita) return
+    if (!interacaoExplicita || confirmacaoExterna) return
 
     const confirmarColetavel = (event: KeyboardEvent) => {
       if (
@@ -190,6 +208,7 @@ export function ColetaveisRegiao({
     return () => window.removeEventListener('keydown', confirmarColetavel)
   }, [
     acionarColetavel,
+    confirmacaoExterna,
     enabled,
     interacaoExplicita,
     notificarColetavelProximo,

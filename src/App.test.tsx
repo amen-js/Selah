@@ -159,6 +159,10 @@ describe('App integration', () => {
     expect(screen.getByRole('heading', { name: 'A Criação' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Noé e a Arca' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'José, o Sonhador' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Selah', level: 1 })).toBeInTheDocument()
+    expect(
+      document.querySelector('img[src="/brand/selah-logo.avif"]'),
+    ).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'Entrar no mundo' }))
     expect(requestPointerLock).toHaveBeenCalledOnce()

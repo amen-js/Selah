@@ -133,6 +133,16 @@ export const enUS = {
   'creation.complete.objective':
     'Everything is full of life. Take in the world and continue your journey when ready.',
 
+  'noe.interaction.aria': 'Interaction available: {target}',
+  'noe.interaction.eyebrow': 'Build and explore',
+  'noe.interaction.task': "Noah's task",
+  'noe.interaction.selah': 'Selah Moment',
+  'noe.interaction.enter': 'Press E or Enter to interact',
+  'noe.slice.aria': 'Worksite chapter completed',
+  'noe.slice.eyebrow': 'Stage completed',
+  'noe.slice.title': 'The worksite is ready',
+  'noe.slice.hint': 'Explore the valley or return through the portal anytime.',
+
   'portal.prompt.aria': 'Portal to {region}',
   'portal.prompt.eyebrow': 'Portal',
   'portal.prompt.enter': 'Press E or Enter to enter',

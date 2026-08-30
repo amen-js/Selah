@@ -131,6 +131,16 @@ export const ptBR = {
   'creation.complete.objective':
     'Tudo ficou cheio de vida. Contemple o mundo e siga sua jornada quando quiser.',
 
+  'noe.interaction.aria': 'Interação disponível: {target}',
+  'noe.interaction.eyebrow': 'Construir e explorar',
+  'noe.interaction.task': 'Tarefa de Noé',
+  'noe.interaction.selah': 'Momento Selah',
+  'noe.interaction.enter': 'Pressione E ou Enter para interagir',
+  'noe.slice.aria': 'Capítulo do canteiro concluído',
+  'noe.slice.eyebrow': 'Etapa concluída',
+  'noe.slice.title': 'O canteiro está pronto',
+  'noe.slice.hint': 'Explore o vale ou volte pelo portal quando quiser.',
+
   'portal.prompt.aria': 'Portal para {region}',
   'portal.prompt.eyebrow': 'Portal',
   'portal.prompt.enter': 'Pressione E ou Enter para entrar',

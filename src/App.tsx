@@ -157,17 +157,26 @@ function App({ reloadPage = reloadCurrentPage }: AppProps) {
             </div>
 
             <div className="start-screen__hero">
-              <span className="start-screen__eyebrow">
-                {hasStarted ? t('app.paused.eyebrow') : t('app.start.eyebrow')}
-              </span>
-              <h1>
-                Selah<span aria-hidden="true">.</span>
-              </h1>
-              <p>
-                {hasStarted
-                  ? t('app.paused.description')
-                  : t('app.start.description')}
-              </p>
+              <div className="start-screen__hero-copy">
+                <span className="start-screen__eyebrow">
+                  {hasStarted ? t('app.paused.eyebrow') : t('app.start.eyebrow')}
+                </span>
+                <h1 className="start-screen__title-accessible">Selah</h1>
+                <p>
+                  {hasStarted
+                    ? t('app.paused.description')
+                    : t('app.start.description')}
+                </p>
+              </div>
+              <img
+                className="start-screen__logo"
+                src="/brand/selah-logo.avif"
+                alt=""
+                width="900"
+                height="600"
+                decoding="async"
+                aria-hidden="true"
+              />
             </div>
 
             <section className="start-screen__journey" aria-labelledby="journey-title">

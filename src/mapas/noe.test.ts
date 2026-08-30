@@ -1,4 +1,12 @@
 import { mapaNoe } from './noe'
+import { portaisPorRegiao } from './portais'
+import {
+  estruturaArcaCanteiroNoe,
+  estruturaRampaCanteiroNoe,
+  instanciasRelevoValeNoe,
+  tarefasCanteiroNoe,
+} from '../components/game/noe/world/canteiro'
+import { obterAssetNoe } from '../components/game/noe/world/assets'
 
 const referenciasEsperadas = [
   'genesis-6-14',
@@ -14,11 +22,17 @@ describe('mapa de Noé', () => {
     expect(mapaNoe.coletaveis).toHaveLength(5)
   })
 
-  it('usa somente props geométricos fallback para o recorte', () => {
+  it('expande o vale para uma escala navegável', () => {
+    expect(mapaNoe.limites.meiaLargura * 2).toBeGreaterThanOrEqual(90)
+    expect(mapaNoe.limites.meiaProfundidade * 2).toBeGreaterThanOrEqual(90)
+  })
+
+  it('remove os placeholders sólidos de arca, rampa e madeira interativa', () => {
+    expect(
+      mapaNoe.props.some(({ id }) => /arca|rampa|madeira/.test(id)),
+    ).toBe(false)
+    expect(mapaNoe.props.every(({ collider }) => collider === false)).toBe(true)
     expect(mapaNoe.props.every(({ modelo }) => modelo === undefined)).toBe(true)
-    expect(new Set(mapaNoe.props.map(({ fallback }) => fallback.forma))).toEqual(
-      new Set(['caixa', 'cilindro', 'esfera']),
-    )
   })
 
   it('mantém IDs únicos em props e colecionáveis', () => {
@@ -42,6 +56,24 @@ describe('mapa de Noé', () => {
     }
   })
 
+  it('mantém a arca, a rampa e todas as tarefas dentro do vale', () => {
+    const arca = estruturaArcaCanteiroNoe
+    const pontos = [
+      ...tarefasCanteiroNoe.map(({ posicao }) => posicao),
+      arca.posicao,
+      estruturaRampaCanteiroNoe.colisor.posicao,
+    ]
+
+    for (const posicao of pontos) {
+      expect(Math.abs(posicao[0])).toBeLessThan(mapaNoe.limites.meiaLargura)
+      expect(Math.abs(posicao[2])).toBeLessThan(mapaNoe.limites.meiaProfundidade)
+    }
+
+    expect(
+      Math.abs(arca.posicao[2]) + arca.comprimento / 2,
+    ).toBeLessThan(mapaNoe.limites.meiaProfundidade)
+  })
+
   it('define raio de ativação positivo para cada colecionável', () => {
     for (const coletavel of mapaNoe.coletaveis) {
       expect(coletavel.raioAtivacao).toBeDefined()
@@ -57,6 +89,52 @@ describe('mapa de Noé', () => {
       )
 
       expect(distanciaHorizontal).toBeGreaterThanOrEqual(RAIO_LIVRE_SPAWN)
+    }
+  })
+
+  it('mantém spawn e portal livres do canteiro e um do outro', () => {
+    const portal = portaisPorRegiao.noe[0]
+    expect(portal).toBeDefined()
+    if (!portal) return
+
+    const distanciaSpawnPortal = Math.hypot(
+      portal.posicao[0] - mapaNoe.spawn[0],
+      portal.posicao[2] - mapaNoe.spawn[2],
+    )
+    expect(distanciaSpawnPortal).toBeGreaterThan(10)
+
+    for (const tarefa of tarefasCanteiroNoe) {
+      const distanciaPortalTarefa = Math.hypot(
+        portal.posicao[0] - tarefa.posicao[0],
+        portal.posicao[2] - tarefa.posicao[2],
+      )
+      const distanciaSpawnTarefa = Math.hypot(
+        mapaNoe.spawn[0] - tarefa.posicao[0],
+        mapaNoe.spawn[2] - tarefa.posicao[2],
+      )
+
+      expect(distanciaPortalTarefa).toBeGreaterThan(tarefa.raio + 5)
+      expect(distanciaSpawnTarefa).toBeGreaterThan(tarefa.raio + 5)
+    }
+
+    const morro = obterAssetNoe('vale-pedra-morro')
+    if (!morro) throw new Error('morro obrigatório ausente')
+    for (const instancia of instanciasRelevoValeNoe) {
+      const raioVisual =
+        (Math.max(
+          morro.fallback.dimensoes[0],
+          morro.fallback.dimensoes[2],
+        ) /
+          2) *
+        (instancia.escala ?? 1)
+      const distanciaPortalMorro = Math.hypot(
+        portal.posicao[0] - instancia.posicao[0],
+        portal.posicao[2] - instancia.posicao[2],
+      )
+
+      expect(distanciaPortalMorro).toBeGreaterThan(
+        raioVisual + portal.raioAtivacao + 2,
+      )
     }
   })
 

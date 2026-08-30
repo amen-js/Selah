@@ -12,6 +12,8 @@ import {
   idsAssetsCanteiroNoe,
   manifestoAssetsNoe,
   obterAssetNoe,
+  obterDeslocamentoFallbackAssetNoe,
+  obterDeslocamentoModeloAssetNoe,
   selecionarAssetsNoePorAreaEMomento,
 } from './assets'
 
@@ -28,26 +30,28 @@ function sha256Arquivo(urlRuntime: string) {
 }
 
 describe('manifesto de assets do canteiro de Noé', () => {
-  it('mantém os dez IDs estáveis, únicos e com lookup tipado', () => {
+  it('mantém os onze IDs estáveis, únicos e com lookup tipado', () => {
     const ids = manifestoAssetsNoe.entradas.map(({ id }) => id)
 
     expect(ids).toEqual(idsAssetsCanteiroNoe)
-    expect(new Set(ids).size).toBe(10)
+    expect(new Set(ids).size).toBe(11)
     expect(obterAssetNoe('canteiro-bancada')?.urlRuntime).toBe(
       '/models/noah/shared/kenney/survival/workbench.glb',
     )
   })
 
-  it('aponta somente para os GLBs auditados e mantém hashes e bytes reais', () => {
+  it('aponta somente para GLBs auditados e mantém hashes e bytes reais', () => {
     for (const entrada of manifestoAssetsNoe.entradas) {
-      expect(entrada.urlRuntime).toMatch(
-        /^\/models\/noah\/shared\/kenney\/survival\/[a-z-]+\.glb$/,
-      )
+      expect(entrada.urlRuntime).toMatch(/^\/models\/noah\/.+\.glb$/)
       expect(entrada.urlRuntime).not.toMatch(/(?:Users|home|Downloads)/i)
       expect(existsSync(caminhoPublico(entrada.urlRuntime))).toBe(true)
-      expect(entrada.licenca.arquivoOrigem).toBe(
-        `Models/GLB format/${basename(entrada.urlRuntime)}`,
-      )
+      if (entrada.licenca.origem === 'pack-oficial') {
+        expect(entrada.licenca.arquivoOrigem).toBe(
+          `Models/GLB format/${basename(entrada.urlRuntime)}`,
+        )
+      } else {
+        expect(entrada.licenca.arquivoOrigem).toBe('pedra_morro.glb')
+      }
       expect(entrada.licenca.sha256).toBe(sha256Arquivo(entrada.urlRuntime))
       expect(entrada.bytes).toBe(
         readFileSync(caminhoPublico(entrada.urlRuntime)).byteLength,
@@ -55,7 +59,7 @@ describe('manifesto de assets do canteiro de Noé', () => {
     }
   })
 
-  it('mantém o payload GLB mais textura abaixo de 200 KiB', () => {
+  it('mantém o payload M1/M2 completo abaixo de 512 KiB', () => {
     const urls = [
       ...manifestoAssetsNoe.entradas.map(({ urlRuntime }) => urlRuntime),
       manifestoAssetsNoe.texturaCompartilhada.urlRuntime,
@@ -70,17 +74,19 @@ describe('manifesto de assets do canteiro de Noé', () => {
         0,
       ) + manifestoAssetsNoe.texturaCompartilhada.bytes
 
-    expect(bytesReais).toBe(139_356)
+    expect(bytesReais).toBe(494_884)
     expect(bytesDeclarados).toBe(bytesReais)
-    expect(bytesReais).toBeLessThanOrEqual(200 * 1_024)
+    expect(bytesReais).toBeLessThanOrEqual(512 * 1_024)
     expect(sha256Arquivo(manifestoAssetsNoe.texturaCompartilhada.urlRuntime)).toBe(
       manifestoAssetsNoe.texturaCompartilhada.licenca.sha256,
     )
   })
 
-  it('registra CC0 e proveniência oficial para modelos e textura', () => {
+  it('registra CC0 e proveniência oficial para o subset Kenney', () => {
     const licenciados = [
-      ...manifestoAssetsNoe.entradas,
+      ...manifestoAssetsNoe.entradas.filter(
+        ({ licenca }) => licenca.origem === 'pack-oficial',
+      ),
       manifestoAssetsNoe.texturaCompartilhada,
     ]
 
@@ -100,6 +106,44 @@ describe('manifesto de assets do canteiro de Noé', () => {
     expect(licencaLocal).toContain('Creative Commons Zero, CC0')
   })
 
+  it('registra o morro fornecido pelo projeto sem inventar licença ou autor', () => {
+    const morro = obterAssetNoe('vale-pedra-morro')
+
+    expect(morro).toMatchObject({
+      bytes: 355_528,
+      escalaVisual: 1,
+      deslocamentoVisualMetros: [0, 4.1, 0],
+      colisor: { tipo: 'nenhum' },
+      licenca: {
+        origem: 'fornecido-pelo-projeto',
+        criador: 'não-declarado',
+        identificador: 'Project-supplied',
+        arquivoOrigem: 'pedra_morro.glb',
+      },
+    })
+    expect(
+      existsSync(
+        caminhoPublico('/models/noah/terrain/project-supplied/README.md'),
+      ),
+    ).toBe(true)
+    expect(
+      existsSync(
+        caminhoPublico('/models/noah/terrain/project-supplied/LICENSE.md'),
+      ),
+    ).toBe(true)
+  })
+
+  it('aplica a correção de origem do morro igualmente no GLB e no fallback', () => {
+    const morro = obterAssetNoe('vale-pedra-morro')
+    const bancada = obterAssetNoe('canteiro-bancada')
+    if (!morro || !bancada) throw new Error('assets obrigatórios ausentes')
+
+    expect(obterDeslocamentoModeloAssetNoe(morro)).toEqual([0, 4.1, 0])
+    expect(obterDeslocamentoFallbackAssetNoe(morro)).toEqual([0, 4.1, 0])
+    expect(obterDeslocamentoModeloAssetNoe(bancada)).toEqual([0, 0, 0])
+    expect(obterDeslocamentoFallbackAssetNoe(bancada)).toEqual([0, 0.36, 0])
+  })
+
   it('libera M1 e M2 cumulativamente apenas dentro do canteiro', () => {
     const idsM1 = selecionarAssetsNoePorAreaEMomento(
       'canteiro-vale',
@@ -114,7 +158,7 @@ describe('manifesto de assets do canteiro de Noé', () => {
       'fechamento-porta',
     ).map(({ id }) => id)
 
-    expect(idsM1).toEqual(idsAssetsCanteiroNoe.slice(0, 6))
+    expect(idsM1).toEqual(idsAssetsCanteiroNoe.slice(0, 7))
     expect(idsM1).not.toContain('canteiro-tabuas')
     expect(idsM2).toEqual(idsAssetsCanteiroNoe)
     expect(idsRetornoAoCanteiro).toEqual(idsAssetsCanteiroNoe)

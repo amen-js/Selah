@@ -62,6 +62,55 @@ describe('ColetaveisRegiao', () => {
     )
   })
 
+  it('em confirmação externa publica o candidato sem abrir ou consumir a tecla', () => {
+    const onColetavelProximo = vi.fn()
+    const onAcionarColetavel = vi.fn()
+    render(
+      <ColetaveisRegiao
+        coletaveis={coletaveis}
+        posicaoJogadorRef={posicaoJogadorRef}
+        enabled
+        confirmacaoExterna
+        onColetavelProximo={onColetavelProximo}
+        onAcionarColetavel={onAcionarColetavel}
+      />,
+    )
+
+    act(executarFrameDeInteracao)
+    expect(onColetavelProximo).toHaveBeenLastCalledWith(coletaveis[1])
+
+    const evento = new KeyboardEvent('keydown', {
+      code: 'KeyE',
+      bubbles: true,
+      cancelable: true,
+    })
+    window.dispatchEvent(evento)
+
+    expect(evento.defaultPrevented).toBe(false)
+    expect(onAcionarColetavel).not.toHaveBeenCalled()
+    expect(useGameStore.getState().selahAtivo).toBeNull()
+  })
+
+  it('permite substituir o acionamento interno sem alterar o padrão explícito', () => {
+    const onAcionarColetavel = vi.fn()
+    render(
+      <ColetaveisRegiao
+        coletaveis={[coletaveis[1]]}
+        posicaoJogadorRef={posicaoJogadorRef}
+        enabled
+        interacaoExplicita
+        onAcionarColetavel={onAcionarColetavel}
+      />,
+    )
+
+    act(executarFrameDeInteracao)
+    fireEvent.keyDown(window, { code: 'KeyE' })
+
+    expect(onAcionarColetavel).toHaveBeenCalledOnce()
+    expect(onAcionarColetavel).toHaveBeenCalledWith(coletaveis[1])
+    expect(useGameStore.getState().selahAtivo).toBeNull()
+  })
+
   it('preserva o bloqueio legado por histórico fora da Criação', () => {
     useGameStore.setState({
       historico: [

@@ -24,10 +24,17 @@ import { portaisPorRegiao } from '../../mapas/portais'
 import { obterMapaRegiao } from '../../mapas/regioes'
 import type { MapaRegiao } from '../../mapas/types'
 import { useGameStore } from '../../stores/gameStore'
+import type { Regiao } from '../../types/selah'
 import { SelahCameraRig } from './camera/SelahCameraRig'
 import { resolverFocoCameraSelah } from './camera/selahFocus'
 import type { FocoCameraSelah } from './camera/types'
 import {
+  AtmosferaCriacao,
+  coletavelCriacaoDisponivelNoMomento,
+  type MomentoCriacao,
+  type MomentoCriacaoId,
+  ObjetivoNarrativoCriacao,
+  ProgressaoCriacaoRuntime,
   PropMapaRenderer,
   type PosicaoJogador,
 } from './creation'
@@ -151,6 +158,7 @@ function Player({
 
 type WorldProps = {
   playing: boolean
+  regiao: Regiao
   mapa: MapaRegiao
   portais: readonly PortalMapa[]
   onPortalProximo: (portal: PortalMapa | null) => void
@@ -159,6 +167,7 @@ type WorldProps = {
 
 function World({
   playing,
+  regiao,
   mapa,
   portais,
   onPortalProximo,
@@ -167,19 +176,45 @@ function World({
   const posicaoJogadorRef = useRef<PosicaoJogador | null>(null)
   const gatilhoSelah = useGameStore((state) => state.selahAtivo?.gatilho ?? null)
   const pausaParentalAtiva = useGameStore((state) => state.pausaParentalAtiva)
+  const [momentoCriacaoId, setMomentoCriacaoId] =
+    useState<MomentoCriacaoId>('vazio')
   const { meiaLargura, meiaProfundidade } = mapa.limites
   const focoCamera = useMemo(
     () => resolverFocoCameraSelah(gatilhoSelah, mapa.coletaveis),
     [gatilhoSelah, mapa.coletaveis],
   )
+  const coletaveisDisponiveis = useMemo(
+    () =>
+      regiao === 'criacao'
+        ? mapa.coletaveis.filter((coletavel) =>
+            coletavelCriacaoDisponivelNoMomento(
+              coletavel.passagemId,
+              momentoCriacaoId,
+            ),
+          )
+        : mapa.coletaveis,
+    [mapa.coletaveis, momentoCriacaoId, regiao],
+  )
+  const atualizarMomentoCriacao = useCallback((momento: MomentoCriacao) => {
+    setMomentoCriacaoId(momento.id)
+  }, [])
 
   return (
     <>
-      <color attach="background" args={['#b8d7ca']} />
-      <fog attach="fog" args={['#b8d7ca', 16, 36]} />
-
-      <hemisphereLight args={['#fff1c7', '#365c48', 2.2]} />
-      <directionalLight position={[8, 12, 5]} intensity={2.5} color="#fff4d6" />
+      {regiao === 'criacao' ? (
+        <AtmosferaCriacao momentoId={momentoCriacaoId} />
+      ) : (
+        <>
+          <color attach="background" args={['#b8d7ca']} />
+          <fog attach="fog" args={['#b8d7ca', 16, 36]} />
+          <hemisphereLight args={['#fff1c7', '#365c48', 2.2]} />
+          <directionalLight
+            position={[8, 12, 5]}
+            intensity={2.5}
+            color="#fff4d6"
+          />
+        </>
+      )}
 
       {mapa.chaoColisor !== false && (
         <RigidBody type="fixed" colliders={false}>
@@ -203,10 +238,23 @@ function World({
         <Arte2DRegiao artes={mapa.artes2D ?? []} />
       </Suspense>
       <ColetaveisRegiao
-        coletaveis={mapa.coletaveis}
+        coletaveis={coletaveisDisponiveis}
         posicaoJogadorRef={posicaoJogadorRef}
         enabled={playing}
       />
+      {regiao === 'criacao' && (
+        <>
+          <ObjetivoNarrativoCriacao
+            momentoId={momentoCriacaoId}
+            enabled={playing}
+          />
+          <ProgressaoCriacaoRuntime
+            posicaoJogadorRef={posicaoJogadorRef}
+            enabled={playing}
+            onMomentoChange={atualizarMomentoCriacao}
+          />
+        </>
+      )}
       <PortaisRegiao
         portais={portais}
         playerRef={posicaoJogadorRef}
@@ -363,6 +411,7 @@ export function GameCanvas({
               <World
                 key={regiao}
                 playing={mundoAtivo}
+                regiao={regiao}
                 mapa={mapa}
                 portais={portaisPorRegiao[regiao]}
                 onPortalProximo={setPortalProximo}

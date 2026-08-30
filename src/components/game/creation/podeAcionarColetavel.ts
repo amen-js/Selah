@@ -3,7 +3,7 @@ export type CondicoesColetavel = Readonly<{
   jaAcionado: boolean
   selahAtivo: boolean
   pausaParentalAtiva: boolean
-  passagemColetada: boolean
+  passagemRespondida: boolean
 }>
 
 /** Indica se um colecionável pode executar seu gatilho de proximidade. */
@@ -13,6 +13,6 @@ export function podeAcionarColetavel(condicoes: CondicoesColetavel): boolean {
     !condicoes.jaAcionado &&
     !condicoes.selahAtivo &&
     !condicoes.pausaParentalAtiva &&
-    !condicoes.passagemColetada
+    !condicoes.passagemRespondida
   )
 }

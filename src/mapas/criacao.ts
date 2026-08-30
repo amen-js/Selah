@@ -266,7 +266,8 @@ export const mapaCriacao: MapaRegiao = {
       id: 'coletavel-humanidade',
       historiaId: 'criacao',
       passagemId: 'genesis-1-27',
-      posicao: [0, 1, 0],
+      // Fora do raio do coração do Éden para não abrir dois gatilhos em sequência.
+      posicao: [4, 1, 0],
       raioAtivacao: 1.5,
       cor: '#d8a36e',
     },

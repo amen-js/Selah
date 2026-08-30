@@ -1,7 +1,7 @@
 # Dev 2 Frontend Integration Specification
 
 **Date:** 2026-08-30
-**Status:** Implementing
+**Status:** Verified
 
 ## Problem
 
@@ -47,8 +47,20 @@ verse and quiz so that the full Selah flow works outside the isolated UI lab.
 
 | Requirement | Verification | Status |
 | --- | --- | --- |
-| INT-01 | Creation map unit + cross-layer test | Implementing |
-| INT-02 | Cross-layer test | Implementing |
-| INT-03 | Cross-layer test | Implementing |
-| INT-04 | Existing `GameOverlay` and `/lab` integration tests + UAT | Implementing |
-| INT-05 | `App` integration test | Implementing |
+| INT-01 | Creation map unit + cross-layer test | Verified |
+| INT-02 | Cross-layer test + live proxy smoke | Verified |
+| INT-03 | Cross-layer test + live proxy smoke | Verified |
+| INT-04 | Existing `GameOverlay` and `/lab` integration tests | Verified |
+| INT-05 | `App` integration test | Verified |
+
+## Validation result
+
+- All five Creation triggers completed verse, fallback-quiz, and evaluation
+  requests through the real frontend gateway and Hono app in the cross-layer test.
+- The live Vite proxy returned health, the approved `genesis-1-24` snapshot, a
+  four-alternative fallback quiz, and the correct server evaluation with both
+  external API keys disabled.
+- `/lab` remained on its injectable fixture gateway and the production overlay
+  retained the real gateway and TTS defaults.
+- Gate: 25 test files and 101 tests passed; lint and production build passed.
+- Test integrity: one cross-layer test added, no tests removed or skipped.

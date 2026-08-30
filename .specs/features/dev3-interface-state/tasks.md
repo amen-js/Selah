@@ -1,7 +1,7 @@
 # Dev 3 Interface and State Tasks
 
 **Design:** `.specs/features/dev3-interface-state/design.md`
-**Status:** Functional milestone complete; T19 waiting for designer assets; T20 publication in progress
+**Status:** Functional milestone complete; T19 waiting for designer assets; T20 integration complete
 
 ## Execution
 
@@ -47,7 +47,8 @@ T16 + designer delivery -> T19 -> T20
 
 ## Execution Result
 
-- **Complete:** T1-T18, including all P1 interface/state work and development-only `/lab`.
+- **Complete:** T1-T18 and T20, including all P1 interface/state work, development-only `/lab`, and the Dev 2 HTTP/TTS handoff.
 - **Waiting on external input:** T19 cannot be applied because no Figma tokens or assets are present in the repository.
-- **Verified:** lint, 50 tests, production build, desktop UAT, mobile UAT, fallback, error handling, and short-hold parental-pause behavior.
+- **Verified:** lint, 101 tests, production build, desktop UAT, mobile UAT, fallback, error handling, and short-hold parental-pause behavior.
 - **UAT fixes:** kept the lab HUD below the test controls and stabilized async Selah loading under React StrictMode.
+- **Cross-team integration:** aligned the five Creation passage IDs with the Dev 2 allowlist, exercised map → gateway → Hono for every collectible, and verified 101 tests plus the live Vite proxy fallback flow.

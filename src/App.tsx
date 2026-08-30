@@ -77,7 +77,7 @@ function App() {
         }}
       />
       <span className="camera-reticle" aria-hidden="true" />
-      <GameOverlay />
+      {configuracaoInicialConcluida && <GameOverlay />}
 
       {configuracaoInicialConcluida ? (
         <section

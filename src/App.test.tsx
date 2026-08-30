@@ -89,6 +89,7 @@ describe('App integration', () => {
     expect(
       screen.getByRole('dialog', { name: 'Configuração do responsável' }),
     ).toBeInTheDocument()
+    expect(screen.queryByTestId('game-overlay')).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Entrar no mundo' })).not.toBeInTheDocument()
     expect(requestPointerLock).not.toHaveBeenCalled()
 
@@ -97,6 +98,7 @@ describe('App integration', () => {
     expect(
       screen.queryByRole('dialog', { name: 'Configuração do responsável' }),
     ).not.toBeInTheDocument()
+    expect(screen.getByTestId('game-overlay')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Entrar no mundo' }))
     expect(requestPointerLock).toHaveBeenCalledOnce()
 

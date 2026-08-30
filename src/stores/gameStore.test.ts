@@ -55,7 +55,7 @@ describe('gameStore', () => {
     const state = useGameStore.getState()
 
     expect(['pt-BR', 'en-US', 'es-ES']).toContain(state.idioma)
-    expect(state.faixaEtaria).toBe('geral')
+    expect(state.faixaEtaria).toBe('crianca')
     expect(state.iaAtiva).toBe(true)
     expect(state.salvarProgresso).toBe(false)
     expect(state.compartilharMetricas).toBe(false)
@@ -276,6 +276,7 @@ describe('gameStore', () => {
 
     await useGameStore.persist.rehydrate()
 
+    expect(useGameStore.getState().faixaEtaria).toBe('geral')
     expect(useGameStore.getState().selahsConcluidos).toEqual([])
     expect(useGameStore.getState().momentosCriacaoConcluidos).toEqual([])
     expect(useGameStore.getState().versiculosColetados).toEqual([versiculo.passagemId])

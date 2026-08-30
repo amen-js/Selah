@@ -74,6 +74,7 @@ describe('SelahOverlay', () => {
   beforeEach(() => {
     useGameStore.getState().apagarProgresso()
     useGameStore.getState().setIdioma('pt-BR')
+    useGameStore.getState().setFaixaEtaria('geral')
     ttsEstado = 'idle'
     ttsListeners.clear()
     vi.clearAllMocks()

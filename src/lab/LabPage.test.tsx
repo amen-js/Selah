@@ -79,4 +79,65 @@ describe('LabPage', () => {
     expect(await screen.findByText(/então Deus disse/i)).toBeInTheDocument()
     expect(screen.getByText('Pasaje · Gênesis 1:3')).toBeInTheDocument()
   })
+
+  it('switches Creation moments without mounting Canvas', async () => {
+    const user = userEvent.setup()
+    const { container } = render(<LabPage />)
+
+    expect(screen.getByText('Momento 1 de 9')).toBeInTheDocument()
+
+    await user.selectOptions(
+      screen.getByRole('combobox', { name: 'Momento da Criação' }),
+      'luz',
+    )
+
+    expect(screen.getByText('Momento 2 de 9')).toBeInTheDocument()
+    expect(
+      screen.getByRole('status', { name: 'Voz Guia' }),
+    ).toHaveTextContent('Siga os sinais luminosos e aproxime-se da luz.')
+    expect(container.querySelector('canvas')).not.toBeInTheDocument()
+  })
+
+  it('translates the selected Creation moment immediately', async () => {
+    const user = userEvent.setup()
+    render(<LabPage />)
+
+    await user.selectOptions(
+      screen.getByRole('combobox', { name: 'Momento da Criação' }),
+      'luz',
+    )
+    await user.selectOptions(
+      screen.getByRole('combobox', { name: 'Idioma da interface' }),
+      'en-US',
+    )
+
+    expect(
+      screen.getByRole('combobox', { name: 'Creation moment' }),
+    ).toHaveValue('luz')
+    expect(screen.getByText('Moment 2 of 9')).toBeInTheDocument()
+    expect(
+      screen.getByRole('status', { name: 'Voice Guide' }),
+    ).toHaveTextContent(
+      'The lightFollow the glowing signs and move closer to the light.',
+    )
+  })
+
+  it('resets the Creation moment simulator to the void', async () => {
+    const user = userEvent.setup()
+    render(<LabPage />)
+
+    const momentSelector = screen.getByRole('combobox', {
+      name: 'Momento da Criação',
+    })
+    await user.selectOptions(momentSelector, 'luz')
+    await user.click(
+      screen.getByRole('button', { name: 'Restaurar estado do laboratório' }),
+    )
+
+    expect(momentSelector).toHaveValue('vazio')
+    expect(screen.getByText('Momento 1 de 9')).toBeInTheDocument()
+    expect(
+      screen.getByRole('status', { name: 'Voz Guia' }),
+    ).toHaveTextContent('Dê alguns passos e descubra o primeiro caminho.')
+  })
 })

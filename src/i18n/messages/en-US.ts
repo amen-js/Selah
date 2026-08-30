@@ -254,6 +254,7 @@ export const enUS = {
   'lab.scenario.success': 'AI success',
   'lab.scenario.fallback': 'Approved fallback',
   'lab.scenario.error': 'Network error',
+  'lab.creationMoment.label': 'Creation moment',
   'lab.startSelah': 'Open Selah',
   'lab.showDialog': 'Show dialogue',
   'lab.activatePause': 'Activate parental pause',

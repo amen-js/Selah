@@ -102,7 +102,7 @@ language.
 | CGUI-04 | P1: clear snapshot outside Creation | Implemented |
 | CGUI-05 | P1: preserve overlay priority | Implemented |
 | CGUI-06 | P1: no new persisted progress | Implemented |
-| CGUI-07 | P2: `/lab` moment simulation | Pending |
+| CGUI-07 | P2: `/lab` moment simulation | Implemented |
 | CGUI-08 | P2: translated moment titles, objectives and UI labels | Implemented |
 
 **Coverage**: 8 total, 8 mapped to tasks, 0 unmapped.

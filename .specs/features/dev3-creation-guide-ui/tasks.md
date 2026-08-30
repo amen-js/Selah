@@ -154,6 +154,7 @@ normal exploration.
 
 ### T7: Simulate Creation moments in the UI lab
 
+**Status**: Implemented
 **What**: Add a moment selector that feeds the same production overlay without
 mounting Canvas.
 **Where**: `src/lab/LabPage.tsx`, `src/lab/LabPage.test.tsx`,
@@ -167,9 +168,9 @@ mounting Canvas.
 
 **Done when**:
 
-- [ ] Lab switches between moments 1 and 2 without Canvas.
-- [ ] Changing UI language updates moment title and objective.
-- [ ] `npm run test:run` passes at least 250 tests.
+- [x] Lab switches between moments 1 and 2 without Canvas.
+- [x] Changing UI language updates moment title and objective.
+- [x] `npm run test:run` passes at least 250 tests.
 
 **Commit**: `feat(lab): simulate Creation journey moments`
 

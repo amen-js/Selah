@@ -251,6 +251,7 @@ export const ptBR = {
   'lab.scenario.success': 'Sucesso com IA',
   'lab.scenario.fallback': 'Fallback aprovado',
   'lab.scenario.error': 'Erro de rede',
+  'lab.creationMoment.label': 'Momento da Criação',
   'lab.startSelah': 'Abrir Selah',
   'lab.showDialog': 'Mostrar diálogo',
   'lab.activatePause': 'Ativar pausa parental',

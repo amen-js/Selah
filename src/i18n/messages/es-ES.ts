@@ -255,6 +255,7 @@ export const esES = {
   'lab.scenario.success': 'Éxito con IA',
   'lab.scenario.fallback': 'Fallback aprobado',
   'lab.scenario.error': 'Error de red',
+  'lab.creationMoment.label': 'Momento de la Creación',
   'lab.startSelah': 'Abrir Selah',
   'lab.showDialog': 'Mostrar diálogo',
   'lab.activatePause': 'Activar pausa parental',

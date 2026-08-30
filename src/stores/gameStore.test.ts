@@ -149,4 +149,15 @@ describe('gameStore', () => {
     expect(useGameStore.getState().selahsIniciados).toBe(0)
     expect(useGameStore.getState().configuracaoInicialConcluida).toBe(false)
   })
+
+  it('keeps narration state transient and clears it with the Selah', () => {
+    useGameStore.getState().abrirSelah({ historiaId: 'criacao', passagemId: versiculo.passagemId })
+    useGameStore.getState().setNarracaoAtiva(true)
+
+    expect(useGameStore.getState().narracaoAtiva).toBe(true)
+    expect(localStorage.getItem(GAME_STORAGE_KEY)).not.toContain('narracaoAtiva')
+
+    useGameStore.getState().cancelarSelah()
+    expect(useGameStore.getState().narracaoAtiva).toBe(false)
+  })
 })

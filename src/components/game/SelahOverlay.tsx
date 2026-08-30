@@ -1,9 +1,9 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useSyncExternalStore } from 'react'
 
 import { useSelahFlow } from '../../hooks/useSelahFlow'
 import { useTranslation } from '../../i18n'
 import type { SelahGateway } from '../../services/selahGateway'
-import type { TtsController } from '../../services/tts'
+import type { TtsController, TtsEstado } from '../../services/tts'
 import { useGameStore } from '../../stores/gameStore'
 
 export type { TtsController }
@@ -14,16 +14,25 @@ interface SelahOverlayProps {
   appVersion?: string
 }
 
+const estadoTtsVazio = (): TtsEstado => 'idle'
+const assinarTtsVazio = () => () => undefined
+
 export function SelahOverlay({ gateway, tts, appVersion }: SelahOverlayProps) {
   const { t } = useTranslation()
   const { selahAtivo, mostrarQuiz, responder, concluir, cancelar } = useSelahFlow({
     gateway,
     appVersion,
   })
-  const falandoRef = useRef(false)
   const tituloRef = useRef<HTMLHeadingElement>(null)
   const faixaEtaria = useGameStore((state) => state.faixaEtaria)
   const ttsAtivo = useGameStore((state) => state.ttsAtivo)
+  const setNarracaoAtiva = useGameStore((state) => state.setNarracaoAtiva)
+  const ttsEstado = useSyncExternalStore(
+    tts?.assinar ?? assinarTtsVazio,
+    tts?.estado ?? estadoTtsVazio,
+    estadoTtsVazio,
+  )
+  const narracaoAtiva = ttsEstado === 'playing' || ttsEstado === 'fallback'
 
   useEffect(() => {
     tituloRef.current?.focus()
@@ -37,15 +46,18 @@ export function SelahOverlay({ gateway, tts, appVersion }: SelahOverlayProps) {
       tts?.suportado &&
       (faixaEtaria === 'crianca' || ttsAtivo)
     ) {
-      tts.falar(versiculo.texto, versiculo.idioma)
-      falandoRef.current = true
+      void tts.falar(versiculo)
     }
 
     return () => {
       tts?.cancelar()
-      falandoRef.current = false
     }
   }, [faixaEtaria, selahAtivo?.fase, selahAtivo?.versiculo, tts, ttsAtivo])
+
+  useEffect(() => {
+    setNarracaoAtiva(narracaoAtiva)
+    return () => setNarracaoAtiva(false)
+  }, [narracaoAtiva, setNarracaoAtiva])
 
   if (!selahAtivo) return null
 
@@ -53,14 +65,17 @@ export function SelahOverlay({ gateway, tts, appVersion }: SelahOverlayProps) {
     const versiculo = selahAtivo.versiculo
     if (!tts?.suportado || !versiculo) return
 
-    if (falandoRef.current) {
+    if (ttsEstado === 'playing' || ttsEstado === 'fallback') {
       tts.pausar()
-      falandoRef.current = false
       return
     }
 
-    tts.falar(versiculo.texto, versiculo.idioma)
-    falandoRef.current = true
+    if (ttsEstado === 'paused') {
+      tts.retomar()
+      return
+    }
+
+    void tts.falar(versiculo)
   }
 
   if (selahAtivo.erro) {
@@ -101,6 +116,23 @@ export function SelahOverlay({ gateway, tts, appVersion }: SelahOverlayProps) {
   if (selahAtivo.fase === 'versiculo' && selahAtivo.versiculo) {
     const { versiculo, quiz } = selahAtivo
     const ttsDisponivel = Boolean(tts?.suportado)
+    const ttsCarregando = ttsEstado === 'loading'
+    const ttsPausavel = ttsEstado === 'playing' || ttsEstado === 'fallback'
+    const ttsRetomavel = ttsEstado === 'paused'
+    const ttsAria = ttsPausavel
+      ? t('selah.tts.pauseAria')
+      : ttsRetomavel
+        ? t('selah.tts.resumeAria')
+        : ttsCarregando
+          ? t('selah.tts.preparingAria')
+          : t('selah.tts.listenAria')
+    const ttsAction = ttsPausavel
+      ? t('selah.tts.pauseAction')
+      : ttsRetomavel
+        ? t('selah.tts.resumeAction')
+        : ttsCarregando
+          ? t('selah.tts.preparingAction')
+          : t('selah.tts.action')
 
     return (
       <div className="modal-backdrop overlay-interactive selah-backdrop">
@@ -114,6 +146,19 @@ export function SelahOverlay({ gateway, tts, appVersion }: SelahOverlayProps) {
           <p className="selah-card__attribution">
             {versiculo.versao} · {versiculo.atribuicao}
           </p>
+          {ttsDisponivel && (
+            <p className="muted">{t('selah.tts.disclosure')}</p>
+          )}
+          {ttsEstado === 'fallback' && (
+            <p className="muted" role="status">
+              {t('selah.tts.fallbackStatus')}
+            </p>
+          )}
+          {ttsEstado === 'error' && (
+            <p className="muted" role="status">
+              {t('selah.tts.error')}
+            </p>
+          )}
           {!ttsDisponivel && (
             <p id="selah-tts-unavailable" className="sr-only">
               {t('selah.tts.unavailable')}
@@ -123,15 +168,15 @@ export function SelahOverlay({ gateway, tts, appVersion }: SelahOverlayProps) {
             <button
               className="secondary-button"
               type="button"
-              disabled={!ttsDisponivel}
+              disabled={!ttsDisponivel || ttsCarregando}
               title={ttsDisponivel ? undefined : t('selah.tts.unavailable')}
-              aria-label={t('selah.tts.listenAria')}
+              aria-label={ttsAria}
               aria-describedby={
                 ttsDisponivel ? undefined : 'selah-tts-unavailable'
               }
               onClick={alternarTts}
             >
-              {t('selah.tts.action')}
+              {ttsAction}
             </button>
             <button
               className="primary-button"

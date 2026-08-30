@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { createOpenRouterClient } from './openrouter.ts'
+import { createOpenRouterClient, createOpenRouterTtsClient } from './openrouter.ts'
 
 interface CapturedRequest {
   url: string
@@ -92,5 +92,69 @@ describe('OpenRouter client', () => {
       expect(request.headers.get('http-referer')).toBe('https://selah.local')
       expect(request.headers.get('x-title')).toBe('Selah')
     }
+  })
+
+  it('synthesizes MP3 speech without applying the quiz ZDR provider filter', async () => {
+    const requests: CapturedRequest[] = []
+    const audio = new Uint8Array([73, 68, 51, 4])
+    const fetchFn: typeof fetch = vi.fn(async (input, init) => {
+      const request = new Request(input, init)
+      requests.push({
+        url: request.url,
+        headers: request.headers,
+        body: (await request.clone().json()) as Record<string, unknown>,
+      })
+      return new Response(audio, {
+        status: 200,
+        headers: { 'content-type': 'audio/mpeg' },
+      })
+    })
+    const client = createOpenRouterTtsClient(
+      'test-openrouter-key',
+      'x-ai/grok-voice-tts-1.0',
+      'eve',
+      fetchFn,
+    )
+
+    const result = await client.sintetizar('E disse Deus: Haja luz.')
+
+    expect(new Uint8Array(result ?? new ArrayBuffer(0))).toEqual(audio)
+    expect(requests).toHaveLength(1)
+    expect(requests[0]?.url).toBe('https://openrouter.ai/api/v1/audio/speech')
+    expect(requests[0]?.body).toEqual({
+      model: 'x-ai/grok-voice-tts-1.0',
+      voice: 'eve',
+      input: 'E disse Deus: Haja luz.',
+      response_format: 'mp3',
+    })
+    expect(requests[0]?.body).not.toHaveProperty('provider')
+    expect(requests[0]?.headers.get('authorization')).toBe('Bearer test-openrouter-key')
+    expect(requests[0]?.headers.get('http-referer')).toBe('https://selah.local')
+    expect(requests[0]?.headers.get('x-title')).toBe('Selah')
+  })
+
+  it('fails closed when speech synthesis is not configured or the provider rejects it', async () => {
+    const fetchFn = vi.fn<typeof fetch>().mockResolvedValue(
+      new Response(JSON.stringify({ error: { message: 'unavailable' } }), {
+        status: 503,
+        headers: { 'content-type': 'application/json' },
+      }),
+    )
+
+    await expect(
+      createOpenRouterTtsClient('', 'x-ai/grok-voice-tts-1.0', 'eve', fetchFn).sintetizar(
+        'Haja luz.',
+      ),
+    ).resolves.toBeNull()
+    expect(fetchFn).not.toHaveBeenCalled()
+
+    await expect(
+      createOpenRouterTtsClient(
+        'test-key',
+        'x-ai/grok-voice-tts-1.0',
+        'eve',
+        fetchFn,
+      ).sintetizar('Haja luz.'),
+    ).resolves.toBeNull()
   })
 })

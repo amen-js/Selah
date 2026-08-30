@@ -46,6 +46,21 @@ export interface OpenRouterClient {
   gerarQuiz: (input: GerarQuizLlmInput) => Promise<QuizGerado | null>
 }
 
+export interface OpenRouterTtsClient {
+  sintetizar: (texto: string, signal?: AbortSignal) => Promise<ArrayBuffer | null>
+}
+
+const createOpenRouterSdk = (apiKey: string, fetchFn: typeof fetch): OpenAI =>
+  new OpenAI({
+    apiKey,
+    baseURL: 'https://openrouter.ai/api/v1',
+    fetch: fetchFn,
+    defaultHeaders: {
+      'HTTP-Referer': 'https://selah.local',
+      'X-Title': 'Selah',
+    },
+  })
+
 const idiomaPrompt = (idioma: Idioma): string => {
   switch (idioma) {
     case 'pt-BR':
@@ -97,15 +112,7 @@ export const createOpenRouterClient = (
   models: string[],
   fetchFn: typeof fetch = fetch,
 ): OpenRouterClient => {
-  const client = new OpenAI({
-    apiKey,
-    baseURL: 'https://openrouter.ai/api/v1',
-    fetch: fetchFn,
-    defaultHeaders: {
-      'HTTP-Referer': 'https://selah.local',
-      'X-Title': 'Selah',
-    },
-  })
+  const client = createOpenRouterSdk(apiKey, fetchFn)
 
   return {
     gerarQuiz: async (input) => {
@@ -160,6 +167,37 @@ export const createOpenRouterClient = (
       }
 
       return null
+    },
+  }
+}
+
+export const createOpenRouterTtsClient = (
+  apiKey: string,
+  model: string,
+  voice: string,
+  fetchFn: typeof fetch = fetch,
+): OpenRouterTtsClient => {
+  const client = apiKey ? createOpenRouterSdk(apiKey, fetchFn) : null
+
+  return {
+    sintetizar: async (texto, signal) => {
+      if (!client || !model || !voice || !texto.trim()) return null
+
+      try {
+        const response = await client.audio.speech.create(
+          {
+            model,
+            voice,
+            input: texto,
+            response_format: 'mp3',
+          },
+          { signal },
+        )
+        const audio = await response.arrayBuffer()
+        return audio.byteLength > 0 ? audio : null
+      } catch {
+        return null
+      }
     },
   }
 }

@@ -43,6 +43,7 @@ interface EstadoBase {
   idioma: Idioma
   faixaEtaria: FaixaEtaria
   ttsAtivo: boolean
+  narracaoAtiva: boolean
   iaAtiva: boolean
   salvarProgresso: boolean
   compartilharMetricas: boolean
@@ -78,6 +79,7 @@ export interface EstadoJogo extends EstadoBase {
   setIdioma: (idioma: Idioma) => void
   setFaixaEtaria: (faixaEtaria: FaixaEtaria) => void
   setTtsAtivo: (ttsAtivo: boolean) => void
+  setNarracaoAtiva: (narracaoAtiva: boolean) => void
   setIaAtiva: (iaAtiva: boolean) => void
   setSalvarProgresso: (salvarProgresso: boolean) => void
   setCompartilharMetricas: (compartilharMetricas: boolean) => void
@@ -102,6 +104,7 @@ const criarEstadoInicial = (): EstadoBase => ({
   idioma: detectarIdioma(),
   faixaEtaria: 'geral',
   ttsAtivo: false,
+  narracaoAtiva: false,
   iaAtiva: true,
   salvarProgresso: false,
   compartilharMetricas: false,
@@ -148,6 +151,7 @@ export const useGameStore = create<EstadoJogo>()(
       setIdioma: (idioma) => set({ idioma }),
       setFaixaEtaria: (faixaEtaria) => set({ faixaEtaria }),
       setTtsAtivo: (ttsAtivo) => set({ ttsAtivo }),
+      setNarracaoAtiva: (narracaoAtiva) => set({ narracaoAtiva }),
       setIaAtiva: (iaAtiva) => set({ iaAtiva }),
       setSalvarProgresso: (salvarProgresso) => set({ salvarProgresso }),
       setCompartilharMetricas: (compartilharMetricas) => set({ compartilharMetricas }),
@@ -237,7 +241,7 @@ export const useGameStore = create<EstadoJogo>()(
               }
             : state,
         ),
-      cancelarSelah: () => set({ selahAtivo: null }),
+      cancelarSelah: () => set({ selahAtivo: null, narracaoAtiva: false }),
       concluirSelah: () =>
         set((state) => {
           if (state.selahAtivo?.fase !== 'feedback') return state
@@ -245,6 +249,7 @@ export const useGameStore = create<EstadoJogo>()(
             selahAtivo: null,
             selahsCompletados: state.selahsCompletados + 1,
             pausaParentalAtiva: true,
+            narracaoAtiva: false,
           }
         }),
       liberarPausaParental: () => set({ pausaParentalAtiva: false }),

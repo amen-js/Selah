@@ -31,7 +31,7 @@ const criarObjetivo = (
   snapshot: SnapshotProgressaoCriacao | undefined,
   idioma: Idioma,
 ): LinhaGuiaCriacao | undefined =>
-  snapshot
+  snapshot && !snapshot.estado.concluida
     ? {
         fase: 'objetivo',
         texto: traduzirJornadaCriacao(snapshot.momento.id, idioma).objetivo,
@@ -82,6 +82,7 @@ export function useCreationNarration({
 
   const [linha, setLinha] = useState<LinhaGuiaCriacao | undefined>(() => {
     if (!ativo || !snapshot) return criarObjetivo(snapshot, idioma)
+    if (snapshot.estado.concluida) return undefined
     return criarLinha(idNarracao(snapshot.momento.id, 'inicial'), idioma)
   })
 
@@ -136,7 +137,23 @@ export function useCreationNarration({
 
     const momentoAtivo = snapshot.momento.id
 
-    if (idiomaMudou) {
+    const acabouAgora =
+      snapshot.estado.concluida && !concluidaAnteriorRef.current
+
+    if (acabouAgora) {
+      iniciarSequencia([idNarracao(momentoAtivo, 'transicao')])
+    } else if (snapshot.estado.concluida) {
+      const transicaoFinalId = idNarracao(momentoAtivo, 'transicao')
+      if (
+        idiomaMudou ||
+        (linha?.narracaoId && linha.narracaoId !== transicaoFinalId)
+      ) {
+        geracaoRef.current += 1
+        filaRef.current = []
+        tts.cancelar()
+        setLinha(undefined)
+      }
+    } else if (idiomaMudou) {
       const atualId = linha?.narracaoId
       const ids = atualId ? [atualId, ...filaRef.current] : []
       if (ids.length > 0) iniciarSequencia(ids)
@@ -150,11 +167,6 @@ export function useCreationNarration({
         idNarracao(momentoAnterior, 'transicao'),
         idNarracao(momentoAtivo, 'inicial'),
       ])
-    } else if (
-      snapshot.estado.concluida &&
-      !concluidaAnteriorRef.current
-    ) {
-      iniciarSequencia([idNarracao(momentoAtivo, 'transicao')])
     } else if (inatividade && !inatividadeAnteriorRef.current) {
       if (!apoioConsumidoRef.current) {
         apoioConsumidoRef.current = true

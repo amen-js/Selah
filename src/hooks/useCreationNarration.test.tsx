@@ -35,6 +35,15 @@ const snapshotFinal: SnapshotProgressaoCriacao = {
   },
 }
 
+const snapshotFinalConcluido: SnapshotProgressaoCriacao = {
+  ...snapshotFinal,
+  estado: {
+    ...snapshotFinal.estado,
+    momentosConcluidos: momentosCriacao.map(({ id }) => id),
+    concluida: true,
+  },
+}
+
 function criarTtsControlavel(suportado = true) {
   let estado: TtsEstado = 'idle'
   const listeners = new Set<(novoEstado: TtsEstado) => void>()
@@ -302,8 +311,9 @@ describe('useCreationNarration', () => {
     })
   })
 
-  it('emits the final transition when the ninth moment becomes complete', async () => {
+  it('emits exactly one final transition when the ninth moment becomes complete', async () => {
     const controle = criarTtsControlavel()
+    useGameStore.getState().setFaixaEtaria('crianca')
     const { result, rerender } = renderHook(
       ({ snapshot }: { snapshot: SnapshotProgressaoCriacao }) =>
         useCreationNarration({
@@ -315,22 +325,128 @@ describe('useCreationNarration', () => {
       { initialProps: { snapshot: snapshotFinal } },
     )
 
-    await avancarTempo(4_000)
+    await avancarTempo(0)
+    await emitirEstado(controle, 'idle')
     expect(result.current.linha?.fase).toBe('objetivo')
 
-    rerender({
-      snapshot: {
-        ...snapshotFinal,
-        estado: { ...snapshotFinal.estado, concluida: true },
-      },
-    })
+    rerender({ snapshot: snapshotFinalConcluido })
 
     expect(result.current.linha).toMatchObject({
       fase: 'transicao',
       narracaoId: 'criacao.fruto-escolha.transicao',
     })
-    await avancarTempo(4_000)
-    expect(result.current.linha?.fase).toBe('objetivo')
+    await avancarTempo(0)
+    await emitirEstado(controle, 'idle')
+
+    expect(result.current.linha).toBeUndefined()
+    expect(
+      vi.mocked(controle.tts.narrar).mock.calls.filter(
+        ([fala]) => fala.narracaoId === 'criacao.fruto-escolha.transicao',
+      ),
+    ).toHaveLength(1)
+
+    rerender({ snapshot: snapshotFinalConcluido })
+    await avancarTempo(20_000)
+    expect(result.current.linha).toBeUndefined()
+    expect(
+      vi.mocked(controle.tts.narrar).mock.calls.filter(
+        ([fala]) => fala.narracaoId === 'criacao.fruto-escolha.transicao',
+      ),
+    ).toHaveLength(1)
+  })
+
+  it('keeps an initially completed journey silent and recovers after reset', async () => {
+    const controle = criarTtsControlavel()
+    useGameStore.getState().setFaixaEtaria('crianca')
+    const { result, rerender } = renderHook(
+      ({
+        snapshot,
+        ativo,
+        inatividade,
+      }: {
+        snapshot?: SnapshotProgressaoCriacao
+        ativo: boolean
+        inatividade: boolean
+      }) =>
+        useCreationNarration({
+          snapshot,
+          inatividade,
+          ativo,
+          tts: controle.tts,
+        }),
+      {
+        initialProps: {
+          snapshot: snapshotFinalConcluido as SnapshotProgressaoCriacao | undefined,
+          ativo: true,
+          inatividade: true,
+        },
+      },
+    )
+
+    expect(result.current.linha).toBeUndefined()
+    await avancarTempo(20_000)
+    expect(controle.tts.narrar).not.toHaveBeenCalled()
+
+    rerender({
+      snapshot: snapshotFinalConcluido,
+      ativo: false,
+      inatividade: false,
+    })
+    rerender({
+      snapshot: snapshotFinalConcluido,
+      ativo: true,
+      inatividade: true,
+    })
+    await avancarTempo(20_000)
+    expect(result.current.linha).toBeUndefined()
+    expect(controle.tts.narrar).not.toHaveBeenCalled()
+
+    rerender({ snapshot: undefined, ativo: false, inatividade: false })
+    rerender({ snapshot: snapshotVazio, ativo: true, inatividade: false })
+    expect(result.current.linha).toMatchObject({
+      fase: 'inicial',
+      narracaoId: 'criacao.vazio.inicial',
+    })
+    await avancarTempo(0)
+    expect(controle.tts.narrar).toHaveBeenCalledOnce()
+  })
+
+  it('cancels the final transition on a completed-journey language change', async () => {
+    const controle = criarTtsControlavel()
+    useGameStore.getState().setFaixaEtaria('crianca')
+    const { result, rerender } = renderHook(
+      ({ snapshot }: { snapshot: SnapshotProgressaoCriacao }) =>
+        useCreationNarration({
+          snapshot,
+          inatividade: false,
+          ativo: true,
+          tts: controle.tts,
+        }),
+      { initialProps: { snapshot: snapshotFinal } },
+    )
+
+    await avancarTempo(0)
+    await emitirEstado(controle, 'idle')
+    rerender({ snapshot: snapshotFinalConcluido })
+    await avancarTempo(0)
+
+    expect(result.current.linha).toMatchObject({
+      fase: 'transicao',
+      narracaoId: 'criacao.fruto-escolha.transicao',
+    })
+    expect(controle.tts.estado()).toBe('playing')
+    vi.mocked(controle.tts.cancelar).mockClear()
+
+    act(() => useGameStore.getState().setIdioma('en-US'))
+
+    expect(controle.tts.cancelar).toHaveBeenCalled()
+    expect(result.current.linha).toBeUndefined()
+    await avancarTempo(20_000)
+    expect(
+      vi.mocked(controle.tts.narrar).mock.calls.filter(
+        ([fala]) => fala.narracaoId === 'criacao.fruto-escolha.transicao',
+      ),
+    ).toHaveLength(1)
   })
 
   it('advances without stalling when narration reaches an error terminal', async () => {

@@ -19,12 +19,19 @@ function ToggleRow({ label, description, checked, onChange }: ToggleRowProps) {
         <strong>{label}</strong>
         <p>{description}</p>
       </span>
-      <input
-        type="checkbox"
-        aria-label={label}
-        checked={checked}
-        onChange={(event) => onChange(event.target.checked)}
-      />
+      <span className="toggle-control">
+        <input
+          className="toggle-control__input"
+          type="checkbox"
+          role="switch"
+          aria-label={label}
+          checked={checked}
+          onChange={(event) => onChange(event.target.checked)}
+        />
+        <span className="toggle-control__track" aria-hidden="true">
+          <span className="toggle-control__thumb" />
+        </span>
+      </span>
     </label>
   )
 }

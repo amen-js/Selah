@@ -36,11 +36,13 @@ describe('ParentSettings', () => {
     const user = userEvent.setup()
     render(<ParentSettings />)
 
-    await user.click(screen.getByRole('checkbox', { name: 'Leitura em voz alta' }))
-    await user.click(screen.getByRole('checkbox', { name: 'Reflexões com IA' }))
-    await user.click(screen.getByRole('checkbox', { name: 'Salvar progresso' }))
+    expect(screen.getAllByRole('switch')).toHaveLength(4)
+
+    await user.click(screen.getByRole('switch', { name: 'Leitura em voz alta' }))
+    await user.click(screen.getByRole('switch', { name: 'Reflexões com IA' }))
+    await user.click(screen.getByRole('switch', { name: 'Salvar progresso' }))
     await user.click(
-      screen.getByRole('checkbox', { name: 'Compartilhar métricas anônimas' }),
+      screen.getByRole('switch', { name: 'Compartilhar métricas anônimas' }),
     )
 
     expect(useGameStore.getState()).toMatchObject({

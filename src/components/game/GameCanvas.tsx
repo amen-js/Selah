@@ -12,16 +12,17 @@ import {
 import { Ecctrl, type EcctrlHandle } from 'ecctrl'
 import { Suspense, useEffect, useMemo, useRef, type RefObject } from 'react'
 import { Color } from 'three'
-import { mapaCriacao } from '../../mapas/criacao'
+import { obterMapaRegiao } from '../../mapas/regioes'
+import type { MapaRegiao } from '../../mapas/types'
 import { useGameStore } from '../../stores/gameStore'
 import { SelahCameraRig } from './camera/SelahCameraRig'
 import { resolverFocoCameraSelah } from './camera/selahFocus'
 import type { FocoCameraSelah } from './camera/types'
 import {
-  ColetaveisCriacao,
   PropMapaRenderer,
   type PosicaoJogador,
 } from './creation'
+import { ColetaveisRegiao } from './region'
 
 type GameControl =
   | 'forward'
@@ -45,6 +46,7 @@ type PlayerProps = {
   posicaoJogadorRef: RefObject<PosicaoJogador | null>
   focoCamera: FocoCameraSelah | null
   manterFoco: boolean
+  spawn: MapaRegiao['spawn']
 }
 
 function Player({
@@ -52,6 +54,7 @@ function Player({
   posicaoJogadorRef,
   focoCamera,
   manterFoco,
+  spawn,
 }: PlayerProps) {
   const controller = useRef<EcctrlHandle>(null)
   const [, getControls] = useKeyboardControls<GameControl>()
@@ -90,11 +93,7 @@ function Player({
       <Ecctrl
         ref={controller}
         enable={playing}
-        position={[
-          mapaCriacao.spawn[0],
-          mapaCriacao.spawn[1],
-          mapaCriacao.spawn[2],
-        ]}
+        position={spawn}
         capsuleHalfHeight={0.28}
         capsuleRadius={0.3}
         floatHeight={0.15}
@@ -134,20 +133,20 @@ function Player({
   )
 }
 
-function World({ playing }: { playing: boolean }) {
+type WorldProps = {
+  playing: boolean
+  mapa: MapaRegiao
+}
+
+function World({ playing, mapa }: WorldProps) {
   const posicaoJogadorRef = useRef<PosicaoJogador | null>(null)
-  const setRegiao = useGameStore((state) => state.setRegiao)
   const gatilhoSelah = useGameStore((state) => state.selahAtivo?.gatilho ?? null)
   const pausaParentalAtiva = useGameStore((state) => state.pausaParentalAtiva)
-  const { meiaLargura, meiaProfundidade } = mapaCriacao.limites
+  const { meiaLargura, meiaProfundidade } = mapa.limites
   const focoCamera = useMemo(
-    () => resolverFocoCameraSelah(gatilhoSelah, mapaCriacao.coletaveis),
-    [gatilhoSelah],
+    () => resolverFocoCameraSelah(gatilhoSelah, mapa.coletaveis),
+    [gatilhoSelah, mapa.coletaveis],
   )
-
-  useEffect(() => {
-    setRegiao('criacao')
-  }, [setRegiao])
 
   return (
     <>
@@ -169,9 +168,9 @@ function World({ playing }: { playing: boolean }) {
         </mesh>
       </RigidBody>
 
-      <PropMapaRenderer props={mapaCriacao.props} />
-      <ColetaveisCriacao
-        coletaveis={mapaCriacao.coletaveis}
+      <PropMapaRenderer props={mapa.props} />
+      <ColetaveisRegiao
+        coletaveis={mapa.coletaveis}
         posicaoJogadorRef={posicaoJogadorRef}
         enabled={playing}
       />
@@ -200,6 +199,7 @@ function World({ playing }: { playing: boolean }) {
         posicaoJogadorRef={posicaoJogadorRef}
         focoCamera={focoCamera}
         manterFoco={pausaParentalAtiva}
+        spawn={mapa.spawn}
       />
     </>
   )
@@ -214,12 +214,20 @@ function PhysicsFallback() {
   )
 }
 
+/** Empty scene used while a region has no map registered yet. */
+function RegionFallback() {
+  return <group name="region-fallback" />
+}
+
 type GameCanvasProps = {
   playing: boolean
   onCanvasReady?: (canvas: HTMLCanvasElement) => void
 }
 
 export function GameCanvas({ playing, onCanvasReady }: GameCanvasProps) {
+  const regiao = useGameStore((state) => state.regiao)
+  const mapa = obterMapaRegiao(regiao)
+
   return (
     <KeyboardControls map={keyboardMap}>
       <Canvas
@@ -233,8 +241,12 @@ export function GameCanvas({ playing, onCanvasReady }: GameCanvasProps) {
         }}
       >
         <Suspense fallback={<PhysicsFallback />}>
-          <Physics gravity={[0, -9.81, 0]}>
-            <World playing={playing} />
+          <Physics key={regiao} gravity={[0, -9.81, 0]}>
+            {mapa ? (
+              <World key={regiao} playing={playing} mapa={mapa} />
+            ) : (
+              <RegionFallback />
+            )}
           </Physics>
         </Suspense>
       </Canvas>

@@ -1,6 +1,6 @@
 # Noah NPC Mission TTS
 
-**Status:** In progress
+**Status:** Done
 **Scope:** Medium
 **Date:** 2026-08-30
 
@@ -32,3 +32,9 @@ visual flow or checkpoint semantics.
 - Component tests cover automatic narration, silent preference, line changes,
   language changes, cancellation, and React Strict Mode.
 - `npm run lint && npm run test:run && npm run build` passes.
+
+## Result
+
+- Lint: passed.
+- Tests: 583 passed across 97 files; 0 failed and 0 skipped.
+- Production build: passed. Vite retained the pre-existing large-chunk warning.

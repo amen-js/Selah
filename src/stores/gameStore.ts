@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
+import type { CheckpointProgressaoNoe } from '../components/game/noe/progression'
 import type {
   AlternativaId,
   AvaliacaoQuiz,
@@ -22,6 +23,42 @@ const IDIOMAS_SUPORTADOS: Idioma[] = ['pt-BR', 'en-US', 'es-ES']
 const normalizarIdsUnicos = (ids: readonly string[]): string[] => [
   ...new Set(ids),
 ]
+
+const checkpointsNoeIguais = (
+  atual: CheckpointProgressaoNoe | null,
+  proximo: CheckpointProgressaoNoe | null,
+): boolean => {
+  if (atual === proximo) return true
+  if (!atual || !proximo || atual.versao !== proximo.versao) return false
+  if (atual.momentosConcluidos.length !== proximo.momentosConcluidos.length) {
+    return false
+  }
+  if (
+    !atual.momentosConcluidos.every(
+      (momentoId, indice) => momentoId === proximo.momentosConcluidos[indice],
+    )
+  ) {
+    return false
+  }
+  if (
+    atual.progressoMomentoAtual.length !== proximo.progressoMomentoAtual.length
+  ) {
+    return false
+  }
+
+  return atual.progressoMomentoAtual.every((progresso, indice) => {
+    const progressoSeguinte = proximo.progressoMomentoAtual[indice]
+    return (
+      progresso.acaoId === progressoSeguinte.acaoId &&
+      progresso.unidadesConcluidas.length ===
+        progressoSeguinte.unidadesConcluidas.length &&
+      progresso.unidadesConcluidas.every(
+        (unidadeId, unidadeIndice) =>
+          unidadeId === progressoSeguinte.unidadesConcluidas[unidadeIndice],
+      )
+    )
+  })
+}
 
 const detectarIdioma = (): Idioma => {
   if (typeof navigator === 'undefined') return 'pt-BR'
@@ -57,6 +94,8 @@ interface EstadoBase {
   selahsConcluidos: string[]
   /** Checkpoint da sequência de momentos da Criação, sem conhecer sua lógica. */
   momentosCriacaoConcluidos: string[]
+  /** Checkpoint opaco da progressão de Noé, normalizado pelo runtime da região. */
+  checkpointNoe: CheckpointProgressaoNoe | null
   selahsIniciados: number
   selahsCompletados: number
   historico: ResultadoQuizLocal[]
@@ -79,6 +118,7 @@ interface EstadoPersistido {
   versiculosColetados?: string[]
   selahsConcluidos?: string[]
   momentosCriacaoConcluidos?: string[]
+  checkpointNoe?: CheckpointProgressaoNoe | null
   selahsIniciados?: number
   selahsCompletados?: number
   historico?: ResultadoQuizLocal[]
@@ -95,6 +135,7 @@ export interface EstadoJogo extends EstadoBase {
   setCompartilharMetricas: (compartilharMetricas: boolean) => void
   concluirConfiguracaoInicial: () => void
   setMomentosCriacaoConcluidos: (momentos: readonly string[]) => void
+  setCheckpointNoe: (checkpoint: CheckpointProgressaoNoe | null) => void
   setDialogoAberto: (dialogoAberto: boolean) => void
   setPainelAberto: (painelAberto: PainelAberto) => void
   abrirSelah: (gatilho: GatilhoSelah) => void
@@ -123,6 +164,7 @@ const criarEstadoInicial = (): EstadoBase => ({
   versiculosColetados: [],
   selahsConcluidos: [],
   momentosCriacaoConcluidos: [],
+  checkpointNoe: null,
   selahsIniciados: 0,
   selahsCompletados: 0,
   historico: [],
@@ -152,6 +194,7 @@ const projetarEstadoPersistido = (state: EstadoJogo): EstadoPersistido => {
     versiculosColetados: state.versiculosColetados,
     selahsConcluidos: state.selahsConcluidos,
     momentosCriacaoConcluidos: state.momentosCriacaoConcluidos,
+    checkpointNoe: state.checkpointNoe,
     selahsIniciados: state.selahsIniciados,
     selahsCompletados: state.selahsCompletados,
     historico: state.historico,
@@ -183,6 +226,12 @@ export const useGameStore = create<EstadoJogo>()(
 
           return iguais ? state : { momentosCriacaoConcluidos: normalizados }
         }),
+      setCheckpointNoe: (checkpointNoe) =>
+        set((state) =>
+          checkpointsNoeIguais(state.checkpointNoe, checkpointNoe)
+            ? state
+            : { checkpointNoe },
+        ),
       setDialogoAberto: (dialogoAberto) => set({ dialogoAberto }),
       setPainelAberto: (painelAberto) => set({ painelAberto }),
       abrirSelah: (gatilho) =>
@@ -299,13 +348,17 @@ export const useGameStore = create<EstadoJogo>()(
       version: 1,
       storage: createJSONStorage<EstadoPersistido>(() => localStorage),
       partialize: projetarEstadoPersistido,
-      merge: (persistedState, currentState) => ({
-        ...currentState,
-        ...(persistedState as EstadoPersistido),
-        selahAtivo: null,
-        dialogoAberto: false,
-        painelAberto: null,
-      }),
+      merge: (persistedState, currentState) => {
+        const persisted = persistedState as EstadoPersistido
+        return {
+          ...currentState,
+          ...persisted,
+          checkpointNoe: persisted.checkpointNoe ?? null,
+          selahAtivo: null,
+          dialogoAberto: false,
+          painelAberto: null,
+        }
+      },
     },
   ),
 )

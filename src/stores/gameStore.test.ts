@@ -1,4 +1,5 @@
 import type { AvaliacaoQuiz, QuizPublico, VersiculoPublico } from '../types/selah'
+import type { CheckpointProgressaoNoe } from '../components/game/noe/progression'
 import {
   GAME_STORAGE_KEY,
   selectExploracaoBloqueada,
@@ -34,6 +35,17 @@ const avaliacao: AvaliacaoQuiz = {
   referencia: 'Gênesis 1:3',
 }
 
+const checkpointNoe: CheckpointProgressaoNoe = {
+  versao: 1,
+  momentosConcluidos: ['chamado-canteiro'],
+  progressoMomentoAtual: [
+    {
+      acaoId: 'noe.madeira.coletada',
+      unidadesConcluidas: ['tabua-1'],
+    },
+  ],
+}
+
 describe('gameStore', () => {
   beforeEach(() => {
     useGameStore.getState().apagarProgresso()
@@ -51,6 +63,7 @@ describe('gameStore', () => {
     expect(state.configuracaoInicialConcluida).toBe(false)
     expect(state.selahsConcluidos).toEqual([])
     expect(state.momentosCriacaoConcluidos).toEqual([])
+    expect(state.checkpointNoe).toBeNull()
   })
 
   it('persists responsible onboarding completion without enabling progress saving', () => {
@@ -188,6 +201,41 @@ describe('gameStore', () => {
     )
   })
 
+  it('keeps the Noah checkpoint in memory without persisting it when saving is disabled', () => {
+    useGameStore.getState().setCheckpointNoe(checkpointNoe)
+
+    expect(useGameStore.getState().checkpointNoe).toEqual(checkpointNoe)
+    expect(localStorage.getItem(GAME_STORAGE_KEY)).not.toContain('checkpointNoe')
+  })
+
+  it('persists the Noah checkpoint when progress saving is enabled', () => {
+    const store = useGameStore.getState()
+    store.setCheckpointNoe(checkpointNoe)
+    store.setSalvarProgresso(true)
+
+    const persistido = JSON.parse(localStorage.getItem(GAME_STORAGE_KEY) ?? '{}')
+    expect(persistido.state.checkpointNoe).toEqual(checkpointNoe)
+  })
+
+  it('does not publish a redundant update for an equivalent Noah checkpoint', () => {
+    const store = useGameStore.getState()
+    store.setCheckpointNoe(checkpointNoe)
+    const antes = useGameStore.getState()
+
+    store.setCheckpointNoe({
+      versao: 1,
+      momentosConcluidos: ['chamado-canteiro'],
+      progressoMomentoAtual: [
+        {
+          acaoId: 'noe.madeira.coletada',
+          unidadesConcluidas: ['tabua-1'],
+        },
+      ],
+    })
+
+    expect(useGameStore.getState()).toBe(antes)
+  })
+
   it('persists concluded passages only when progress saving is enabled', () => {
     const store = useGameStore.getState()
     store.abrirSelah({ historiaId: 'criacao', passagemId: versiculo.passagemId })
@@ -230,6 +278,7 @@ describe('gameStore', () => {
 
     expect(useGameStore.getState().selahsConcluidos).toEqual([])
     expect(useGameStore.getState().versiculosColetados).toEqual([versiculo.passagemId])
+    expect(useGameStore.getState().checkpointNoe).toBeNull()
   })
 
   it('excludes gameplay history while playing without save', () => {
@@ -247,6 +296,7 @@ describe('gameStore', () => {
 
   it('clears persisted data and derives aggregate rates', () => {
     useGameStore.getState().setSalvarProgresso(true)
+    useGameStore.getState().setCheckpointNoe(checkpointNoe)
     useGameStore.setState({ selahsIniciados: 4, selahsCompletados: 3 })
 
     expect(selectTaxaConclusao(useGameStore.getState())).toBe(75)
@@ -257,6 +307,7 @@ describe('gameStore', () => {
     expect(useGameStore.getState().selahsIniciados).toBe(0)
     expect(useGameStore.getState().selahsConcluidos).toEqual([])
     expect(useGameStore.getState().momentosCriacaoConcluidos).toEqual([])
+    expect(useGameStore.getState().checkpointNoe).toBeNull()
     expect(useGameStore.getState().configuracaoInicialConcluida).toBe(false)
   })
 

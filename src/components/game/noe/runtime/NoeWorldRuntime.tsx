@@ -8,6 +8,7 @@ import { useGameStore } from '../../../../stores/gameStore'
 import { obterRequisitosPendentesNoe } from '../progression'
 import {
   AbrigoTempestadeNoe,
+  AmbienciaSonoraNoe,
   AtmosferaNoe,
   CampoAnimaisNoe,
   CanteiroNoe,
@@ -301,6 +302,7 @@ export function NoeWorldRuntime({
   return (
     <>
       <AtmosferaNoe estado={estado} reducedMotion={reducedMotion} />
+      <AmbienciaSonoraNoe estado={estado} enabled={enabled} />
       <CanteiroNoe
         momentoAtualId={estado.momentoAtualId}
         progressoMomentoAtual={estado.progressoMomentoAtual}

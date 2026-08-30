@@ -45,6 +45,7 @@ vi.mock('../world', () => ({
         ouvir chamado final
       </button>
     ) : null,
+  AmbienciaSonoraNoe: () => null,
   AtmosferaNoe: () => null,
   CampoAnimaisNoe: ({
     momentoAtualId,

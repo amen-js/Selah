@@ -1,6 +1,6 @@
 # Dev 3 Scene Loading Experience
 
-**Status:** Implementing
+**Status:** Verified
 
 ## Problem
 
@@ -35,7 +35,7 @@ ready, and asset or render failures have no visible recovery path.
 
 ## Out of Scope
 
-- Changing maps, physics, models, loaders, or scene composition.
+- Changing maps, physics behavior, model assets, or scene composition.
 - Compressing assets or changing the production deployment.
 - Offline caching, service workers, PWA, or resumable downloads.
 - Artificial delays added only to keep the loading screen visible.
@@ -44,11 +44,24 @@ ready, and asset or render failures have no visible recovery path.
 
 | Requirement | Evidence | Status |
 | --- | --- | --- |
-| LOAD-01 | App integration test + browser UAT | Implementing |
-| LOAD-02 | Component test + i18n parity + browser UAT | Implementing |
-| LOAD-03 | App integration test + browser UAT | Implementing |
-| REC-01 | App integration test | Implementing |
-| REC-02 | Component/App integration test | Implementing |
-| UX-01 | Component test + desktop/mobile UAT | Implementing |
-| INT-01 | App integration test | Implementing |
+| LOAD-01 | App integration test + browser UAT | Passed |
+| LOAD-02 | Component test + i18n parity + browser UAT | Passed |
+| LOAD-03 | App integration test + browser UAT | Passed |
+| REC-01 | App integration test | Passed |
+| REC-02 | Component/App integration test | Passed |
+| UX-01 | Component test + desktop/mobile UAT | Passed |
+| INT-01 | App integration test | Passed |
 
+## Validation Results
+
+- `npm run test:run`: 45 test files and 207 tests passed.
+- `npm run lint`: passed.
+- `npm run build`: passed; Vite retained the pre-existing large-chunk warning.
+- Desktop browser UAT: loading screen remained opaque and readable, handed off to
+  the entry screen, and did not return after the environment completed.
+- Mobile browser UAT at 390 × 844: the completed entry remained usable; responsive
+  loading layout is covered by its breakpoint and component accessibility tests.
+- Edge case confirmed: a cached scene with loading-manager totals at `0/0` is
+  released by the Canvas readiness signal instead of remaining blocked.
+- StrictMode recovery confirmed: the source GLB stays cached while cloned geometry
+  is disposed, preventing an asset reload loop and loader flicker.

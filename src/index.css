@@ -483,6 +483,10 @@ button:disabled {
   font: clamp(1.5rem, 4vw, 2.5rem) / 1.35 var(--selah-font-display);
 }
 
+.selah-card__verse:focus-visible {
+  outline: none;
+}
+
 .selah-card__attribution {
   color: var(--selah-text-muted);
   font-size: 0.8rem;

@@ -91,6 +91,65 @@ describe('SelahOverlay', () => {
 
     expect(screen.getByText('Preparando sua reflexão…')).toBeInTheDocument()
     expect(screen.getByRole('dialog').parentElement).toHaveClass('selah-backdrop')
+    expect(screen.getByRole('dialog')).toHaveClass('selah-card--enter')
+  })
+
+  it('reveals the verse progressively and pauses the effect with narration', async () => {
+    vi.useFakeTimers()
+
+    try {
+      prepareVerse()
+      render(<SelahOverlay gateway={gateway} tts={tts} />)
+
+      const heading = screen.getByRole('heading', { name: versiculo.texto })
+      const visibleText = heading.querySelector('.typewriter-text__visible')
+
+      expect(visibleText).toHaveTextContent('')
+
+      await act(async () => vi.advanceTimersByTimeAsync(320))
+      expect(visibleText).toHaveTextContent('H')
+
+      act(() => emitirTts('paused'))
+      const pausedText = visibleText?.textContent
+      await act(async () => vi.advanceTimersByTimeAsync(500))
+      expect(visibleText).toHaveTextContent(pausedText ?? '')
+
+      act(() => emitirTts('playing'))
+      await act(async () => vi.advanceTimersByTimeAsync(1_000))
+      expect(visibleText).toHaveTextContent(versiculo.texto)
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('stages the quiz question and alternatives without hiding their accessible text', async () => {
+    vi.useFakeTimers()
+
+    try {
+      prepareVerse()
+      useGameStore.getState().mostrarQuiz()
+      render(<SelahOverlay gateway={gateway} tts={tts} />)
+
+      const question = screen.getByRole('heading', { name: 'O que surgiu?' })
+      const firstAnswer = screen.getByRole('button', {
+        name: 'Alternativa A: A luz',
+      })
+      const visibleQuestion = question.querySelector('.typewriter-text__visible')
+      const visibleAnswer = firstAnswer.querySelector('.typewriter-text__visible')
+
+      expect(visibleQuestion).toHaveTextContent('')
+      expect(visibleAnswer).toHaveTextContent('')
+
+      await act(async () => vi.advanceTimersByTimeAsync(300))
+      expect(visibleQuestion?.textContent).not.toBe('')
+      expect(visibleAnswer).toHaveTextContent('')
+
+      await act(async () => vi.advanceTimersByTimeAsync(2_000))
+      expect(visibleQuestion).toHaveTextContent('O que surgiu?')
+      expect(visibleAnswer).toHaveTextContent('A luz')
+    } finally {
+      vi.useRealTimers()
+    }
   })
 
   it('shows the verse and exposes the injected TTS control', async () => {

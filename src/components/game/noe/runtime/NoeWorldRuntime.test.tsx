@@ -3,6 +3,8 @@ import { useGameStore } from '../../../../stores/gameStore'
 import type { ColetaveisRegiaoProps } from '../../region/ColetaveisRegiao'
 import type { PortaisRegiaoProps } from '../../portals/PortaisRegiao'
 import type { CanteiroNoeProps } from '../world/types'
+import type { CampoAnimaisNoeProps } from '../world/CampoAnimaisNoe'
+import type { HabitatsArcaNoeProps } from '../world/HabitatsArcaNoe'
 import type { MantimentosArcaNoeProps } from '../world/MantimentosArcaNoe'
 import type { AbrigoTempestadeNoeProps } from '../world/AbrigoTempestadeNoe'
 import { NoeWorldRuntime } from './NoeWorldRuntime'
@@ -42,6 +44,36 @@ vi.mock('../world', () => ({
       </button>
     ) : null,
   AtmosferaNoe: () => null,
+  CampoAnimaisNoe: ({
+    momentoAtualId,
+    onCandidatoChange,
+    onConcluirUnidade,
+  }: CampoAnimaisNoeProps) =>
+    momentoAtualId === 'conducao-animais' ? (
+      <button
+        type="button"
+        onClick={() =>
+          onCandidatoChange?.({
+            tipo: 'tarefa',
+            id: 'campo-aves',
+            acaoId: 'noe.animais.aves-guiadas',
+            unidadeId: 'aves-trilha-sementes',
+            posicao: [0, 0, 0],
+            raio: 2,
+            prioridade: 340,
+            distancia: 0,
+            comportamento: 'trilha-sementes',
+            acionar: () =>
+              onConcluirUnidade(
+                'noe.animais.aves-guiadas',
+                'aves-trilha-sementes',
+              ),
+          })
+        }
+      >
+        guiar aves
+      </button>
+    ) : null,
   CanteiroNoe: ({ momentoAtualId, onCandidatoChange }: CanteiroNoeProps) => (
     <section>
       <output data-testid="momento-noe">{momentoAtualId}</output>
@@ -105,7 +137,38 @@ vi.mock('../world', () => ({
           })
         }
       >
-        entregar feno
+      entregar feno
+      </button>
+    ) : null,
+  HabitatsArcaNoe: ({
+    momentoAtualId,
+    onCandidatoChange,
+    onConcluirUnidade,
+  }: HabitatsArcaNoeProps) =>
+    momentoAtualId === 'acomodacao-animais' ? (
+      <button
+        type="button"
+        onClick={() =>
+          onCandidatoChange?.({
+            tipo: 'tarefa',
+            id: 'habitat-elefantes',
+            acaoId: 'noe.habitat.grandes-animais-preparado',
+            unidadeId: 'nivel-inferior-elefantes',
+            familiaId: 'elefantes',
+            etapaInteracao: 'encaixar-habitat',
+            posicao: [0, 0, 0],
+            raio: 2,
+            prioridade: 350,
+            distancia: 0,
+            acionar: () =>
+              onConcluirUnidade(
+                'noe.habitat.grandes-animais-preparado',
+                'nivel-inferior-elefantes',
+              ),
+          })
+        }
+      >
+        acomodar elefantes
       </button>
     ) : null,
 }))
@@ -326,6 +389,67 @@ describe('NoeWorldRuntime', () => {
           {
             acaoId: 'noe.mantimento.feno-armazenado',
             unidadesConcluidas: ['feno-estabulos-inferiores'],
+          },
+        ],
+      ),
+    )
+  })
+
+  it('encaminha uma família inteira em M4 pelo árbitro único', async () => {
+    useGameStore.setState({
+      checkpointNoe: {
+        versao: 1,
+        momentosConcluidos: [
+          'chamado-canteiro',
+          'coleta-vedacao',
+          'estoque-mantimentos',
+        ],
+        progressoMomentoAtual: [],
+      },
+    })
+    renderRuntime()
+
+    fireEvent.click(screen.getByRole('button', { name: 'guiar aves' }))
+    fireEvent.keyDown(window, { code: 'KeyE' })
+
+    await waitFor(() =>
+      expect(useGameStore.getState().checkpointNoe?.progressoMomentoAtual).toEqual(
+        [
+          {
+            acaoId: 'noe.animais.aves-guiadas',
+            unidadesConcluidas: ['aves-trilha-sementes'],
+          },
+        ],
+      ),
+    )
+  })
+
+  it('encaminha o encaixe de habitat em M5 pelo árbitro único', async () => {
+    useGameStore.setState({
+      checkpointNoe: {
+        versao: 1,
+        momentosConcluidos: [
+          'chamado-canteiro',
+          'coleta-vedacao',
+          'estoque-mantimentos',
+          'conducao-animais',
+        ],
+        progressoMomentoAtual: [],
+      },
+    })
+    renderRuntime()
+
+    fireEvent.click(
+      screen.getByRole('button', { name: 'acomodar elefantes' }),
+    )
+    fireEvent.keyDown(window, { code: 'KeyE' })
+
+    await waitFor(() =>
+      expect(useGameStore.getState().checkpointNoe?.progressoMomentoAtual).toEqual(
+        [
+          {
+            acaoId: 'noe.habitat.grandes-animais-preparado',
+            unidadesConcluidas: ['nivel-inferior-elefantes'],
           },
         ],
       ),

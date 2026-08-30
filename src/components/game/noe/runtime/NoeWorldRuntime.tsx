@@ -9,9 +9,13 @@ import { obterRequisitosPendentesNoe } from '../progression'
 import {
   AbrigoTempestadeNoe,
   AtmosferaNoe,
+  CampoAnimaisNoe,
   CanteiroNoe,
   type CandidatoAbrigoTempestadeNoe,
+  type CandidatoCampoAnimaisNoe,
+  type CandidatoHabitatNoe,
   type CandidatoTarefaNoe as CandidatoTarefaCanteiroNoe,
+  HabitatsArcaNoe,
   MantimentosArcaNoe,
   type CandidatoMantimentoNoe,
 } from '../world'
@@ -74,6 +78,10 @@ export function NoeWorldRuntime({
     useState<CandidatoTarefaCanteiroNoe | null>(null)
   const [mantimentoProximo, setMantimentoProximo] =
     useState<CandidatoMantimentoNoe | null>(null)
+  const [grupoAnimalProximo, setGrupoAnimalProximo] =
+    useState<CandidatoCampoAnimaisNoe | null>(null)
+  const [habitatProximo, setHabitatProximo] =
+    useState<CandidatoHabitatNoe | null>(null)
   const [abrigoProximo, setAbrigoProximo] =
     useState<CandidatoAbrigoTempestadeNoe | null>(null)
   const [coletavelProximo, setColetavelProximo] =
@@ -151,6 +159,28 @@ export function NoeWorldRuntime({
       })
     }
 
+    if (grupoAnimalProximo) {
+      proximos.push({
+        tipo: 'tarefa',
+        id: grupoAnimalProximo.id,
+        acaoId: grupoAnimalProximo.acaoId,
+        unidadeId: grupoAnimalProximo.unidadeId,
+        distancia: grupoAnimalProximo.distancia,
+        acionar: grupoAnimalProximo.acionar,
+      })
+    }
+
+    if (habitatProximo) {
+      proximos.push({
+        tipo: 'tarefa',
+        id: habitatProximo.id,
+        acaoId: habitatProximo.acaoId,
+        unidadeId: habitatProximo.unidadeId,
+        distancia: habitatProximo.distancia,
+        acionar: habitatProximo.acionar,
+      })
+    }
+
     if (abrigoProximo) {
       proximos.push({
         tipo: 'tarefa',
@@ -196,6 +226,8 @@ export function NoeWorldRuntime({
     abrigoProximo,
     coletavelProximo,
     emitir,
+    grupoAnimalProximo,
+    habitatProximo,
     mantimentoProximo,
     onPortalAcionado,
     onDialogoSolicitado,
@@ -250,6 +282,22 @@ export function NoeWorldRuntime({
         posicaoJogadorRef={posicaoJogadorRef}
         enabled={enabled}
         onCandidatoChange={setMantimentoProximo}
+        onConcluirUnidade={concluirUnidade}
+      />
+      <CampoAnimaisNoe
+        momentoAtualId={estado.momentoAtualId}
+        progressoMomentoAtual={estado.progressoMomentoAtual}
+        playerRef={posicaoJogadorRef}
+        enabled={enabled}
+        onCandidatoChange={setGrupoAnimalProximo}
+        onConcluirUnidade={concluirUnidade}
+      />
+      <HabitatsArcaNoe
+        momentoAtualId={estado.momentoAtualId}
+        progressoMomentoAtual={estado.progressoMomentoAtual}
+        playerRef={posicaoJogadorRef}
+        enabled={enabled}
+        onCandidatoChange={setHabitatProximo}
         onConcluirUnidade={concluirUnidade}
       />
       <AbrigoTempestadeNoe

@@ -15,6 +15,7 @@ describe('LocalDashboard', () => {
 
     expect(screen.getByTestId('completion-rate')).toHaveTextContent('0%')
     expect(screen.getByTestId('accuracy-rate')).toHaveTextContent('0%')
+    expect(screen.getByRole('button', { name: 'Fechar métricas' })).toHaveFocus()
   })
 
   it('calculates local aggregate rates and closes the panel', async () => {

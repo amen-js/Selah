@@ -14,6 +14,7 @@ export function Journal() {
             <h2 id="journal-title">Diário da jornada</h2>
           </div>
           <button
+            autoFocus
             className="secondary-button"
             type="button"
             aria-label="Fechar diário"

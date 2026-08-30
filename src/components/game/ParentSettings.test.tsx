@@ -15,6 +15,7 @@ describe('ParentSettings', () => {
 
     expect(screen.getByText(/sem cadastro infantil/i)).toBeInTheDocument()
     expect(screen.getByText(/fallback aprovado/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Fechar configurações' })).toHaveFocus()
   })
 
   it('updates the age group', async () => {

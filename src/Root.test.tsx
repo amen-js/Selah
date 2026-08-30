@@ -7,10 +7,10 @@ vi.mock('./App', () => ({
 }))
 
 describe('Root', () => {
-  it('renders the laboratory only for the development route', () => {
+  it('renders the laboratory only for the development route', async () => {
     render(<Root pathname="/lab" isDev />)
 
-    expect(screen.getByText(/nenhum canvas 3D/i)).toBeInTheDocument()
+    expect(await screen.findByText(/nenhum canvas 3D/i)).toBeInTheDocument()
   })
 
   it('does not expose the laboratory route in production', () => {

@@ -21,6 +21,7 @@ export function LocalDashboard() {
             <h2 id="metrics-title">Medimos Momentos Selah</h2>
           </div>
           <button
+            autoFocus
             className="secondary-button"
             type="button"
             aria-label="Fechar métricas"

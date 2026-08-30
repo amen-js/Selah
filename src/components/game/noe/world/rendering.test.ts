@@ -38,6 +38,19 @@ describe('contratos de renderização do canteiro de Noé', () => {
     expect(fonte).toContain('name="selos-betume-persistentes"')
   })
 
+  it('troca os andaimes pelo acabamento concluído depois de M2', () => {
+    const fonte = ler('ArcaCanteiroNoe.tsx')
+
+    expect(fonte).toContain('obterEstadoAcabamentoArcaNoe(momentoAtualId)')
+    expect(fonte).toContain(
+      "indiceMomentoNoe(momentoAtualId) > indiceMomentoNoe('coleta-vedacao')",
+    )
+    expect(fonte).toContain("acabamento === 'em-construcao'")
+    expect(fonte).toContain('<AndaimesArcaEmConstrucao />')
+    expect(fonte).toContain('<AcabamentoArcaConcluida />')
+    expect(fonte).toContain('name="acabamento-arca-concluida"')
+  })
+
   it('usa família procedural apropriada e bosque CC0 sem colisão automática', () => {
     const familia = ler('FamiliaNoe.tsx')
     const bosque = ler('BosqueGoferNoe.tsx')

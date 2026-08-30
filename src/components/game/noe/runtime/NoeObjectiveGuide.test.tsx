@@ -1,7 +1,9 @@
 import { render, screen } from '@testing-library/react'
 import {
   criarEstadoProgressaoNoe,
+  momentosNoe,
   processarEventoProgressaoNoe,
+  type EstadoProgressaoNoe,
 } from '../progression'
 import { NoeObjectiveGuide } from './NoeObjectiveGuide'
 
@@ -29,6 +31,21 @@ describe('NoeObjectiveGuide', () => {
 
     expect(screen.getByRole('progressbar')).toHaveAttribute('value', '1')
     expect(screen.getByText(/plank|tábua/i)).toBeInTheDocument()
+  })
+
+  it('projeta 100% quando a jornada foi concluída e o progresso ativo foi limpo', () => {
+    const estadoConcluido = {
+      momentoAtualId: 'nova-terra-arco-iris',
+      momentosConcluidos: momentosNoe.map(({ id }) => id),
+      progressoMomentoAtual: [],
+      concluida: true,
+    } satisfies EstadoProgressaoNoe
+
+    render(<NoeObjectiveGuide estado={estadoConcluido} visible />)
+
+    expect(screen.getByText('100%')).toBeInTheDocument()
+    expect(screen.getByRole('progressbar')).toHaveAttribute('value', '5')
+    expect(screen.getByRole('progressbar')).toHaveAttribute('max', '5')
   })
 
   it('não renderiza durante bloqueios de interface', () => {

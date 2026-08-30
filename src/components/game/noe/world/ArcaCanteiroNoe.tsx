@@ -1,5 +1,6 @@
 import { CuboidCollider, RigidBody } from '@react-three/rapier'
 import type { Ponto3D } from '../../../../mapas/types'
+import { indiceMomentoNoe } from '../progression/estado'
 import type { MomentoNoeId, ProgressoAcaoNoe } from '../progression/types'
 import {
   colisoresArcaCanteiroNoe,
@@ -41,9 +42,20 @@ function CaixaVisual({
 const posicoesVigasZ = [-12.5, -7.5, -2.5, 2.5, 7.5, 12.5] as const
 const alturasTabuasCasco = [0.78, 1.62, 2.46, 3.3, 4.14, 4.98] as const
 
-function DetalhesArcaEmConstrucao() {
+type EstadoAcabamentoArcaNoe = 'em-construcao' | 'concluida'
+
+/** The restored canonical moment is enough to rebuild the durable hull finish. */
+function obterEstadoAcabamentoArcaNoe(
+  momentoAtualId: MomentoNoeId,
+): EstadoAcabamentoArcaNoe {
+  return indiceMomentoNoe(momentoAtualId) > indiceMomentoNoe('coleta-vedacao')
+    ? 'concluida'
+    : 'em-construcao'
+}
+
+function RevestimentoCascoArca() {
   return (
-    <group name="detalhes-arca-em-construcao">
+    <group name="revestimento-casco-arca-noe">
       {alturasTabuasCasco.flatMap((y, indice) => [
         <CaixaVisual
           key={`tabua-casco-esquerda-${y}`}
@@ -58,7 +70,16 @@ function DetalhesArcaEmConstrucao() {
           cor={indice % 2 === 0 ? COR_MADEIRA_MEDIA : COR_MADEIRA_CLARA}
         />,
       ])}
+    </group>
+  )
+}
 
+function AndaimesArcaEmConstrucao() {
+  return (
+    <group
+      name="andaimes-arca-em-construcao"
+      userData={{ estado: 'em-construcao' }}
+    >
       {/* Exterior scaffold sits outside the solid hull and leaves the door clear. */}
       {[-7.15, 7.15].flatMap((x) =>
         [-10, 0, 10].map((z) => (
@@ -110,9 +131,52 @@ function DetalhesArcaEmConstrucao() {
   )
 }
 
-function VisualArca() {
+function AcabamentoArcaConcluida() {
   return (
-    <group name="visual-arca-noe">
+    <group
+      name="acabamento-arca-concluida"
+      userData={{ estado: 'concluida', andaimes: false }}
+    >
+      <CaixaVisual
+        posicao={[0, 7.23, 0]}
+        dimensoes={[0.34, 0.34, 27.55]}
+        cor={COR_DESTAQUE}
+      />
+      {[-5.62, 5.62].map((x) => (
+        <CaixaVisual
+          key={`beiral-concluido-${x}`}
+          posicao={[x, 5.78, 0]}
+          dimensoes={[0.24, 0.24, 27.45]}
+          cor={COR_MADEIRA_ESCURA}
+        />
+      ))}
+      {[-13.58, 13.58].map((z) => (
+        <group key={`frontao-concluido-${z}`}>
+          <CaixaVisual
+            posicao={[-2.72, 6.46, z]}
+            dimensoes={[5.82, 0.2, 0.22]}
+            rotacao={[0, 0, 0.24]}
+            cor={COR_MADEIRA_MEDIA}
+          />
+          <CaixaVisual
+            posicao={[2.72, 6.46, z]}
+            dimensoes={[5.82, 0.2, 0.22]}
+            rotacao={[0, 0, -0.24]}
+            cor={COR_MADEIRA_MEDIA}
+          />
+        </group>
+      ))}
+    </group>
+  )
+}
+
+function VisualArca({
+  acabamento,
+}: {
+  acabamento: EstadoAcabamentoArcaNoe
+}) {
+  return (
+    <group name="visual-arca-noe" userData={{ acabamento }}>
       <CaixaVisual
         posicao={[0, 0.22, 0]}
         dimensoes={[12, 0.44, 28]}
@@ -190,7 +254,12 @@ function VisualArca() {
         cor={COR_MADEIRA_MEDIA}
       />
 
-      <DetalhesArcaEmConstrucao />
+      <RevestimentoCascoArca />
+      {acabamento === 'em-construcao' ? (
+        <AndaimesArcaEmConstrucao />
+      ) : (
+        <AcabamentoArcaConcluida />
+      )}
 
       <pointLight
         position={[0, 4.4, 4]}
@@ -354,6 +423,7 @@ export function ArcaCanteiroNoe({
     momentoAtualId,
     progressoMomentoAtual,
   )
+  const acabamento = obterEstadoAcabamentoArcaNoe(momentoAtualId)
 
   return (
     <group name="arca-canteiro-noe">
@@ -371,7 +441,7 @@ export function ArcaCanteiroNoe({
             friction={1}
           />
         ))}
-        <VisualArca />
+        <VisualArca acabamento={acabamento} />
       </RigidBody>
       <RampaArca reparada={estadoVisual.rampa === 'reparada'} />
       <SelosBetume fendasVedadas={estadoVisual.fendasVedadas} />

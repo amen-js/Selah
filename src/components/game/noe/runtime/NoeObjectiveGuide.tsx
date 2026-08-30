@@ -73,11 +73,13 @@ export function NoeObjectiveGuide({
       (soma, tarefa) => soma + tarefa.unidadesNecessarias.length,
       0,
     )
-    const concluidas = momento.gatilhoConclusao.tarefas.reduce(
-      (soma, tarefa) =>
-        soma + quantidadeConcluidaTarefaNoe(estado, tarefa.acaoId),
-      0,
-    )
+    const concluidas = estado.concluida
+      ? total
+      : momento.gatilhoConclusao.tarefas.reduce(
+          (soma, tarefa) =>
+            soma + quantidadeConcluidaTarefaNoe(estado, tarefa.acaoId),
+          0,
+        )
     const primeiro = pendentes[0]
     const objetivo = estado.concluida
       ? 'noe.objective.complete'

@@ -76,6 +76,9 @@ describe('App integration', () => {
     expect(selahAudioMock.useSelahAudio).toHaveBeenCalledOnce()
     expect(screen.getByTestId('game-canvas')).toHaveAttribute('data-playing', 'false')
     expect(screen.getByTestId('game-overlay')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'A Criação' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Noé e a Arca' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'José, o Sonhador' })).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'Entrar no mundo' }))
     expect(requestPointerLock).toHaveBeenCalledOnce()

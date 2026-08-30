@@ -10,3 +10,7 @@ their final provenance and distribution terms.
 
 Only the files used by the current scene are copied into the repository. The
 source archive remains outside the checkout and is not committed.
+
+The animal PNGs under `animals/kenney/` come from Kenney's **Animal Pack
+Remastered** and are CC0. Their provenance and license are documented beside
+the selected files.

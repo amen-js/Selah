@@ -1,7 +1,9 @@
-import { render, screen } from '@testing-library/react'
+import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
-import { createLabGateway } from '../../lab/fixtures'
+import { createLabGateway, quizIaLab, versiculoLab } from '../../lab/fixtures'
+import type { SelahGateway } from '../../services/selahGateway'
+import type { TtsController, TtsEstado } from '../../services/tts'
 import { useGameStore } from '../../stores/gameStore'
 import { momentosCriacao } from './creation/progression'
 import type { SnapshotProgressaoCriacao } from './creation/progression'
@@ -16,10 +18,43 @@ const snapshotVazio: SnapshotProgressaoCriacao = {
   },
 }
 
+function criarTtsControlavel() {
+  let estado: TtsEstado = 'idle'
+  const listeners = new Set<(novoEstado: TtsEstado) => void>()
+  const emitir = (novoEstado: TtsEstado) => {
+    if (novoEstado === estado) return
+    estado = novoEstado
+    for (const listener of listeners) listener(novoEstado)
+  }
+  const tts: TtsController = {
+    suportado: true,
+    estado: () => estado,
+    assinar: (listener) => {
+      listeners.add(listener)
+      return () => listeners.delete(listener)
+    },
+    falar: vi.fn(async () => {
+      emitir('loading')
+      emitir('playing')
+    }),
+    narrar: vi.fn(async () => {
+      emitir('loading')
+      emitir('playing')
+    }),
+    pausar: vi.fn(() => emitir('paused')),
+    retomar: vi.fn(() => emitir('playing')),
+    cancelar: vi.fn(() => emitir('idle')),
+  }
+
+  return { tts, emitir }
+}
+
 describe('GameOverlay', () => {
   beforeEach(() => {
     useGameStore.getState().apagarProgresso()
     useGameStore.getState().setIdioma('pt-BR')
+    useGameStore.getState().setFaixaEtaria('geral')
+    useGameStore.getState().setTtsAtivo(false)
   })
 
   it('renders the HUD and opens composed panels', async () => {
@@ -76,10 +111,13 @@ describe('GameOverlay', () => {
     ).not.toBeInTheDocument()
   })
 
-  it('renders Creation progress and Voice Guide together during active exploration', () => {
+  it('renders Creation progress and starts its initial Voice Guide narration', async () => {
+    const controle = criarTtsControlavel()
+    useGameStore.getState().setFaixaEtaria('crianca')
     render(
       <GameOverlay
         gateway={createLabGateway('sucesso')}
+        tts={controle.tts}
         progressaoCriacao={snapshotVazio}
         exploracaoAtiva
       />,
@@ -88,13 +126,21 @@ describe('GameOverlay', () => {
     expect(screen.getByText('Momento 1 de 9')).toBeInTheDocument()
     expect(
       screen.getByRole('status', { name: 'Voz Guia' }),
-    ).toHaveTextContent('Dê alguns passos e descubra o primeiro caminho.')
+    ).toHaveTextContent('No começo, tudo era escuro e bem silencioso')
+    await waitFor(() => {
+      expect(controle.tts.narrar).toHaveBeenCalledWith(
+        expect.objectContaining({ narracaoId: 'criacao.vazio.inicial', idioma: 'pt-BR' }),
+      )
+    })
   })
 
-  it('keeps Creation progress but hides the guide while exploration is inactive', () => {
+  it('keeps Creation progress but neither shows nor narrates while exploration is inactive', async () => {
+    const controle = criarTtsControlavel()
+    useGameStore.getState().setFaixaEtaria('crianca')
     render(
       <GameOverlay
         gateway={createLabGateway('sucesso')}
+        tts={controle.tts}
         progressaoCriacao={snapshotVazio}
       />,
     )
@@ -103,6 +149,49 @@ describe('GameOverlay', () => {
     expect(
       screen.queryByRole('status', { name: 'Voz Guia' }),
     ).not.toBeInTheDocument()
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 10))
+    })
+    expect(controle.tts.narrar).not.toHaveBeenCalled()
+  })
+
+  it('narrates support when active Creation exploration becomes inactive', async () => {
+    const controle = criarTtsControlavel()
+    useGameStore.getState().setFaixaEtaria('crianca')
+    const { rerender } = render(
+      <GameOverlay
+        gateway={createLabGateway('sucesso')}
+        tts={controle.tts}
+        progressaoCriacao={snapshotVazio}
+        exploracaoAtiva
+      />,
+    )
+
+    await waitFor(() => expect(controle.tts.narrar).toHaveBeenCalledTimes(1))
+    await act(async () => {
+      controle.emitir('idle')
+      await Promise.resolve()
+    })
+
+    rerender(
+      <GameOverlay
+        gateway={createLabGateway('sucesso')}
+        tts={controle.tts}
+        progressaoCriacao={snapshotVazio}
+        exploracaoAtiva
+        inatividadeCriacao
+      />,
+    )
+
+    await waitFor(() => {
+      expect(controle.tts.narrar).toHaveBeenCalledTimes(2)
+      expect(controle.tts.narrar).toHaveBeenLastCalledWith(
+        expect.objectContaining({ narracaoId: 'criacao.vazio.apoio', idioma: 'pt-BR' }),
+      )
+    })
+    expect(screen.getByRole('status', { name: 'Voz Guia' })).toHaveTextContent(
+      'Siga devagarinho',
+    )
   })
 
   it.each([
@@ -110,38 +199,79 @@ describe('GameOverlay', () => {
     ['journal', () => useGameStore.getState().setPainelAberto('diario')],
     ['settings', () => useGameStore.getState().setPainelAberto('configuracoes')],
     ['metrics', () => useGameStore.getState().setPainelAberto('metricas')],
-  ])('hides the Voice Guide while %s is open', (_, openOverlay) => {
-    openOverlay()
+    ['parental pause', () => useGameStore.setState({ pausaParentalAtiva: true })],
+  ])('cancels and hides the Voice Guide when %s opens', async (_, openOverlay) => {
+    const controle = criarTtsControlavel()
+    useGameStore.getState().setFaixaEtaria('crianca')
     render(
       <GameOverlay
         gateway={createLabGateway('sucesso')}
+        tts={controle.tts}
         progressaoCriacao={snapshotVazio}
         exploracaoAtiva
       />,
     )
 
-    expect(screen.getByText('Momento 1 de 9')).toBeInTheDocument()
+    await waitFor(() => expect(controle.tts.narrar).toHaveBeenCalledOnce())
+    vi.mocked(controle.tts.cancelar).mockClear()
+    act(openOverlay)
+
+    await waitFor(() => expect(controle.tts.cancelar).toHaveBeenCalled())
     expect(
       screen.queryByRole('status', { name: 'Voz Guia' }),
     ).not.toBeInTheDocument()
   })
 
-  it('gives an active Selah precedence over Creation guidance', () => {
-    useGameStore.getState().abrirSelah({
-      historiaId: 'criacao',
-      passagemId: 'genesis-1-3',
+  it('cancels Creation guidance before Selah starts scripture speech', async () => {
+    const controle = criarTtsControlavel()
+    useGameStore.getState().setFaixaEtaria('crianca')
+    let resolverVersiculo: (versiculo: typeof versiculoLab) => void = () => undefined
+    let resolverQuiz: (quiz: typeof quizIaLab) => void = () => undefined
+    const versiculoPendente = new Promise<typeof versiculoLab>((resolve) => {
+      resolverVersiculo = resolve
     })
+    const quizPendente = new Promise<typeof quizIaLab>((resolve) => {
+      resolverQuiz = resolve
+    })
+    const gateway: SelahGateway = {
+      ...createLabGateway('sucesso'),
+      buscarVersiculo: vi.fn(() => versiculoPendente),
+      gerarQuiz: vi.fn(() => quizPendente),
+    }
     render(
       <GameOverlay
-        gateway={createLabGateway('sucesso')}
+        gateway={gateway}
+        tts={controle.tts}
         progressaoCriacao={snapshotVazio}
         exploracaoAtiva
       />,
     )
 
-    expect(
-      screen.queryByLabelText('Informações e ações da exploração'),
-    ).not.toBeInTheDocument()
+    await waitFor(() => expect(controle.tts.narrar).toHaveBeenCalledOnce())
+    vi.mocked(controle.tts.cancelar).mockClear()
+    act(() => {
+      useGameStore.getState().abrirSelah({
+        historiaId: 'criacao',
+        passagemId: 'genesis-1-3',
+      })
+    })
+
+    await waitFor(() => expect(controle.tts.cancelar).toHaveBeenCalled())
+    expect(controle.tts.falar).not.toHaveBeenCalled()
+    const ultimaOrdemCancelamento = Math.max(
+      ...vi.mocked(controle.tts.cancelar).mock.invocationCallOrder,
+    )
+
+    await act(async () => {
+      resolverVersiculo(versiculoLab)
+      resolverQuiz(quizIaLab)
+      await Promise.all([versiculoPendente, quizPendente])
+    })
+
+    await waitFor(() => expect(controle.tts.falar).toHaveBeenCalledWith(versiculoLab))
+    expect(ultimaOrdemCancelamento).toBeLessThan(
+      vi.mocked(controle.tts.falar).mock.invocationCallOrder[0]!,
+    )
     expect(
       screen.queryByRole('status', { name: 'Voz Guia' }),
     ).not.toBeInTheDocument()

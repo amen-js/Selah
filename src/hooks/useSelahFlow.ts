@@ -33,7 +33,7 @@ export function useSelahFlow({
       carregamentoAtual.current = null
       return
     }
-    if (selahAtivo.fase !== 'carregando') return
+    if (selahAtivo.fase !== 'carregando' || selahAtivo.erro) return
 
     const chave = `${selahAtivo.gatilho.historiaId}:${selahAtivo.gatilho.passagemId}`
     if (carregamentoAtual.current === chave) return
@@ -64,12 +64,26 @@ export function useSelahFlow({
       }),
     ])
       .then(([versiculo, quiz]) => {
-        if (cancelado) return
+        const ativoAtual = useGameStore.getState().selahAtivo
+        if (
+          cancelado ||
+          ativoAtual?.gatilho.historiaId !== selahAtivo.gatilho.historiaId ||
+          ativoAtual.gatilho.passagemId !== selahAtivo.gatilho.passagemId
+        ) {
+          return
+        }
         carregarVersiculo(versiculo)
         carregarQuiz(quiz)
       })
       .catch(() => {
-        if (cancelado) return
+        const ativoAtual = useGameStore.getState().selahAtivo
+        if (
+          cancelado ||
+          ativoAtual?.gatilho.historiaId !== selahAtivo.gatilho.historiaId ||
+          ativoAtual.gatilho.passagemId !== selahAtivo.gatilho.passagemId
+        ) {
+          return
+        }
         definirErroSelah(
           'Não foi possível carregar este Momento Selah. Tente novamente mais tarde.',
         )

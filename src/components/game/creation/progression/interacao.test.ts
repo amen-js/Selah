@@ -27,7 +27,7 @@ describe('interações liberadas pela progressão da Criação', () => {
     expect(obterObjetivoZonaCriacao('natureza')).toBeNull()
     expect(obterObjetivoZonaCriacao('ceu-terra-aguas')).toMatchObject({
       id: 'mirante-dos-rios',
-      posicao: [-8, 1, 5],
+      posicao: [-14, 2.5, 5],
     })
     expect(obterObjetivoZonaCriacao('ceu-ritmo')?.id).toBe('observatorio-do-ceu')
     expect(obterObjetivoZonaCriacao('eden')?.id).toBe('coracao-do-eden')

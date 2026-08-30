@@ -38,7 +38,7 @@ export const momentosCriacao = [
     gatilhoConclusao: {
       tipo: 'zona-narrativa',
       zonaId: 'mirante-dos-rios',
-      posicao: [-8, 1, 5],
+      posicao: [-14, 2.5, 5],
       raio: 3,
     },
     assets: ['terreno-criacao', 'rios', 'lago', 'montanhas', 'som-agua'],
@@ -67,7 +67,7 @@ export const momentosCriacao = [
     gatilhoConclusao: {
       tipo: 'zona-narrativa',
       zonaId: 'observatorio-do-ceu',
-      posicao: [0, 1, -11],
+      posicao: [0, 2, -17],
       raio: 3,
     },
     assets: ['sol', 'lua', 'estrelas', 'nuvens', 'som-transicao-celeste'],
@@ -96,7 +96,7 @@ export const momentosCriacao = [
     gatilhoConclusao: {
       tipo: 'zona-narrativa',
       zonaId: 'coracao-do-eden',
-      posicao: [0, 1, 0],
+      posicao: [0, 1, -2],
       raio: 3,
     },
     assets: ['jardim-eden', 'arvore-central', 'rios-eden', 'som-eden'],
@@ -127,7 +127,7 @@ export const momentosCriacao = [
     gatilhoConclusao: {
       tipo: 'zona-narrativa',
       zonaId: 'arvore-do-conhecimento',
-      posicao: [7, 1, -7],
+      posicao: [12, 1, -12],
       raio: 2.8,
     },
     assets: ['arvore-conhecimento', 'fruto-nao-interativo', 'som-encerramento-criacao'],

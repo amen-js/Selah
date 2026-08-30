@@ -24,6 +24,8 @@ export interface Env {
   port: number
   openRouterApiKey: string
   openRouterModels: string[]
+  openRouterTtsModel: string
+  openRouterTtsVoice: string
   youVersionAppKey: string
   youVersionBibleIds: Record<'pt-BR' | 'en-US' | 'es-ES', number>
   corsOrigins: string[]
@@ -49,6 +51,8 @@ export const loadEnv = (): Env => ({
     'openai/gpt-4o-mini',
     'google/gemini-2.5-flash',
   ]),
+  openRouterTtsModel: process.env.OPENROUTER_TTS_MODEL ?? 'x-ai/grok-voice-tts-1.0',
+  openRouterTtsVoice: process.env.OPENROUTER_TTS_VOICE ?? 'eve',
   youVersionAppKey: process.env.YVP_APP_KEY ?? '',
   youVersionBibleIds: {
     // IDs licenciados nesta app key (NVI 129/128 retornam 403).

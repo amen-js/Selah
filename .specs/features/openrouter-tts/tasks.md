@@ -10,6 +10,7 @@
 
 ### T1: Add OpenRouter speech adapter and configuration
 
+**Status:** Complete
 **What:** Add the independent TTS adapter, environment defaults, and unit tests.
 **Where:** `server/services/openrouter.ts`, `server/env.ts`, `.env.example`, adapter tests.
 **Depends on:** None
@@ -23,6 +24,7 @@ quiz requests retain their existing ZDR payload.
 
 ### T2: Expose the protected TTS route
 
+**Status:** Pending
 **What:** Add `POST /api/tts`, health status, timeout, rate limit, and route tests.
 **Where:** `server/app.ts`, `server/app.test.ts`.
 **Depends on:** T1
@@ -36,6 +38,7 @@ documented status codes and headers are covered.
 
 ### T3: Replace the browser-only TTS controller
 
+**Status:** Pending
 **What:** Implement neural playback, observable state, cleanup, and local voice fallback.
 **Where:** `src/services/tts.ts`, `src/services/tts.test.ts`.
 **Depends on:** T2
@@ -49,6 +52,7 @@ and local voice selection respects the verse language.
 
 ### T4: Integrate narration state with Selah UI and ambience
 
+**Status:** Pending
 **What:** Drive localized controls from TTS state and duck ambient audio during playback.
 **Where:** overlay, translations, game store/audio hook, and their tests.
 **Depends on:** T3
@@ -62,6 +66,7 @@ disclosure, and volume restoration are verified.
 
 ### T5: Validate and document completion
 
+**Status:** Pending
 **What:** Run the full gate and update traceability/task status.
 **Where:** `.specs/features/openrouter-tts/`.
 **Depends on:** T4
@@ -89,4 +94,3 @@ disclosure, and volume restoration are verified.
 | T3 | Client service | Unit | Unit | OK |
 | T4 | Store/hook/component | Unit/integration | Integration | OK |
 | T5 | Release gate | Build | Build | OK |
-

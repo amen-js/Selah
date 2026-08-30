@@ -65,7 +65,7 @@ export function SelahOverlay({ gateway, tts, appVersion }: SelahOverlayProps) {
 
   if (selahAtivo.erro) {
     return (
-      <div className="modal-backdrop overlay-interactive">
+      <div className="modal-backdrop overlay-interactive selah-backdrop">
         <section className="selah-card" role="dialog" aria-modal="true" aria-labelledby="selah-error">
           <p className="eyebrow">{t('selah.moment')}</p>
           <h1 id="selah-error" ref={tituloRef} tabIndex={-1}>
@@ -84,7 +84,7 @@ export function SelahOverlay({ gateway, tts, appVersion }: SelahOverlayProps) {
 
   if (selahAtivo.fase === 'carregando') {
     return (
-      <div className="modal-backdrop overlay-interactive">
+      <div className="modal-backdrop overlay-interactive selah-backdrop">
         <section className="selah-card" role="dialog" aria-modal="true" aria-labelledby="selah-loading">
           <p className="eyebrow">{t('selah.loading.eyebrow')}</p>
           <h1 id="selah-loading" ref={tituloRef} tabIndex={-1}>
@@ -103,7 +103,7 @@ export function SelahOverlay({ gateway, tts, appVersion }: SelahOverlayProps) {
     const ttsDisponivel = Boolean(tts?.suportado)
 
     return (
-      <div className="modal-backdrop overlay-interactive">
+      <div className="modal-backdrop overlay-interactive selah-backdrop">
         <section className="selah-card" role="dialog" aria-modal="true" aria-labelledby="selah-verse">
           <p className="eyebrow">
             {t('selah.verse.eyebrow', { reference: versiculo.referencia })}
@@ -153,7 +153,7 @@ export function SelahOverlay({ gateway, tts, appVersion }: SelahOverlayProps) {
     const enviando = selahAtivo.fase === 'enviando'
 
     return (
-      <div className="modal-backdrop overlay-interactive">
+      <div className="modal-backdrop overlay-interactive selah-backdrop">
         <section className="selah-card" role="dialog" aria-modal="true" aria-labelledby="selah-question">
           <span className="status-chip">
             {quiz.origem === 'ia'
@@ -192,7 +192,7 @@ export function SelahOverlay({ gateway, tts, appVersion }: SelahOverlayProps) {
     const { avaliacao } = selahAtivo
 
     return (
-      <div className="modal-backdrop overlay-interactive">
+      <div className="modal-backdrop overlay-interactive selah-backdrop">
         <section className="selah-card" role="dialog" aria-modal="true" aria-labelledby="selah-feedback">
           <p className="eyebrow">{avaliacao.referencia}</p>
           <h1 id="selah-feedback" ref={tituloRef} tabIndex={-1}>

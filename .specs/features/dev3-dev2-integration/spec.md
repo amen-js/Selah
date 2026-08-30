@@ -62,5 +62,6 @@ verse and quiz so that the full Selah flow works outside the isolated UI lab.
   external API keys disabled.
 - `/lab` remained on its injectable fixture gateway and the production overlay
   retained the real gateway and TTS defaults.
-- Gate: 25 test files and 101 tests passed; lint and production build passed.
+- Gate after integrating the Selah engine delivery: 28 test files and 115 tests
+  passed; lint and production build passed.
 - Test integrity: one cross-layer test added, no tests removed or skipped.

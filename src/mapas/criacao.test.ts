@@ -7,6 +7,7 @@ const referenciasEsperadas = [
   'genesis-1-24',
   'genesis-1-27',
 ]
+const RAIO_LIVRE_SPAWN = 6
 
 describe('mapa da criação', () => {
   it('contém exatamente cinco colecionáveis', () => {
@@ -38,6 +39,17 @@ describe('mapa da criação', () => {
     for (const coletavel of mapaCriacao.coletaveis) {
       expect(coletavel.raioAtivacao).toBeDefined()
       expect(coletavel.raioAtivacao).toBeGreaterThan(0)
+    }
+  })
+
+  it('mantém uma zona livre de colecionáveis ao redor do spawn', () => {
+    for (const coletavel of mapaCriacao.coletaveis) {
+      const distanciaHorizontal = Math.hypot(
+        coletavel.posicao[0] - mapaCriacao.spawn[0],
+        coletavel.posicao[2] - mapaCriacao.spawn[2],
+      )
+
+      expect(distanciaHorizontal).toBeGreaterThanOrEqual(RAIO_LIVRE_SPAWN)
     }
   })
 

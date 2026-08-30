@@ -61,6 +61,7 @@ export const ptBR = {
   'app.controls.camera': 'Câmera',
   'app.controls.pause': 'Pausar',
   'app.controls.pauseHint': 'Pressione P a qualquer momento para pausar.',
+  'mobile.controls.action': 'Ação',
 
   'onboarding.eyebrow': 'Antes da primeira jornada',
   'onboarding.title': 'Configuração do responsável',
@@ -128,6 +129,7 @@ export const ptBR = {
   'creation.interaction.selah': 'Momento Selah',
   'creation.interaction.point': 'Ponto da Criação',
   'creation.interaction.enter': 'Pressione E ou Enter para continuar',
+  'creation.interaction.touch': 'Toque em Ação para continuar',
   'creation.complete.title': 'A Criação foi revelada',
   'creation.complete.objective':
     'Tudo ficou cheio de vida. Contemple o mundo e siga sua jornada quando quiser.',
@@ -137,6 +139,7 @@ export const ptBR = {
   'noe.interaction.task': 'Tarefa de Noé',
   'noe.interaction.selah': 'Momento Selah',
   'noe.interaction.enter': 'Pressione E ou Enter para interagir',
+  'noe.interaction.touch': 'Toque em Ação para interagir',
   'noe.slice.aria': 'Capítulo do canteiro concluído',
   'noe.slice.eyebrow': 'Etapa concluída',
   'noe.slice.title': 'O canteiro está pronto',
@@ -211,6 +214,7 @@ export const ptBR = {
   'portal.prompt.aria': 'Portal para {region}',
   'portal.prompt.eyebrow': 'Portal',
   'portal.prompt.enter': 'Pressione E ou Enter para entrar',
+  'portal.prompt.touch': 'Toque em Ação para entrar',
   'portal.prompt.soon': 'Em breve',
   'portal.transition.aria': 'Transição de região',
   'portal.transition.exiting': 'Preparando sua passagem…',

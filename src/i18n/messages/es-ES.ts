@@ -63,6 +63,7 @@ export const esES = {
   'app.controls.camera': 'Cámara',
   'app.controls.pause': 'Pausar',
   'app.controls.pauseHint': 'Presiona P en cualquier momento para pausar.',
+  'mobile.controls.action': 'Acción',
 
   'onboarding.eyebrow': 'Antes del primer viaje',
   'onboarding.title': 'Configuración del responsable',
@@ -130,6 +131,7 @@ export const esES = {
   'creation.interaction.selah': 'Momento Selah',
   'creation.interaction.point': 'Punto de la Creación',
   'creation.interaction.enter': 'Presiona E o Enter para continuar',
+  'creation.interaction.touch': 'Toca Acción para continuar',
   'creation.complete.title': 'La Creación ha sido revelada',
   'creation.complete.objective':
     'Todo está lleno de vida. Contempla el mundo y continúa tu viaje cuando quieras.',
@@ -139,6 +141,7 @@ export const esES = {
   'noe.interaction.task': 'Tarea de Noé',
   'noe.interaction.selah': 'Momento Selah',
   'noe.interaction.enter': 'Presiona E o Enter para interactuar',
+  'noe.interaction.touch': 'Toca Acción para interactuar',
   'noe.slice.aria': 'Capítulo del astillero completado',
   'noe.slice.eyebrow': 'Etapa completada',
   'noe.slice.title': 'El astillero está listo',
@@ -213,6 +216,7 @@ export const esES = {
   'portal.prompt.aria': 'Portal a {region}',
   'portal.prompt.eyebrow': 'Portal',
   'portal.prompt.enter': 'Presiona E o Enter para entrar',
+  'portal.prompt.touch': 'Toca Acción para entrar',
   'portal.prompt.soon': 'Próximamente',
   'portal.transition.aria': 'Transición de región',
   'portal.transition.exiting': 'Preparando tu paso…',

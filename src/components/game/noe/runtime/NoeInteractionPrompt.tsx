@@ -4,10 +4,14 @@ export type TipoInteracaoNoe = 'tarefa' | 'selah'
 
 export interface NoeInteractionPromptProps {
   tipo: TipoInteracaoNoe | null
+  touch?: boolean
 }
 
 /** Accessible DOM feedback for Noah's externally arbitrated interactions. */
-export function NoeInteractionPrompt({ tipo }: NoeInteractionPromptProps) {
+export function NoeInteractionPrompt({
+  tipo,
+  touch = false,
+}: NoeInteractionPromptProps) {
   const { t } = useTranslation()
 
   if (!tipo) return null
@@ -28,7 +32,7 @@ export function NoeInteractionPrompt({ tipo }: NoeInteractionPromptProps) {
       </span>
       <strong className="portal-prompt__region">{alvo}</strong>
       <span className="portal-prompt__hint">
-        {t('noe.interaction.enter')}
+        {t(touch ? 'noe.interaction.touch' : 'noe.interaction.enter')}
       </span>
     </aside>
   )

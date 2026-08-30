@@ -21,6 +21,16 @@ describe('PortalPrompt', () => {
     )
   })
 
+  it('orienta a entrada pelo botão touch sem citar teclado', () => {
+    useGameStore.getState().setIdioma('pt-BR')
+    render(<PortalPrompt portal={portal} touch />)
+
+    expect(screen.getByRole('status')).toHaveTextContent(
+      'Toque em Ação para entrar',
+    )
+    expect(screen.getByRole('status')).not.toHaveTextContent('E ou Enter')
+  })
+
   it('localiza o prompt e informa quando a região está indisponível', () => {
     useGameStore.getState().setIdioma('en-US')
     render(<PortalPrompt portal={{ ...portal, disponivel: false }} />)

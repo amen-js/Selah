@@ -27,6 +27,14 @@ describe('CreationInteractionPrompt', () => {
     )
   })
 
+  it('orienta a confirmação pelo botão touch', () => {
+    render(<CreationInteractionPrompt tipo="selah" touch />)
+
+    expect(screen.getByRole('status')).toHaveTextContent(
+      'Toque em Ação para continuar',
+    )
+  })
+
   it('não renderiza fora do raio de interação', () => {
     render(<CreationInteractionPrompt tipo={null} />)
     expect(screen.queryByRole('status')).toBeNull()

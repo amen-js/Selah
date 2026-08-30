@@ -5,14 +5,20 @@ import { useEffect, useMemo, useRef, type RefObject } from 'react'
 import { Vector3 } from 'three'
 import { calcularDirecaoLateral, calcularPosicaoFoco } from './posicaoFoco'
 import type { FocoCameraSelah } from './types'
+import {
+  consumirArrastoCameraMobile,
+  type EstadoControleMobile,
+} from '../mobile/mobileInput'
 
 const YAW_INICIAL = 0.7
 const PITCH_INICIAL = 0.32
 const DISTANCIA_INICIAL = 9.5
 const PROGRESSO_EPSILON = 0.0001
+const SENSIBILIDADE_CAMERA_MOBILE = 0.004
 
 export interface SelahCameraRigProps {
   controller: RefObject<EcctrlHandle | null>
+  controleMobile: EstadoControleMobile
   foco: FocoCameraSelah | null
   manterFoco: boolean
 }
@@ -24,6 +30,7 @@ export interface SelahCameraRigProps {
  */
 export function SelahCameraRig({
   controller,
+  controleMobile,
   foco,
   manterFoco,
 }: SelahCameraRigProps) {
@@ -118,6 +125,18 @@ export function SelahCameraRig({
   }, [gl])
 
   useFrame(({ camera: frameCamera }, delta) => {
+    const arrastoMobile = consumirArrastoCameraMobile(controleMobile)
+    if (!manterFocoAtual.current) {
+      yaw.current -= arrastoMobile.x * SENSIBILIDADE_CAMERA_MOBILE
+      pitch.current = Math.min(
+        1.35,
+        Math.max(
+          0.15,
+          pitch.current + arrastoMobile.y * SENSIBILIDADE_CAMERA_MOBILE,
+        ),
+      )
+    }
+
     const character = controller.current
     if (!character) return
 

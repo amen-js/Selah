@@ -4,11 +4,13 @@ export type TipoInteracaoCriacao = 'selah' | 'ponto-criacao'
 
 export interface CreationInteractionPromptProps {
   tipo: TipoInteracaoCriacao | null
+  touch?: boolean
 }
 
 /** Accessible DOM feedback for deliberate Creation interactions. */
 export function CreationInteractionPrompt({
   tipo,
+  touch = false,
 }: CreationInteractionPromptProps) {
   const { t } = useTranslation()
 
@@ -32,7 +34,11 @@ export function CreationInteractionPrompt({
       </span>
       <strong className="portal-prompt__region">{alvo}</strong>
       <span className="portal-prompt__hint">
-        {t('creation.interaction.enter')}
+        {t(
+          touch
+            ? 'creation.interaction.touch'
+            : 'creation.interaction.enter',
+        )}
       </span>
     </aside>
   )

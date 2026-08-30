@@ -12,10 +12,11 @@ const rotulosRegiao: Record<Regiao, TranslationKey> = {
 
 export interface PortalPromptProps {
   portal: PortalMapa | null
+  touch?: boolean
 }
 
 /** Feedback DOM acessível para o portal detectado mais próximo. */
-export function PortalPrompt({ portal }: PortalPromptProps) {
+export function PortalPrompt({ portal, touch = false }: PortalPromptProps) {
   const { t } = useTranslation()
 
   if (!portal) return null
@@ -34,7 +35,9 @@ export function PortalPrompt({ portal }: PortalPromptProps) {
       <span className="portal-prompt__eyebrow">{t('portal.prompt.eyebrow')}</span>
       <strong className="portal-prompt__region">{regiao}</strong>
       {disponivel ? (
-        <span className="portal-prompt__hint">{t('portal.prompt.enter')}</span>
+        <span className="portal-prompt__hint">
+          {t(touch ? 'portal.prompt.touch' : 'portal.prompt.enter')}
+        </span>
       ) : (
         <span className="portal-prompt__hint">{t('portal.prompt.soon')}</span>
       )}

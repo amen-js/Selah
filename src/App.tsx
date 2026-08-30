@@ -17,11 +17,27 @@ interface AppProps {
 
 const reloadCurrentPage = () => window.location.reload()
 
+const prefereControlesTouch = () => {
+  if (typeof window === 'undefined') return false
+
+  if (typeof window.matchMedia === 'function') {
+    if (
+      window.matchMedia('(pointer: coarse)').matches ||
+      window.matchMedia('(any-pointer: coarse)').matches
+    ) {
+      return true
+    }
+  }
+
+  return navigator.maxTouchPoints > 0
+}
+
 function App({ reloadPage = reloadCurrentPage }: AppProps) {
   const { t } = useTranslation()
   const sceneProgress = useProgress()
   const [playing, setPlaying] = useState(false)
   const [hasStarted, setHasStarted] = useState(false)
+  const [touchControls] = useState(prefereControlesTouch)
   const [progressaoCriacao, setProgressaoCriacao] =
     useState<SnapshotProgressaoCriacao | null>(null)
   const [inatividadeCriacao, setInatividadeCriacao] = useState(false)
@@ -71,6 +87,8 @@ function App({ reloadPage = reloadCurrentPage }: AppProps) {
 
   useEffect(() => {
     const handlePointerLockChange = () => {
+      if (touchControls) return
+
       const isPlaying = document.pointerLockElement === canvasRef.current
 
       setPlaying(isPlaying)
@@ -81,7 +99,18 @@ function App({ reloadPage = reloadCurrentPage }: AppProps) {
     return () => {
       document.removeEventListener('pointerlockchange', handlePointerLockChange)
     }
-  }, [])
+  }, [touchControls])
+
+  const pauseExploration = useCallback(() => {
+    if (touchControls) {
+      setPlaying(false)
+      return
+    }
+
+    if (document.pointerLockElement === canvasRef.current) {
+      document.exitPointerLock()
+    }
+  }, [touchControls])
 
   useEffect(() => {
     if (!playing) return
@@ -90,33 +119,48 @@ function App({ reloadPage = reloadCurrentPage }: AppProps) {
       if (event.code !== 'KeyP') return
 
       event.preventDefault()
-      if (document.pointerLockElement === canvasRef.current) {
-        document.exitPointerLock()
-      }
+      pauseExploration()
     }
 
     document.addEventListener('keydown', handlePauseShortcut)
     return () => {
       document.removeEventListener('keydown', handlePauseShortcut)
     }
-  }, [playing])
+  }, [pauseExploration, playing])
 
   useEffect(() => {
-    if (interfaceBloqueada && document.pointerLockElement === canvasRef.current) {
+    if (!interfaceBloqueada) return
+
+    if (touchControls) return
+
+    if (document.pointerLockElement === canvasRef.current) {
       document.exitPointerLock()
     }
-  }, [interfaceBloqueada])
+  }, [interfaceBloqueada, touchControls])
 
   const enterWorld = () => {
     if (!configuracaoInicialConcluida || !sceneReady) return
-    void canvasRef.current?.requestPointerLock()
+
+    if (touchControls) {
+      setPlaying(true)
+      setHasStarted(true)
+      return
+    }
+
+    try {
+      const resultado = canvasRef.current?.requestPointerLock()
+      if (resultado instanceof Promise) void resultado.catch(() => undefined)
+    } catch {
+      // Pointer Lock is unavailable in a few embedded browsers. The start
+      // screen remains visible so the user can retry in a supported browser.
+    }
   }
 
   return (
     <main
       className={`game-shell${exploracaoAtiva ? ' is-playing' : ''}${
         interfaceBloqueada ? ' is-overlay-active' : ''
-      }`}
+      }${touchControls ? ' has-touch-controls' : ''}`}
     >
       <SceneErrorBoundary onError={() => setSceneRenderFailed(true)}>
         <GameCanvas
@@ -125,6 +169,8 @@ function App({ reloadPage = reloadCurrentPage }: AppProps) {
           onProgressaoCriacaoChange={handleProgressaoCriacaoChange}
           onInatividadeCriacaoChange={setInatividadeCriacao}
           onAtividadeNoeChange={setAtividadeNoeAtiva}
+          touchControls={touchControls}
+          onPause={pauseExploration}
           onCanvasReady={(canvas) => {
             canvasRef.current = canvas
           }}

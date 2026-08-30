@@ -2,6 +2,7 @@
   position: relative;
   width: 100%;
   height: 100svh;
+  height: 100dvh;
   overflow: hidden;
   background: #b8d7ca;
 }
@@ -403,7 +404,7 @@
 .start-screen {
   position: absolute;
   inset: 0;
-  z-index: 3;
+  z-index: 25;
   display: grid;
   place-items: center;
   padding: clamp(1.25rem, 4vw, 3rem);
@@ -414,6 +415,7 @@
     radial-gradient(circle at 20% 90%, rgba(242, 203, 113, 0.12), transparent 24rem);
   backdrop-filter: blur(6px);
   transition: opacity 220ms ease, visibility 220ms ease;
+  overscroll-behavior: contain;
 }
 
 .is-playing .start-screen,
@@ -775,13 +777,19 @@ kbd {
 
 @media (max-width: 560px) {
   .start-screen {
-    place-items: end center;
-    padding: 0.75rem;
+    place-items: center;
+    padding:
+      max(0.5rem, env(safe-area-inset-top)) max(0.5rem, env(safe-area-inset-right))
+      max(0.5rem, env(safe-area-inset-bottom)) max(0.5rem, env(safe-area-inset-left));
   }
 
   .start-screen__panel {
-    max-height: calc(100% - 0.75rem);
-    padding: 1.1rem;
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100dvh - max(1rem, env(safe-area-inset-top) + env(safe-area-inset-bottom)));
+    padding: 0.875rem;
+    border-radius: var(--selah-radius);
+    overscroll-behavior: contain;
   }
 
   .start-screen__brand-caption,
@@ -790,9 +798,10 @@ kbd {
   }
 
   .start-screen__hero {
+    order: 2;
     grid-template-columns: 1fr;
-    gap: 0.75rem;
-    margin-block: 2rem 1.75rem;
+    gap: 0.35rem;
+    margin-block: 0.75rem 1rem;
   }
 
   .start-screen__hero-copy {
@@ -803,11 +812,25 @@ kbd {
   .start-screen__logo {
     order: 1;
     justify-self: center;
-    width: min(100%, 24rem);
+    width: min(100%, 13rem);
+    max-height: 8.5rem;
+    object-fit: contain;
+    border-radius: 1rem;
   }
 
   .start-screen h1 {
-    font-size: clamp(4rem, 22vw, 6rem);
+    font-size: clamp(3rem, 19vw, 4.5rem);
+  }
+
+  .start-screen__hero p {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+
+  .start-screen__journey {
+    order: 4;
+    padding-top: 1rem;
   }
 
   .start-screen__journey-list {
@@ -820,13 +843,16 @@ kbd {
   }
 
   .start-screen__actions {
+    order: 3;
     align-items: stretch;
     flex-direction: column;
+    margin-top: 0;
   }
 
   .start-screen__primary {
     justify-content: space-between;
     width: 100%;
+    min-height: 56px;
   }
 
   .start-screen__pointer-hint {
@@ -837,6 +863,204 @@ kbd {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     text-align: left;
+  }
+
+  .start-screen__controls {
+    order: 5;
+    margin-top: 1rem;
+  }
+
+  .start-screen small {
+    order: 6;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .has-touch-controls .start-screen__pointer-hint,
+  .has-touch-controls .start-screen__controls,
+  .has-touch-controls .start-screen small {
+    display: none;
+  }
+
+  .has-touch-controls .portal-prompt {
+    bottom: max(9.5rem, calc(env(safe-area-inset-bottom) + 9.5rem));
+    max-width: calc(100vw - max(1rem, env(safe-area-inset-left) + env(safe-area-inset-right)));
+  }
+
+  .has-touch-controls .noe-objective-guide {
+    top: max(7.5rem, calc(env(safe-area-inset-top) + 7.5rem));
+    left: max(0.5rem, env(safe-area-inset-left));
+    width: min(20rem, calc(100vw - max(1rem, env(safe-area-inset-left) + env(safe-area-inset-right))));
+  }
+}
+
+@media (orientation: landscape) and (max-height: 560px) {
+  .scene-loading {
+    padding:
+      max(0.5rem, env(safe-area-inset-top)) max(0.75rem, env(safe-area-inset-right))
+      max(0.5rem, env(safe-area-inset-bottom)) max(0.75rem, env(safe-area-inset-left));
+  }
+
+  .scene-loading__content {
+    grid-template-columns: minmax(9rem, 0.7fr) minmax(0, 1.3fr);
+    grid-template-areas:
+      'brand copy'
+      'orb copy'
+      'orb progress';
+    align-items: center;
+    justify-items: stretch;
+    gap: 0.5rem 2rem;
+    width: min(100%, 48rem);
+    text-align: left;
+  }
+
+  .scene-loading__brand {
+    grid-area: brand;
+    justify-self: center;
+  }
+
+  .scene-loading__orb {
+    grid-area: orb;
+    justify-self: center;
+    width: min(34dvh, 9rem);
+    margin: 0;
+  }
+
+  .scene-loading__copy {
+    grid-area: copy;
+  }
+
+  .scene-loading__eyebrow {
+    margin-bottom: 0.45rem;
+  }
+
+  .scene-loading h1 {
+    font-size: clamp(2rem, 8dvh, 3rem);
+  }
+
+  .scene-loading__description {
+    margin: 0.75rem 0 0;
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+
+  .scene-loading__progress-block,
+  .scene-loading__retry {
+    grid-area: progress;
+    margin-top: 0.75rem;
+  }
+
+  .scene-loading__retry {
+    justify-self: start;
+  }
+
+  .start-screen {
+    padding:
+      max(0.375rem, env(safe-area-inset-top)) max(0.625rem, env(safe-area-inset-right))
+      max(0.375rem, env(safe-area-inset-bottom)) max(0.625rem, env(safe-area-inset-left));
+  }
+
+  .start-screen__panel {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(15rem, 0.95fr);
+    grid-template-areas:
+      'brand brand'
+      'hero journey'
+      'actions journey';
+    align-content: start;
+    gap: 0.5rem 1rem;
+    max-height: calc(100dvh - max(0.75rem, env(safe-area-inset-top) + env(safe-area-inset-bottom)));
+    padding: 0.75rem 1rem;
+  }
+
+  .start-screen__brand {
+    grid-area: brand;
+  }
+
+  .start-screen__hero {
+    grid-area: hero;
+    grid-template-columns: minmax(7rem, 0.7fr) minmax(0, 1.3fr);
+    gap: 0.625rem;
+    margin: 0;
+  }
+
+  .start-screen__hero-copy {
+    order: 2;
+    text-align: left;
+  }
+
+  .start-screen__logo {
+    order: 1;
+    width: min(100%, 10rem);
+    max-height: 7rem;
+  }
+
+  .start-screen__eyebrow {
+    margin-bottom: 0.35rem;
+  }
+
+  .start-screen__hero p {
+    margin-top: 0.35rem;
+    font-size: 0.78rem;
+    line-height: 1.32;
+  }
+
+  .start-screen__journey {
+    grid-area: journey;
+    align-self: stretch;
+    padding-top: 0;
+    padding-left: 1rem;
+    border-top: 0;
+    border-left: 1px solid var(--selah-border);
+  }
+
+  .start-screen__section-heading {
+    margin-bottom: 0.5rem;
+  }
+
+  .start-screen__journey-list {
+    grid-template-columns: 1fr;
+    gap: 0.4rem;
+  }
+
+  .start-screen__journey-card {
+    min-height: 0;
+    padding: 0.55rem 0.65rem;
+  }
+
+  .start-screen__journey-card p {
+    display: none;
+  }
+
+  .start-screen__actions {
+    grid-area: actions;
+    align-self: end;
+    margin: 0;
+  }
+
+  .start-screen__primary {
+    min-height: 48px;
+  }
+
+  .has-touch-controls .portal-prompt {
+    top: max(3.75rem, calc(env(safe-area-inset-top) + 3.75rem));
+    bottom: auto;
+    min-width: min(17rem, calc(100vw - 14rem));
+    padding: 0.5rem 0.75rem;
+  }
+
+  .has-touch-controls .noe-objective-guide {
+    top: max(3.75rem, calc(env(safe-area-inset-top) + 3.75rem));
+    left: max(6.5rem, calc(env(safe-area-inset-left) + 6.5rem));
+    width: min(18rem, calc(50vw - 7rem));
+    padding: 0.625rem 0.75rem;
+  }
+
+  .noe-objective-guide p {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
   }
 }
 
@@ -969,7 +1193,11 @@ kbd {
   z-index: 80;
   display: grid;
   place-items: center;
-  padding: clamp(16px, 4vw, 48px);
+  padding:
+    max(clamp(16px, 4vw, 48px), env(safe-area-inset-top))
+    max(clamp(16px, 4vw, 48px), env(safe-area-inset-right))
+    max(clamp(16px, 4vw, 48px), env(safe-area-inset-bottom))
+    max(clamp(16px, 4vw, 48px), env(safe-area-inset-left));
   color: #fff8e8;
   background:
     radial-gradient(circle at 50% 42%, rgb(238 184 87 / 17%), transparent 42%),
@@ -981,7 +1209,7 @@ kbd {
   display: grid;
   gap: 22px;
   width: min(760px, 100%);
-  max-height: calc(100vh - 32px);
+  max-height: calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   padding: clamp(22px, 4vw, 38px);
   overflow: auto;
   background: linear-gradient(145deg, rgb(41 55 42 / 98%), rgb(19 32 26 / 98%));
@@ -1146,7 +1374,11 @@ kbd {
   z-index: 80;
   display: grid;
   place-items: end center;
-  padding: clamp(18px, 5vw, 56px);
+  padding:
+    max(clamp(18px, 5vw, 56px), env(safe-area-inset-top))
+    max(clamp(18px, 5vw, 56px), env(safe-area-inset-right))
+    max(clamp(18px, 5vw, 56px), env(safe-area-inset-bottom))
+    max(clamp(18px, 5vw, 56px), env(safe-area-inset-left));
   color: #fff8e8;
   background: linear-gradient(180deg, transparent 24%, rgb(8 20 15 / 72%));
   pointer-events: auto;
@@ -1162,6 +1394,9 @@ kbd {
   border: 1px solid rgb(244 201 93 / 38%);
   border-radius: 24px;
   box-shadow: 0 24px 70px rgb(0 0 0 / 44%);
+  max-height: calc(100dvh - 2rem - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .noe-mission-dialog__portrait {
@@ -1331,6 +1566,32 @@ kbd {
 }
 
 @media (max-width: 560px) {
+  .noe-sealing {
+    padding:
+      max(0.5rem, env(safe-area-inset-top)) max(0.5rem, env(safe-area-inset-right))
+      max(0.5rem, env(safe-area-inset-bottom)) max(0.5rem, env(safe-area-inset-left));
+  }
+
+  .noe-sealing__panel {
+    gap: 0.875rem;
+    max-height: calc(100dvh - 1rem - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    padding: 1rem;
+    border-radius: 1rem;
+  }
+
+  .noe-sealing__header h2 {
+    font-size: 1.55rem;
+  }
+
+  .noe-sealing__header p {
+    font-size: 0.875rem;
+  }
+
+  .noe-sealing__crack {
+    height: min(34dvh, 16rem);
+    min-height: 12rem;
+  }
+
   .noe-sealing__actions {
     flex-direction: column-reverse;
   }
@@ -1341,6 +1602,8 @@ kbd {
 
   .noe-mission-dialog__panel {
     grid-template-columns: 1fr;
+    padding: 1rem;
+    border-radius: 1rem;
   }
 
   .noe-mission-dialog__portrait {
@@ -1349,6 +1612,84 @@ kbd {
 
   .noe-mission-dialog__actions {
     flex-direction: column-reverse;
+  }
+
+  .noe-mission-dialog__actions button {
+    width: 100%;
+    min-height: 48px;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 560px) {
+  .noe-sealing {
+    padding:
+      max(0.375rem, env(safe-area-inset-top)) max(0.625rem, env(safe-area-inset-right))
+      max(0.375rem, env(safe-area-inset-bottom)) max(0.625rem, env(safe-area-inset-left));
+  }
+
+  .noe-sealing__panel {
+    grid-template-columns: minmax(12rem, 0.65fr) minmax(18rem, 1.35fr);
+    grid-template-areas:
+      'header workbench'
+      'actions workbench';
+    gap: 0.75rem 1rem;
+    max-height: calc(100dvh - 0.75rem - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    padding: 0.75rem 1rem;
+  }
+
+  .noe-sealing__header {
+    grid-area: header;
+  }
+
+  .noe-sealing__workbench {
+    grid-area: workbench;
+    gap: 0.5rem;
+  }
+
+  .noe-sealing__crack {
+    height: calc(100dvh - 5.25rem - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    min-height: 13rem;
+  }
+
+  .noe-sealing__actions {
+    grid-area: actions;
+    align-self: end;
+    flex-direction: column-reverse;
+  }
+
+  .noe-sealing__actions button {
+    width: 100%;
+    min-height: 48px;
+  }
+
+  .noe-mission-dialog {
+    padding:
+      max(0.375rem, env(safe-area-inset-top)) max(0.625rem, env(safe-area-inset-right))
+      max(0.375rem, env(safe-area-inset-bottom)) max(0.625rem, env(safe-area-inset-left));
+  }
+
+  .noe-mission-dialog__panel {
+    grid-template-columns: 1fr;
+    max-height: calc(100dvh - 0.75rem - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    padding: 0.75rem 1rem;
+  }
+
+  .noe-mission-dialog__portrait {
+    display: none;
+  }
+
+  .noe-mission-dialog__content {
+    gap: 0.375rem;
+  }
+
+  .noe-mission-dialog p {
+    min-height: auto;
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+
+  .noe-mission-dialog__actions button {
+    min-height: 48px;
   }
 }
 

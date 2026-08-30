@@ -1,4 +1,4 @@
-import type { GatilhoSelah } from '../types/selah'
+import type { GatilhoSelah } from '../types/selah.ts'
 
 export type Ponto3D = readonly [number, number, number]
 export type Escala3D = number | Ponto3D

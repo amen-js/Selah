@@ -14,6 +14,11 @@ O plano de produto e execução do hackathon está em [`plans/selah.plan.md`](pl
 
 O documento de design do jogo está em [`docs/GDD.md`](docs/GDD.md).
 
+Os resumos de execução por função estão em:
+
+- [`docs/handoffs/PO.md`](docs/handoffs/PO.md) — decisões, curadoria, aceite e pitch da P.O.
+- [`docs/handoffs/DESIGNER.md`](docs/handoffs/DESIGNER.md) — identidade, assets e level design do Designer
+
 ## Equipe
 
 | Papel | Nome | GitHub |

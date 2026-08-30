@@ -124,6 +124,14 @@ export const esES = {
   'creation.journey.fruto-escolha.title': 'El fruto y la gran elección',
   'creation.journey.fruto-escolha.objective':
     'Camina hasta el árbol especial y observa la gran elección.',
+  'creation.interaction.aria': 'Interacción disponible: {target}',
+  'creation.interaction.eyebrow': 'Interactuar',
+  'creation.interaction.selah': 'Momento Selah',
+  'creation.interaction.point': 'Punto de la Creación',
+  'creation.interaction.enter': 'Presiona E o Enter para continuar',
+  'creation.complete.title': 'La Creación ha sido revelada',
+  'creation.complete.objective':
+    'Todo está lleno de vida. Contempla el mundo y continúa tu viaje cuando quieras.',
 
   'portal.prompt.aria': 'Portal a {region}',
   'portal.prompt.eyebrow': 'Portal',

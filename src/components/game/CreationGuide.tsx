@@ -19,7 +19,12 @@ export function CreationGuide({
 
   if (!exploracaoAtiva) return null
 
-  const jornada = traduzirJornadaCriacao(snapshot.momento.id, idioma)
+  const texto = snapshot.estado.concluida
+    ? {
+        titulo: t('creation.complete.title'),
+        objetivo: t('creation.complete.objective'),
+      }
+    : traduzirJornadaCriacao(snapshot.momento.id, idioma)
   const rotulo = t('creation.guide.label')
 
   return (
@@ -31,8 +36,8 @@ export function CreationGuide({
       aria-label={rotulo}
     >
       <span className="creation-guide__label">{rotulo}</span>
-      <strong className="creation-guide__title">{jornada.titulo}</strong>
-      <p>{linha?.texto ?? jornada.objetivo}</p>
+      <strong className="creation-guide__title">{texto.titulo}</strong>
+      <p>{linha?.texto ?? texto.objetivo}</p>
     </aside>
   )
 }

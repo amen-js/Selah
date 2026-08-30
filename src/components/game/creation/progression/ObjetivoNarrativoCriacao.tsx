@@ -9,18 +9,20 @@ const COR_OBJETIVO = '#ffe08a'
 export interface ObjetivoNarrativoCriacaoProps {
   momentoId: MomentoCriacaoId
   enabled: boolean
+  jornadaConcluida?: boolean
 }
 
 /** A small in-world beacon for narrative zones; it has no collider or UI state. */
 export function ObjetivoNarrativoCriacao({
   momentoId,
   enabled,
+  jornadaConcluida = false,
 }: ObjetivoNarrativoCriacaoProps) {
   const grupoRef = useRef<Group>(null)
   const tempoRef = useRef(0)
   const objetivo = useMemo(
-    () => obterObjetivoZonaCriacao(momentoId),
-    [momentoId],
+    () => obterObjetivoZonaCriacao(momentoId, jornadaConcluida),
+    [jornadaConcluida, momentoId],
   )
 
   useFrame((_, delta) => {

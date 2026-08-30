@@ -18,8 +18,9 @@ ProgressaoCriacaoRuntime
        -> CreationGuide
 ```
 
-Leaving Creation emits `null`. Nothing from this projection is added to Zustand
-or local storage.
+Leaving Creation emits `null`. Nothing from this DOM projection is added to
+Zustand or local storage; the gameplay runtime separately owns its canonical
+checkpoint.
 
 ## Code Reuse Analysis
 
@@ -38,7 +39,7 @@ or local storage.
 
 - **Location**: `src/components/game/creation/progression/types.ts`
 - **Purpose**: Name the transient pair of canonical moment and canonical state.
-- **Persistence**: None.
+- **Persistence**: None in the UI projection.
 
 ```ts
 interface SnapshotProgressaoCriacao {

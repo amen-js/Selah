@@ -7,9 +7,10 @@ import type {
 const fonteKenney = 'https://kenney.nl/assets/nature-kit'
 const diretorioKenney = '/models/creation/shared/kenney'
 const fonteAnimaisQuaternius = 'https://quaternius.com/packs/farmanimal.html'
-const fonteHumanosQuaternius =
-  'https://quaternius.com/packs/universalbasecharacters.html'
 const diretorioQuaternius = '/models/creation/shared/quaternius'
+const fontePersonagensEden =
+  'https://github.com/amen-js/Selah/tree/main/src/components/game/creation/world'
+const diretorioPersonagensEden = '/models/creation/characters'
 
 const hashesKenney = {
   cliffLargeStone:
@@ -50,8 +51,11 @@ const hashesKenney = {
 
 const hashesQuaternius = {
   ovelha: 'd295beed1d28f1eee2af209c637aebaa928a280652040d72627eb84e7f69ffb8',
-  adao: '624475f7e4d5d410286cfe7007301380ddaa4d12d24b9ede63ab73dea2af0b7e',
-  eva: 'e59f51bd141eb2d71a712fb3acd8e1869d235833dbdfbbcf6b356d84fd58b0ef',
+} as const
+
+const hashesPersonagensEden = {
+  adao: '33ec1371f20586d27e4438f265ba63a43ce55c4214957ea98f15beefd205f4ee',
+  eva: 'b9a8e166f7074d5295515b27cc0dbb3c4619aeb08f7339261120aa744dbf2b30',
 } as const
 
 type EntradaSemLicenca = Omit<EntradaManifestoAssetCriacao, 'licenca'>
@@ -86,6 +90,21 @@ function entradaQuaternius(
       urlFonte,
       criador: 'Quaternius',
       identificador: 'CC0-1.0',
+      sha256,
+    },
+  }
+}
+
+function entradaPersonagemEden(
+  dados: EntradaSemLicenca,
+  sha256: string,
+): EntradaManifestoAssetCriacao {
+  return {
+    ...dados,
+    licenca: {
+      urlFonte: fontePersonagensEden,
+      criador: 'Equipe Selah',
+      identificador: 'Project-authored',
       sha256,
     },
   }
@@ -236,31 +255,29 @@ export const manifestoAssetsCriacao: ManifestoAssetsCriacao = {
       },
       hashesKenney.groundRiverStraight,
     ),
-    entradaQuaternius(
+    entradaPersonagemEden(
       {
         id: 'adao',
-        arquivo: `${diretorioQuaternius}/universal-base-characters/adam.glb`,
+        arquivo: `${diretorioPersonagensEden}/adam.model.json`,
         tipo: 'personagem',
         momentos: ['adao-e-eva'],
         carregamento: 'momento-ativo',
         escala: 1,
         eixoFrontal: '+z',
       },
-      fonteHumanosQuaternius,
-      hashesQuaternius.adao,
+      hashesPersonagensEden.adao,
     ),
-    entradaQuaternius(
+    entradaPersonagemEden(
       {
         id: 'eva',
-        arquivo: `${diretorioQuaternius}/universal-base-characters/eve.glb`,
+        arquivo: `${diretorioPersonagensEden}/eve.model.json`,
         tipo: 'personagem',
         momentos: ['adao-e-eva'],
         carregamento: 'momento-ativo',
         escala: 1,
         eixoFrontal: '+z',
       },
-      fonteHumanosQuaternius,
-      hashesQuaternius.eva,
+      hashesPersonagensEden.eva,
     ),
     entradaKenney(
       {

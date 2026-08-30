@@ -28,6 +28,15 @@ const casosNarrativos: Array<{
   { narracaoId: 'criacao.vazio.transicao', idioma: 'en-US' },
 ]
 
+const snapshotConcluido: SnapshotProgressaoCriacao = {
+  momento: momentosCriacao[momentosCriacao.length - 1],
+  estado: {
+    momentoAtualId: 'fruto-escolha',
+    momentosConcluidos: momentosCriacao.map(({ id }) => id),
+    concluida: true,
+  },
+}
+
 describe('CreationGuide', () => {
   beforeEach(() => {
     useGameStore.getState().setIdioma('pt-BR')
@@ -88,6 +97,20 @@ describe('CreationGuide', () => {
     )
 
     expect(screen.queryByRole('status')).not.toBeInTheDocument()
+  })
+
+  it('replaces the stale tree instruction with the journey conclusion', () => {
+    render(
+      <CreationGuide snapshot={snapshotConcluido} exploracaoAtiva />,
+    )
+
+    expect(screen.getByRole('status')).toHaveTextContent(
+      'A Criação foi revelada',
+    )
+    expect(screen.getByRole('status')).toHaveTextContent(
+      'Tudo ficou cheio de vida.',
+    )
+    expect(screen.queryByText(/Caminhe até a árvore especial/i)).toBeNull()
   })
 
   it('has no interactive controls and reacts immediately to language changes', () => {

@@ -122,6 +122,14 @@ export const ptBR = {
   'creation.journey.fruto-escolha.title': 'O fruto e a grande escolha',
   'creation.journey.fruto-escolha.objective':
     'Caminhe até a árvore especial e observe a grande escolha.',
+  'creation.interaction.aria': 'Interação disponível: {target}',
+  'creation.interaction.eyebrow': 'Interagir',
+  'creation.interaction.selah': 'Momento Selah',
+  'creation.interaction.point': 'Ponto da Criação',
+  'creation.interaction.enter': 'Pressione E ou Enter para continuar',
+  'creation.complete.title': 'A Criação foi revelada',
+  'creation.complete.objective':
+    'Tudo ficou cheio de vida. Contemple o mundo e siga sua jornada quando quiser.',
 
   'portal.prompt.aria': 'Portal para {region}',
   'portal.prompt.eyebrow': 'Portal',

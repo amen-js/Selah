@@ -1,0 +1,9 @@
+{
+  "id": "eva",
+  "implementation": "src/components/game/creation/world/PersonagemEden.tsx",
+  "style": "storybook-low-poly",
+  "silhouette": "youthful",
+  "wardrobe": "modest-eden-dress",
+  "animation": "procedural-relaxed-idle",
+  "frontAxis": "+z"
+}

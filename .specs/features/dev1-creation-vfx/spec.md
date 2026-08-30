@@ -6,7 +6,7 @@ Provide a standalone, fully-tested React Three Fiber package of procedural visua
 
 ## Requirements
 
-1. **VFX-01:** Expose `EfeitosCriacao` accepting `{ momentoId, enabled, reducedMotion? }` and returning procedural R3F components mapped to visible assets from `obterRevelacaoCriacao`.
+1. **VFX-01:** Expose `EfeitosCriacao` accepting `{ momentoId, enabled, reducedMotion? }` and returning procedural R3F components mapped by `obterConfiguracaoEfeitosCriacao`.
 2. **VFX-02:** Expose pure helper `obterConfiguracaoEfeitosCriacao(momentoId, options?)` returning the active procedural effect IDs and configurations.
 3. **VFX-03:** Support exactly the 9 approved procedural asset IDs:
    - `ambiente-vazio`
@@ -19,7 +19,7 @@ Provide a standalone, fully-tested React Three Fiber package of procedural visua
    - `estrelas`
    - `nuvens`
 4. **VFX-04:** Explicitly exclude audio, models, characters, animals, and terrain assets from procedural rendering.
-5. **VFX-05:** Support cumulative reveal of procedural effects matching the narrative progression of Creation.
+5. **VFX-05:** Distinguish beat-scoped narrative cues from persistent celestial environment: void, guide, light core, markers and growth expire according to their beat; sun, moon, stars and clouds persist from celestial rhythm onward.
 6. **VFX-06:** Deterministic star and particle generation without random values in render loops or unmount leaks.
 7. **VFX-07:** Support `reducedMotion` prop to freeze or reduce motion, adhering to child-friendly and accessibility guidelines.
 8. **VFX-08:** `enabled: false` must cleanly disable or freeze effect rendering.

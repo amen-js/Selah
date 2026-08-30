@@ -13,8 +13,12 @@
 | T6 | Replace provisional map with optimized 3D chunks | Final assets | Browser + performance | Pending |
 | T7 | Full Creation route UAT, performance and accessibility pass | T4-T6 | Full | Pending |
 
-T2 and T3 intentionally avoid the shared store: answered passage IDs already
-provide the persistent milestones required to reconstruct safe progress.
+T2 keeps progression rules pure. T3 stores only two local checkpoints in the
+shared store: explicitly concluded Selah passage IDs and the canonical prefix of
+completed Creation moments. This is required because answer history is not
+completion and spatial/final beats cannot be reconstructed from quiz responses.
+Both checkpoints persist only when the responsible adult enables progress
+saving.
 
 T6 is isolated behind the typed asset IDs and manifest contract so an external
 asset branch can prepare licensed GLBs without editing the progression runtime.

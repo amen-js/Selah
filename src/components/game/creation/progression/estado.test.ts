@@ -5,6 +5,7 @@ import {
   criarEstadoProgressaoCriacao,
   processarEventoProgressaoCriacao,
   reconstruirProgressaoCriacao,
+  reconstruirProgressaoPorMomentosConcluidos,
 } from './estado'
 import type { EventoProgressaoCriacao } from './types'
 
@@ -64,7 +65,7 @@ describe('estado da progressão da Criação', () => {
     expect(processarEventoProgressaoCriacao(luz, eventosJornada[0])).toBe(luz)
   })
 
-  it('reconstrói o marco seguro mais distante apenas pelas respostas registradas', () => {
+  it('reconstrói o marco seguro mais distante apenas pelos Selahs concluídos', () => {
     expect(reconstruirProgressaoCriacao([]).momentoAtualId).toBe('vazio')
     expect(reconstruirProgressaoCriacao(['genesis-1-3']).momentoAtualId).toBe(
       'ceu-terra-aguas',
@@ -80,6 +81,44 @@ describe('estado da progressão da Criação', () => {
         'genesis-1-27',
       ]).momentosConcluidos,
     ).toEqual(momentosCriacao.slice(0, 8).map(({ id }) => id))
+  })
+
+  it('restaura exatamente zonas e conclusão pelo checkpoint canônico', () => {
+    expect(
+      reconstruirProgressaoCriacao([], ['vazio', 'luz', 'ceu-terra-aguas']),
+    ).toEqual({
+      momentoAtualId: 'natureza',
+      momentosConcluidos: ['vazio', 'luz', 'ceu-terra-aguas'],
+      concluida: false,
+    })
+
+    expect(
+      reconstruirProgressaoPorMomentosConcluidos(
+        momentosCriacao.map(({ id }) => id),
+      ),
+    ).toEqual({
+      momentoAtualId: 'fruto-escolha',
+      momentosConcluidos: momentosCriacao.map(({ id }) => id),
+      concluida: true,
+    })
+  })
+
+  it('trunca checkpoints inválidos no último prefixo sequencial', () => {
+    expect(
+      reconstruirProgressaoPorMomentosConcluidos([
+        'vazio',
+        'luz',
+        'natureza',
+        'ceu-terra-aguas',
+      ]),
+    ).toEqual({
+      momentoAtualId: 'ceu-terra-aguas',
+      momentosConcluidos: ['vazio', 'luz'],
+      concluida: false,
+    })
+    expect(
+      reconstruirProgressaoPorMomentosConcluidos(['momento-inexistente']),
+    ).toBeNull()
   })
 
   it('consome resposta antecipada somente depois do gatilho intermediário', () => {

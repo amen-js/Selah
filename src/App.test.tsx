@@ -216,6 +216,39 @@ describe('App integration', () => {
     expect(localStorage.getItem(GAME_STORAGE_KEY)).toBe(persistedBefore)
   })
 
+  it('keeps exploration and pointer lock while later Creation chunks load', () => {
+    const { rerender } = render(<App />)
+
+    act(() => {
+      pointerLockElement = canvasMock.element
+      document.dispatchEvent(new Event('pointerlockchange'))
+    })
+    expect(screen.getByTestId('game-canvas')).toHaveAttribute(
+      'data-playing',
+      'true',
+    )
+
+    progressMock.state = {
+      active: true,
+      progress: 20,
+      item: '/models/creation/nature/tree.glb',
+      loaded: 0,
+      total: 1,
+      errors: [],
+    }
+    rerender(<App />)
+
+    expect(screen.getByTestId('game-canvas')).toHaveAttribute(
+      'data-playing',
+      'true',
+    )
+    expect(screen.getByTestId('game-overlay')).toBeInTheDocument()
+    expect(
+      screen.queryByRole('heading', { name: 'O mundo está despertando' }),
+    ).not.toBeInTheDocument()
+    expect(exitPointerLock).not.toHaveBeenCalled()
+  })
+
   it('requires responsible setup before requesting pointer lock', () => {
     useGameStore.getState().apagarProgresso()
     useGameStore.getState().setIdioma('pt-BR')

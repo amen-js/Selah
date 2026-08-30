@@ -1,4 +1,4 @@
-import type { NarracaoCriacaoId } from '../content/creationNarrations'
+import type { NarracaoAprovadaId } from '../content/narrations'
 import type { Idioma, VersiculoPublico } from '../types/selah'
 
 export type TtsEstado =
@@ -10,7 +10,7 @@ export type TtsEstado =
   | 'error'
 
 export interface NarracaoTtsInput {
-  narracaoId: NarracaoCriacaoId
+  narracaoId: NarracaoAprovadaId
   idioma: Idioma
   textoFallback: string
 }

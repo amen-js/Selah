@@ -1,7 +1,7 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 
-import { buscarNarracaoCriacao } from '../src/content/creationNarrations.ts'
+import { buscarNarracaoAprovada } from '../src/content/narrations.ts'
 import { buscarPassagemAprovada, type FaixaEtaria, type Idioma } from './data/passagens.ts'
 import { loadEnv, type Env } from './env.ts'
 import { createMetricsStore, type EventoMetrica, type MetricsStore } from './services/metrics.ts'
@@ -287,7 +287,7 @@ export const createApp = (deps: AppDeps = {}) => {
       return context.json({ erro: 'Pedido de áudio inválido.' }, 400)
     }
 
-    const narracao = buscarNarracaoCriacao(narracaoId, idioma)
+    const narracao = buscarNarracaoAprovada(narracaoId, idioma)
     if (!narracao) {
       return context.json({ erro: 'Narração não encontrada na allowlist.' }, 404)
     }

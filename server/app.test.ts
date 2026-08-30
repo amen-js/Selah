@@ -156,6 +156,29 @@ describe('Selah API proxy', () => {
     expect(sintetizar.mock.calls[0]?.[1]).toBeInstanceOf(AbortSignal)
   })
 
+  it('returns localized approved Noah mission audio', async () => {
+    const audio = new Uint8Array([73, 68, 51, 6]).buffer
+    const sintetizar = vi.fn<OpenRouterTtsClient['sintetizar']>().mockResolvedValue(audio)
+    const app = createApp({ env, openRouterTts: { sintetizar } })
+
+    const response = await app.request('/api/tts/narracao', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        narracaoId: 'noe.mission.line2',
+        idioma: 'es-ES',
+      }),
+    })
+
+    expect(response.status).toBe(200)
+    expect(response.headers.get('content-type')).toContain('audio/mpeg')
+    expect(response.headers.get('cache-control')).toBe('no-store')
+    expect(sintetizar).toHaveBeenCalledOnce()
+    expect(sintetizar.mock.calls[0]?.[0]).toBe(
+      'Estamos construyendo juntos. Cada tabla y cada cuidado forman parte de este trabajo.',
+    )
+  })
+
   it('rejects invalid Creation guide requests before synthesis', async () => {
     const sintetizar = vi.fn<OpenRouterTtsClient['sintetizar']>()
     const app = createApp({ env, openRouterTts: { sintetizar } })

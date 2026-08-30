@@ -1,4 +1,5 @@
 import type { VersiculoPublico } from '../types/selah'
+import type { NarracaoMissaoNoeId } from '../content/narrations'
 import { createTtsController, type TtsEstado } from './tts'
 
 const versiculo: VersiculoPublico = {
@@ -22,6 +23,13 @@ const narracaoLuz = {
   idioma: 'pt-BR' as const,
   textoFallback:
     'Olhe só! Pontos brilhantes surgiram. Vamos seguir os sinais luminosos e ver a luz aparecer?',
+}
+
+const narracaoNoe = {
+  narracaoId: 'noe.mission.line1' as NarracaoMissaoNoeId,
+  idioma: 'pt-BR' as const,
+  textoFallback:
+    'Deus nos confiou uma grande missão: preparar um abrigo seguro para a vida.',
 }
 
 const createAudio = () => ({
@@ -233,6 +241,38 @@ describe('createTtsController', () => {
     })
     expect(audioFactory).toHaveBeenCalledWith('blob:creation-guide')
     expect(audio.play).toHaveBeenCalledOnce()
+    expect(tts.estado()).toBe('playing')
+  })
+
+  it('requests approved NPC narration through the shared narration route', async () => {
+    const audio = createAudio()
+    const fetchFn = vi.fn<typeof fetch>().mockResolvedValue(
+      new Response(new Uint8Array([73, 68, 51]), {
+        status: 200,
+        headers: { 'content-type': 'audio/mpeg' },
+      }),
+    )
+    const tts = createTtsController({
+      synth: null,
+      fetchFn,
+      audioFactory: (src) => ({ ...audio, src }),
+      createObjectURL: () => 'blob:noah-dialog',
+      revokeObjectURL: vi.fn(),
+      baseUrl: 'http://localhost:8787/',
+    })
+
+    await tts.narrar(narracaoNoe)
+
+    expect(fetchFn).toHaveBeenCalledWith(
+      'http://localhost:8787/api/tts/narracao',
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({
+          narracaoId: narracaoNoe.narracaoId,
+          idioma: narracaoNoe.idioma,
+        }),
+      }),
+    )
     expect(tts.estado()).toBe('playing')
   })
 

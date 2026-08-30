@@ -913,7 +913,7 @@ kbd {
 }
 
 .portal-prompt__region {
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--selah-font-display);
   font-size: 1.2rem;
   font-weight: 500;
 }
@@ -959,7 +959,7 @@ kbd {
 
 .portal-transition-overlay p {
   margin: 0;
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--selah-font-display);
   font-size: clamp(1.1rem, 3vw, 1.5rem);
 }
 

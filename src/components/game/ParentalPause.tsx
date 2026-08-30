@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 
+import { useTranslation } from '../../i18n'
 import { useGameStore } from '../../stores/gameStore'
 
 const HOLD_DURATION_MS = 3_000
 
 export function ParentalPause() {
+  const { t } = useTranslation()
   const [segurando, setSegurando] = useState(false)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const pausaParentalAtiva = useGameStore((state) => state.pausaParentalAtiva)
@@ -44,18 +46,15 @@ export function ParentalPause() {
         aria-modal="true"
         aria-labelledby="parental-pause-title"
       >
-        <p className="eyebrow">Pausa Selah</p>
-        <h1 id="parental-pause-title">Agora a pausa acontece fora da tela</h1>
-        <p>
-          Respirem, conversem sobre a passagem ou observem algo ao redor. Não há recompensa por
-          manter esta tela aberta, e o navegador sempre pode ser fechado.
-        </p>
-        <p>Quando for o momento de voltar, peça para um responsável segurar o botão abaixo.</p>
+        <p className="eyebrow">{t('pause.eyebrow')}</p>
+        <h1 id="parental-pause-title">{t('pause.title')}</h1>
+        <p>{t('pause.description')}</p>
+        <p>{t('pause.instruction')}</p>
         <button
           className={`hold-button${segurando ? ' hold-button--active' : ''}`}
           type="button"
           autoFocus
-          aria-label="Segure para liberar a exploração"
+          aria-label={t('pause.holdAria')}
           onPointerDown={(event) => {
             event.preventDefault()
             iniciarPressao()
@@ -73,10 +72,10 @@ export function ParentalPause() {
             if (event.key === 'Enter' || event.key === ' ') cancelarPressao()
           }}
         >
-          Segure para continuar
+          {t('pause.holdAction')}
         </button>
         <p className="muted" role="status">
-          {segurando ? 'Continue segurando…' : 'A liberação acontece somente neste dispositivo.'}
+          {segurando ? t('pause.statusHolding') : t('pause.statusIdle')}
         </p>
       </section>
     </div>

@@ -304,6 +304,70 @@ button:disabled {
   line-height: 1.55;
 }
 
+.toggle-control {
+  position: relative;
+  display: inline-block;
+  flex: 0 0 auto;
+  width: 3.25rem;
+  height: 1.875rem;
+  margin-inline-start: auto;
+}
+
+.toggle-control__input {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.toggle-control__track {
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--selah-border);
+  border-radius: 999px;
+  background: rgba(184, 200, 190, 0.18);
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease;
+}
+
+.toggle-control__thumb {
+  position: absolute;
+  top: 0.1875rem;
+  left: 0.1875rem;
+  width: 1.375rem;
+  height: 1.375rem;
+  border-radius: 50%;
+  background: var(--selah-text-muted);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.32);
+  transition:
+    transform 160ms ease,
+    background-color 160ms ease;
+}
+
+.toggle-control__input:checked + .toggle-control__track {
+  border-color: var(--selah-accent);
+  background: var(--selah-accent);
+}
+
+.toggle-control__input:checked + .toggle-control__track .toggle-control__thumb {
+  transform: translateX(1.375rem);
+  background: var(--selah-bg);
+}
+
+.toggle-control__input:focus-visible {
+  outline: none;
+}
+
+.toggle-control__input:focus-visible + .toggle-control__track {
+  outline: 3px solid var(--selah-accent-strong);
+  outline-offset: 3px;
+}
+
 .dialog-box {
   position: absolute;
   right: max(1rem, env(safe-area-inset-right));
@@ -534,6 +598,18 @@ button:disabled {
 @media (max-width: 720px) {
   .lab-page .hud {
     top: max(17rem, calc(env(safe-area-inset-top) + 17rem));
+  }
+
+  .lab-page .modal-backdrop,
+  .lab-page .parent-pause {
+    padding-top: max(13.5rem, calc(env(safe-area-inset-top) + 13.5rem));
+  }
+
+  .lab-page .panel,
+  .lab-page .selah-card,
+  .lab-page .parent-pause__card {
+    max-height: calc(100svh - 14.75rem);
+    overflow-y: auto;
   }
 
   .hud {

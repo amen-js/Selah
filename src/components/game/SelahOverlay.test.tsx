@@ -55,6 +55,7 @@ const prepareVerse = (origem: QuizPublico['origem'] = 'ia') => {
 describe('SelahOverlay', () => {
   beforeEach(() => {
     useGameStore.getState().apagarProgresso()
+    useGameStore.getState().setIdioma('pt-BR')
     vi.clearAllMocks()
   })
 
@@ -68,7 +69,7 @@ describe('SelahOverlay', () => {
 
     render(<SelahOverlay gateway={pendingGateway} tts={tts} />)
 
-    expect(screen.getByText(/preparando este momento/i)).toBeInTheDocument()
+    expect(screen.getByText('Preparando sua reflexão…')).toBeInTheDocument()
   })
 
   it('shows the verse and exposes the injected TTS control', async () => {
@@ -77,10 +78,10 @@ describe('SelahOverlay', () => {
     render(<SelahOverlay gateway={gateway} tts={tts} />)
 
     expect(screen.getByText('Haja luz.')).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: 'Ouvir versículo' }))
+    await user.click(screen.getByRole('button', { name: 'Ouvir passagem em voz alta' }))
     expect(tts.falar).toHaveBeenCalledWith(versiculo.texto, 'pt-BR')
 
-    await user.click(screen.getByRole('button', { name: 'Continuar para o quiz' }))
+    await user.click(screen.getByRole('button', { name: 'Continuar para a pergunta' }))
     expect(useGameStore.getState().selahAtivo?.fase).toBe('quiz')
   })
 
@@ -103,9 +104,11 @@ describe('SelahOverlay', () => {
     useGameStore.getState().mostrarQuiz()
     render(<SelahOverlay gateway={gateway} tts={tts} />)
 
-    expect(screen.getByText(/quiz local aprovado/i)).toBeInTheDocument()
+    expect(screen.getByText('Pergunta bíblica revisada')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Alternativa A: A luz' }))
-    await user.click(await screen.findByRole('button', { name: 'Iniciar Pausa Selah' }))
+    await user.click(
+      await screen.findByRole('button', { name: 'Começar pausa em família' }),
+    )
 
     expect(useGameStore.getState().pausaParentalAtiva).toBe(true)
   })
@@ -117,7 +120,45 @@ describe('SelahOverlay', () => {
     render(<SelahOverlay gateway={gateway} tts={tts} />)
 
     expect(screen.getByRole('alert')).toHaveTextContent('Não foi possível carregar')
-    await user.click(screen.getByRole('button', { name: 'Sair do Momento Selah' }))
+    await user.click(screen.getByRole('button', { name: 'Sair do momento' }))
     expect(useGameStore.getState().selahAtivo).toBeNull()
+  })
+
+  it('explains unavailable TTS accessibly in the selected language', () => {
+    prepareVerse()
+    useGameStore.getState().setIdioma('es-ES')
+    render(<SelahOverlay gateway={gateway} tts={{ ...tts, suportado: false }} />)
+
+    const button = screen.getByRole('button', {
+      name: 'Escuchar el pasaje en voz alta',
+    })
+    expect(button).toBeDisabled()
+    expect(button).toHaveAccessibleDescription(
+      'La lectura en voz alta no está disponible en este navegador. El texto permanece disponible para leer.',
+    )
+    expect(screen.getByText('Haja luz.')).toBeInTheDocument()
+  })
+
+  it('translates origin and incorrect feedback while preserving API content', async () => {
+    const user = userEvent.setup()
+    const incorrectGateway: SelahGateway = {
+      ...gateway,
+      responderQuiz: vi.fn().mockResolvedValue({
+        acertou: false,
+        explicacao: 'Explicação recebida da API.',
+        referencia: versiculo.referencia,
+      }),
+    }
+    prepareVerse()
+    useGameStore.getState().setIdioma('es-ES')
+    useGameStore.getState().mostrarQuiz()
+    render(<SelahOverlay gateway={incorrectGateway} tts={tts} />)
+
+    expect(screen.getByText('Pregunta creada para esta reflexión')).toBeInTheDocument()
+    expect(screen.getByText('O que surgiu?')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Opción A: A luz' }))
+
+    expect(await screen.findByText('Reflexionemos un poco más')).toBeInTheDocument()
+    expect(screen.getByText('Explicação recebida da API.')).toBeInTheDocument()
   })
 })

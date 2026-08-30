@@ -1,16 +1,20 @@
 import { useEffect, useRef, useState } from 'react'
 import { GameCanvas } from './components/game/GameCanvas'
 import { GameOverlay } from './components/game/GameOverlay'
+import { useTranslation } from './i18n'
 import { useSelahAudio } from './hooks/useSelahAudio'
 import { selectExploracaoBloqueada, useGameStore } from './stores/gameStore'
 import './App.css'
 
 function App() {
+  const { t } = useTranslation()
   const [playing, setPlaying] = useState(false)
   const [hasStarted, setHasStarted] = useState(false)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const exploracaoBloqueada = useGameStore(selectExploracaoBloqueada)
   const exploracaoAtiva = playing && !exploracaoBloqueada
+
+  useSelahAudio()
 
   useSelahAudio()
 
@@ -73,43 +77,46 @@ function App() {
 
       <section
         className="start-screen"
-        aria-label={hasStarted ? 'Jogo pausado' : 'Iniciar jogo'}
+        aria-label={hasStarted ? t('app.paused.aria') : t('app.start.aria')}
         aria-hidden={playing || exploracaoBloqueada}
       >
         <div className="start-screen__panel">
           <span className="start-screen__eyebrow">
-            {hasStarted ? 'Exploração pausada' : 'Uma jornada de reflexão'}
+            {hasStarted ? t('app.paused.eyebrow') : t('app.start.eyebrow')}
           </span>
           <h1>{hasStarted ? 'Selah.' : 'Selah'}</h1>
           <p>
             {hasStarted
-              ? 'Respire. Quando estiver pronto, retorne ao jardim.'
-              : 'Pare em meio ao barulho. Entre na jornada.'}
+              ? t('app.paused.description')
+              : t('app.start.description')}
           </p>
 
           <button type="button" onClick={enterWorld}>
-            {hasStarted ? 'Continuar jornada' : 'Entrar no mundo'}
+            {hasStarted ? t('app.resume') : t('app.enter')}
           </button>
 
-          <div className="start-screen__controls" aria-label="Controles">
+          <div
+            className="start-screen__controls"
+            aria-label={t('app.controls.aria')}
+          >
             <span>
-              <kbd>WASD</kbd> Mover
+              <kbd>WASD</kbd> {t('app.controls.move')}
             </span>
             <span>
-              <kbd>Espaço</kbd> Pular
+              <kbd>{t('app.controls.space')}</kbd> {t('app.controls.jump')}
             </span>
             <span>
-              <kbd>Shift</kbd> Correr
+              <kbd>{t('app.controls.shift')}</kbd> {t('app.controls.run')}
             </span>
             <span>
-              <kbd>Mouse</kbd> Câmera
+              <kbd>{t('app.controls.mouse')}</kbd> {t('app.controls.camera')}
             </span>
             <span>
-              <kbd>P</kbd> Pausar
+              <kbd>P</kbd> {t('app.controls.pause')}
             </span>
           </div>
 
-          <small>Use P para pausar sem sair da tela cheia.</small>
+          <small>{t('app.controls.pauseHint')}</small>
         </div>
       </section>
     </main>

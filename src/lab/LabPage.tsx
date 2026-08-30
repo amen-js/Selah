@@ -2,8 +2,15 @@ import { useMemo, useState } from 'react'
 
 import { GameOverlay } from '../components/game/GameOverlay'
 import type { TtsController } from '../components/game/SelahOverlay'
+import { useTranslation, type TranslationKey } from '../i18n'
 import { useGameStore } from '../stores/gameStore'
 import { createLabGateway, type CenarioLab, versiculoLab } from './fixtures'
+
+const cenarioKeys: Record<CenarioLab, TranslationKey> = {
+  sucesso: 'lab.scenario.success',
+  fallback: 'lab.scenario.fallback',
+  erro: 'lab.scenario.error',
+}
 
 const createLabTts = (): TtsController => {
   const suportado =
@@ -30,6 +37,7 @@ const createLabTts = (): TtsController => {
 }
 
 export function LabPage() {
+  const { t } = useTranslation()
   const [cenario, setCenario] = useState<CenarioLab>('sucesso')
   const gateway = useMemo(() => createLabGateway(cenario), [cenario])
   const tts = useMemo(() => createLabTts(), [])
@@ -50,52 +58,57 @@ export function LabPage() {
 
   return (
     <main className="lab-page">
-      <section className="lab-controls" aria-label="Controles do laboratório">
-        <strong>Laboratório da UI</strong>
+      <section className="lab-controls" aria-label={t('lab.controls.aria')}>
+        <strong>{t('lab.title')}</strong>
         <label>
-          <span className="sr-only">Cenário do laboratório</span>
+          <span className="sr-only">{t('lab.scenario.label')}</span>
           <select
-            aria-label="Cenário do laboratório"
+            aria-label={t('lab.scenario.label')}
             value={cenario}
             onChange={(event) => setCenario(event.target.value as CenarioLab)}
           >
-            <option value="sucesso">Sucesso com IA</option>
-            <option value="fallback">Fallback aprovado</option>
-            <option value="erro">Erro de rede</option>
+            {(Object.keys(cenarioKeys) as CenarioLab[]).map((value) => (
+              <option key={value} value={value}>
+                {t(cenarioKeys[value])}
+              </option>
+            ))}
           </select>
         </label>
         <button className="primary-button" type="button" onClick={iniciarSelah}>
-          Iniciar Momento Selah
+          {t('lab.startSelah')}
         </button>
         <button
           className="secondary-button"
           type="button"
           onClick={() => setDialogoAberto(true)}
         >
-          Mostrar diálogo
+          {t('lab.showDialog')}
         </button>
         <button
           className="secondary-button"
           type="button"
           onClick={() => useGameStore.setState({ pausaParentalAtiva: true })}
         >
-          Ativar pausa parental
+          {t('lab.activatePause')}
         </button>
         <button
           className="secondary-button"
           type="button"
-          aria-label="Reiniciar laboratório"
+          aria-label={t('lab.resetAria')}
           onClick={reiniciar}
         >
-          Reiniciar
+          {t('lab.reset')}
         </button>
       </section>
 
-      <section className="lab-canvas-placeholder" aria-label="Área simulada do jogo">
+      <section
+        className="lab-canvas-placeholder"
+        aria-label={t('lab.areaAria')}
+      >
         <div>
-          <p className="eyebrow">Rota independente</p>
-          <h1>Nenhum Canvas 3D é necessário aqui.</h1>
-          <p>Use os controles acima ou o HUD para testar cada camada da interface.</p>
+          <p className="eyebrow">{t('lab.routeEyebrow')}</p>
+          <h1>{t('lab.placeholder.title')}</h1>
+          <p>{t('lab.placeholder.description')}</p>
         </div>
       </section>
 
@@ -105,7 +118,7 @@ export function LabPage() {
         appVersion="lab"
         dialogo={{
           personagem: 'Lumi',
-          mensagem: 'Sou um personagem virtual automatizado. Vamos observar a criação da luz.',
+          mensagem: t('lab.dialog.message'),
         }}
       />
     </main>
